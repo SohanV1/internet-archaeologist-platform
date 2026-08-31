@@ -7,9 +7,10 @@ import { History, ExternalLink, Calendar, FileCode, CheckCircle, Clock, GitCompa
 interface Props {
   snapshots: WebSnapshot[];
   onNavigateToCompare?: (snapshotId: string) => void;
+  onTraceEvidence?: (evidenceIdOrEntity: string) => void;
 }
 
-export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare }) => {
+export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTraceEvidence }) => {
   const [selectedSnapshot, setSelectedSnapshot] = React.useState<WebSnapshot | null>(
     snapshots.length > 0 ? snapshots[snapshots.length - 1] : null
   );
@@ -120,6 +121,15 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare }) =>
             </div>
             
             <div className="flex flex-wrap items-center gap-2">
+              {onTraceEvidence && (
+                <button
+                  onClick={() => onTraceEvidence(selectedSnapshot.evidenceId || selectedSnapshot.id)}
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 rounded-lg border border-emerald-500/30 text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm"
+                >
+                  <span>Trace Archive Evidence</span>
+                </button>
+              )}
+
               {onNavigateToCompare && (
                 <button
                   onClick={() => onNavigateToCompare(selectedSnapshot.id)}

@@ -26,6 +26,7 @@ interface Props {
   subdomains: SubdomainRecord[];
   technologies: Technology[];
   onNavigateToTab?: (tab: 'tech' | 'timeline' | 'changes' | 'graph' | 'subdomains') => void;
+  onTraceEvidence?: (evidenceIdOrEntity: string) => void;
 }
 
 export const WebsiteStory: React.FC<Props> = ({
@@ -34,7 +35,8 @@ export const WebsiteStory: React.FC<Props> = ({
   milestones,
   subdomains,
   technologies,
-  onNavigateToTab
+  onNavigateToTab,
+  onTraceEvidence
 }) => {
   const [filterCategory, setFilterCategory] = React.useState<string>('all');
 
@@ -269,6 +271,19 @@ export const WebsiteStory: React.FC<Props> = ({
                         </span>
                       )}
                     </div>
+
+                    {/* Trace Evidence Link */}
+                    {onTraceEvidence && (
+                      <button
+                        onClick={() => onTraceEvidence(m.evidenceId || m.title)}
+                        className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 font-mono transition-colors cursor-pointer bg-emerald-500/5 hover:bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20"
+                        title="Trace underlying evidence record"
+                      >
+                        <ShieldCheck className="w-3 h-3" />
+                        <span>Trace Evidence</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
 
                   <h4 className="text-base font-bold text-slate-100 font-mono group-hover:text-amber-300 transition-colors">
@@ -306,3 +321,4 @@ export const WebsiteStory: React.FC<Props> = ({
     </div>
   );
 };
+

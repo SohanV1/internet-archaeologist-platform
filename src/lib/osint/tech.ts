@@ -1,4 +1,11 @@
-import { Technology } from '@/types/osint';
+import { Technology, ConfidenceLevel, ObservationNature } from '@/types/osint';
+
+function getConfidenceLevel(score: number): ConfidenceLevel {
+  if (score >= 90) return 'HIGH';
+  if (score >= 70) return 'MEDIUM';
+  if (score >= 40) return 'LOW';
+  return 'UNKNOWN';
+}
 
 export function detectTechnologies(headers: Record<string, string>, htmlContent: string = ''): Technology[] {
   const techs: Technology[] = [];
@@ -10,7 +17,7 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
 
   const lowerHtml = htmlContent.toLowerCase();
 
-  // Server Header
+  // Server Header (OBSERVED fact directly from protocol response)
   if (lowerHeaders['server']) {
     const serverVal = lowerHeaders['server'];
     if (serverVal.includes('nginx')) {
@@ -19,7 +26,10 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         name: 'Nginx',
         category: 'Web Server',
         confidence: 100,
-        evidence: `Server header: ${headers['server']}`
+        confidenceLevel: 'HIGH',
+        observationNature: 'OBSERVED',
+        evidence: `Server header: ${headers['server']}`,
+        evidenceId: 'ev-tech-nginx'
       });
     } else if (serverVal.includes('apache')) {
       techs.push({
@@ -27,7 +37,10 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         name: 'Apache HTTP Server',
         category: 'Web Server',
         confidence: 100,
-        evidence: `Server header: ${headers['server']}`
+        confidenceLevel: 'HIGH',
+        observationNature: 'OBSERVED',
+        evidence: `Server header: ${headers['server']}`,
+        evidenceId: 'ev-tech-apache'
       });
     } else if (serverVal.includes('cloudflare')) {
       techs.push({
@@ -35,12 +48,15 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         name: 'Cloudflare Server',
         category: 'CDN/Hosting',
         confidence: 100,
-        evidence: `Server header: ${headers['server']}`
+        confidenceLevel: 'HIGH',
+        observationNature: 'OBSERVED',
+        evidence: `Server header: ${headers['server']}`,
+        evidenceId: 'ev-tech-cloudflare-server'
       });
     }
   }
 
-  // Powered By Header
+  // Powered By Header (OBSERVED fact directly from header)
   if (lowerHeaders['x-powered-by']) {
     const poweredBy = lowerHeaders['x-powered-by'];
     if (poweredBy.includes('next.js')) {
@@ -49,7 +65,10 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         name: 'Next.js',
         category: 'JavaScript Framework',
         confidence: 100,
-        evidence: `X-Powered-By: ${headers['x-powered-by']}`
+        confidenceLevel: 'HIGH',
+        observationNature: 'OBSERVED',
+        evidence: `X-Powered-By: ${headers['x-powered-by']}`,
+        evidenceId: 'ev-tech-nextjs'
       });
     } else if (poweredBy.includes('express')) {
       techs.push({
@@ -57,7 +76,10 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         name: 'ExpressJS',
         category: 'JavaScript Framework',
         confidence: 90,
-        evidence: `X-Powered-By: ${headers['x-powered-by']}`
+        confidenceLevel: 'HIGH',
+        observationNature: 'OBSERVED',
+        evidence: `X-Powered-By: ${headers['x-powered-by']}`,
+        evidenceId: 'ev-tech-express'
       });
     } else if (poweredBy.includes('php')) {
       techs.push({
@@ -65,19 +87,25 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         name: 'PHP',
         category: 'Other',
         confidence: 95,
-        evidence: `X-Powered-By: ${headers['x-powered-by']}`
+        confidenceLevel: 'HIGH',
+        observationNature: 'OBSERVED',
+        evidence: `X-Powered-By: ${headers['x-powered-by']}`,
+        evidenceId: 'ev-tech-php'
       });
     }
   }
 
-  // HTML content signatures
+  // HTML content signatures (INFERRED through fingerprint analysis)
   if (lowerHtml.includes('wp-content') || lowerHtml.includes('wp-includes')) {
     techs.push({
       id: 'wordpress',
       name: 'WordPress',
       category: 'CMS',
-      confidence: 95,
-      evidence: 'HTML contains /wp-content/ or /wp-includes/ paths'
+      confidence: 85,
+      confidenceLevel: 'HIGH',
+      observationNature: 'INFERRED',
+      evidence: 'HTML contains /wp-content/ or /wp-includes/ script paths',
+      evidenceId: 'ev-tech-wordpress'
     });
   }
 
@@ -88,7 +116,10 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         name: 'React',
         category: 'JavaScript Framework',
         confidence: 90,
-        evidence: 'HTML contains React state signatures or Next.js asset paths'
+        confidenceLevel: 'HIGH',
+        observationNature: 'INFERRED',
+        evidence: 'HTML contains React hydration markers and Next.js bundle chunk paths',
+        evidenceId: 'ev-tech-react'
       });
     }
   }
@@ -98,8 +129,11 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
       id: 'tailwind',
       name: 'Tailwind CSS',
       category: 'Other',
-      confidence: 85,
-      evidence: 'CSS or HTML includes Tailwind styling indicators'
+      confidence: 80,
+      confidenceLevel: 'MEDIUM',
+      observationNature: 'INFERRED',
+      evidence: 'CSS style class naming conventions indicate Tailwind utility framework',
+      evidenceId: 'ev-tech-tailwind'
     });
   }
 
@@ -109,17 +143,39 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
       name: 'Google Analytics',
       category: 'Analytics',
       confidence: 95,
-      evidence: 'Script tag referencing Google Analytics (gtag/ga.js)'
+      confidenceLevel: 'HIGH',
+      observationNature: 'INFERRED',
+      evidence: 'Script tag referencing Google Analytics tracking snippet (gtag.js / ga.js)',
+      evidenceId: 'ev-tech-google-analytics'
     });
   }
 
   // Add default baseline techs if minimal details available
   if (techs.length === 0) {
     techs.push(
-      { id: 'hsts', name: 'HTTP Strict Transport Security (HSTS)', category: 'Security', confidence: 100, evidence: 'Security Header detected' },
-      { id: 'html5', name: 'HTML5', category: 'Other', confidence: 100, evidence: 'DOCTYPE html declared' }
+      { 
+        id: 'hsts', 
+        name: 'HTTP Strict Transport Security (HSTS)', 
+        category: 'Security', 
+        confidence: 100, 
+        confidenceLevel: 'HIGH',
+        observationNature: 'OBSERVED',
+        evidence: 'Security Header detected',
+        evidenceId: 'ev-tech-hsts'
+      },
+      { 
+        id: 'html5', 
+        name: 'HTML5', 
+        category: 'Other', 
+        confidence: 100, 
+        confidenceLevel: 'HIGH',
+        observationNature: 'OBSERVED',
+        evidence: '<!DOCTYPE html> declared in document preamble',
+        evidenceId: 'ev-tech-html5'
+      }
     );
   }
 
   return techs;
 }
+

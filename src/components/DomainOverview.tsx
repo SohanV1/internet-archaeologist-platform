@@ -6,9 +6,10 @@ import { Globe, Server, Database, ShieldCheck, Copy, Check, Network, Calendar, S
 
 interface Props {
   investigation: Investigation;
+  onTraceEvidence?: (evidenceIdOrEntity: string) => void;
 }
 
-export const DomainOverview: React.FC<Props> = ({ investigation }) => {
+export const DomainOverview: React.FC<Props> = ({ investigation, onTraceEvidence }) => {
   const [copiedIp, setCopiedIp] = React.useState<string | null>(null);
 
   const copyToClipboard = (text: string) => {
@@ -40,9 +41,15 @@ export const DomainOverview: React.FC<Props> = ({ investigation }) => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center gap-1.5 text-xs font-semibold font-mono shadow-sm">
-            <ShieldCheck className="w-3.5 h-3.5" /> Passive OSINT Mode
-          </span>
+          {onTraceEvidence && (
+            <button
+              onClick={() => onTraceEvidence('ev-dns-' + investigation.domain)}
+              className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center gap-1.5 text-xs font-semibold font-mono shadow-sm transition-colors cursor-pointer"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" /> Provenance Dossier
+            </button>
+          )}
+
           <span className="px-3 py-1.5 bg-purple-500/10 text-purple-300 border border-purple-500/30 rounded-full flex items-center gap-1.5 text-xs font-semibold font-mono">
             <Sparkles className="w-3.5 h-3.5" /> {investigation.summary?.securityRating || 'High'} Security
           </span>
@@ -148,4 +155,5 @@ export const DomainOverview: React.FC<Props> = ({ investigation }) => {
     </div>
   );
 };
+
 

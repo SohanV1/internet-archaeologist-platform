@@ -56,6 +56,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = React.useState<
     'story' | 'compare' | 'subdomains' | 'certs' | 'infra' | 'vs' | 'overview' | 'tech' | 'timeline' | 'changes' | 'graph' | 'evidence'
   >('story');
+  const [highlightEvidenceId, setHighlightEvidenceId] = React.useState<string | null>(null);
   const [savedList, setSavedList] = React.useState<Investigation[]>([]);
   const [isSavedModalOpen, setIsSavedModalOpen] = React.useState<boolean>(false);
   const [copiedValue, setCopiedValue] = React.useState<string | null>(null);
@@ -158,6 +159,29 @@ export default function Home() {
       clearInterval(stageInterval);
       setLoading(false);
     }
+  };
+
+  const handleTraceEvidence = (evidenceIdOrEntity: string) => {
+    if (!investigation) return;
+
+    // Find matching evidence item
+    const match = investigation.evidence.find(ev => 
+      ev.id === evidenceIdOrEntity ||
+      (ev.relatedEntity && ev.relatedEntity.toLowerCase() === evidenceIdOrEntity.toLowerCase()) ||
+      ev.id.toLowerCase().includes(evidenceIdOrEntity.toLowerCase())
+    );
+
+    const targetId = match ? match.id : evidenceIdOrEntity;
+    setHighlightEvidenceId(targetId);
+    setActiveTab('evidence');
+
+    // Smoothly scroll to the evidence card after tab render
+    setTimeout(() => {
+      const el = document.getElementById(`evidence-${targetId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
   };
 
   const handleDeleteSaved = (id: string) => {
@@ -287,7 +311,10 @@ export default function Home() {
         {investigation && !loading && (
           <>
             {/* Domain Top Overview Banner */}
-            <DomainOverview investigation={investigation} />
+            <DomainOverview 
+              investigation={investigation} 
+              onTraceEvidence={handleTraceEvidence}
+            />
 
             {/* Navigation Tabs Bar */}
             <div className="flex flex-wrap border-b border-slate-800/80 gap-1.5 font-mono text-xs p-1.5 bg-slate-900/50 rounded-2xl backdrop-blur-md">
@@ -469,6 +496,7 @@ export default function Home() {
                     else if (tab === 'graph') setActiveTab('graph');
                     else if (tab === 'subdomains') setActiveTab('subdomains');
                   }}
+                  onTraceEvidence={handleTraceEvidence}
                 />
               )}
 
@@ -483,6 +511,7 @@ export default function Home() {
                 <SubdomainsView
                   subdomains={investigation.subdomains || []}
                   rootDomain={investigation.domain}
+                  onTraceEvidence={handleTraceEvidence}
                 />
               )}
 
@@ -490,6 +519,7 @@ export default function Home() {
                 <CertificateHistory
                   certificates={investigation.certificates}
                   domain={investigation.domain}
+                  onTraceEvidence={handleTraceEvidence}
                 />
               )}
 
@@ -498,6 +528,7 @@ export default function Home() {
                   asnInfo={investigation.asnInfo}
                   dnsRecords={investigation.dnsRecords}
                   domain={investigation.domain}
+                  onTraceEvidence={handleTraceEvidence}
                 />
               )}
 
@@ -514,9 +545,17 @@ export default function Home() {
                       <Globe className="w-5 h-5 text-amber-400" />
                       Authoritative DNS Zone Records
                     </h3>
-                    <span className="text-xs text-slate-400 font-mono">
-                      {investigation.dnsRecords.length} entries resolved via DNS-over-HTTPS (RFC 8484)
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleTraceEvidence('ev-dns-' + investigation.domain)}
+                        className="text-xs text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 rounded-full font-mono font-bold transition-colors cursor-pointer"
+                      >
+                        Trace DNS Evidence
+                      </button>
+                      <span className="text-xs text-slate-400 font-mono">
+                        {investigation.dnsRecords.length} entries resolved via DoH
+                      </span>
+                    </div>
                   </div>
                   <div className="overflow-x-auto rounded-xl border border-slate-800">
                     <table className="w-full text-left text-xs border-collapse">
@@ -559,16 +598,27 @@ export default function Home() {
                 </div>
               )}
 
-              {activeTab === 'tech' && <TechStack technologies={investigation.technologies} />}
+              {activeTab === 'tech' && (
+                <TechStack 
+                  technologies={investigation.technologies} 
+                  onTraceEvidence={handleTraceEvidence}
+                />
+              )}
               {activeTab === 'timeline' && (
                 <Timeline 
                   snapshots={investigation.snapshots} 
                   onNavigateToCompare={() => setActiveTab('compare')}
+                  onTraceEvidence={handleTraceEvidence}
                 />
               )}
               {activeTab === 'changes' && <ChangeDetector changes={investigation.changes} />}
               {activeTab === 'graph' && <RelationshipGraph data={investigation.relationships} />}
-              {activeTab === 'evidence' && <EvidenceList evidence={investigation.evidence} />}
+              {activeTab === 'evidence' && (
+                <EvidenceList 
+                  evidence={investigation.evidence} 
+                  highlightId={highlightEvidenceId}
+                />
+              )}
             </div>
           </>
         )}
@@ -584,5 +634,6 @@ export default function Home() {
     </div>
   );
 }
+
 
 

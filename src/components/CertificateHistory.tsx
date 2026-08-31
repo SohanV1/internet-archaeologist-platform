@@ -20,9 +20,10 @@ import {
 interface Props {
   certificates?: CertificateRecord[];
   domain: string;
+  onTraceEvidence?: (evidenceIdOrEntity: string) => void;
 }
 
-export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain }) => {
+export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain, onTraceEvidence }) => {
   const [filterStatus, setFilterStatus] = React.useState<'all' | 'active' | 'expired'>('all');
   const [searchTerm, setSearchTerm] = React.useState('');
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
@@ -58,6 +59,15 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain 
         </div>
 
         <div className="flex items-center gap-2">
+          {onTraceEvidence && (
+            <button
+              onClick={() => onTraceEvidence('ev-ct-certs-' + domain)}
+              className="text-xs text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3.5 py-1.5 rounded-full font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+            >
+              <span>Trace CT Evidence</span>
+            </button>
+          )}
+
           <a
             href={`https://crt.sh/?q=%.${encodeURIComponent(domain)}`}
             target="_blank"
