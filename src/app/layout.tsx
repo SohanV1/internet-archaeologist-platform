@@ -2,8 +2,8 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Internet Archaeologist — OSINT & Web History Platform',
-  description: 'Investigate public web footprints, track domain history, tech stack evolution, and passive OSINT evidence.',
+  title: 'Internet Archaeologist Platform',
+  description: 'Passive public OSINT reconnaissance, website evolution history, tech stack migration analysis, and subdomain intelligence platform.',
 };
 
 export default function RootLayout({

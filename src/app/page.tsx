@@ -24,6 +24,15 @@ export default function Home() {
   const [isSavedModalOpen, setIsSavedModalOpen] = React.useState<boolean>(false);
   const [copiedValue, setCopiedValue] = React.useState<string | null>(null);
 
+  // Update browser tab title dynamically with active domain
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.title = investigation?.domain 
+        ? `${investigation.domain} — Internet Archaeologist Platform` 
+        : 'Internet Archaeologist Platform';
+    }
+  }, [investigation]);
+
   // Load saved projects on startup
   React.useEffect(() => {
     const list = getSavedInvestigations();
