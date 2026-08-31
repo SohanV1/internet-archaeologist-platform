@@ -6,7 +6,7 @@ import { Search, Shield, Download, Radar, Sparkles, Terminal } from 'lucide-reac
 interface NavbarProps {
   currentDomain: string;
   onSearch: (domain: string) => void;
-  onExportReport: () => void;
+  onExportReport: (format: 'json' | 'html' | 'csv-dns' | 'csv-subs') => void;
   savedCount: number;
   onToggleSavedModal: () => void;
 }
@@ -21,6 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleSavedModal
 }) => {
   const [inputVal, setInputVal] = React.useState(currentDomain);
+  const [isExportOpen, setIsExportOpen] = React.useState(false);
 
   React.useEffect(() => {
     setInputVal(currentDomain);
@@ -93,14 +94,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Quick Actions */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 relative">
           <button
             onClick={onToggleSavedModal}
             className="flex items-center space-x-2 px-3.5 py-2 text-xs bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl border border-slate-800 hover:border-slate-700 transition-all font-medium shadow-sm cursor-pointer"
             title="View saved research projects"
           >
             <Shield className="w-4 h-4 text-emerald-400" />
-            <span>Saved Projects</span>
+            <span>Saved</span>
             {savedCount > 0 && (
               <span className="ml-1 px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 font-mono rounded-full border border-emerald-500/40 font-bold">
                 {savedCount}
@@ -108,14 +109,49 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </button>
 
-          <button
-            onClick={onExportReport}
-            className="flex items-center space-x-2 px-3.5 py-2 text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/30 hover:border-amber-500/60 transition-all font-medium cursor-pointer"
-            title="Export Findings Report"
-          >
-            <Download className="w-4 h-4 text-amber-400" />
-            <span>Export Report</span>
-          </button>
+          {/* Export Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsExportOpen(!isExportOpen)}
+              className="flex items-center space-x-2 px-3.5 py-2 text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/30 hover:border-amber-500/60 transition-all font-medium cursor-pointer"
+              title="Export Findings"
+            >
+              <Download className="w-4 h-4 text-amber-400" />
+              <span>Export</span>
+            </button>
+
+            {isExportOpen && (
+              <div 
+                className="absolute right-0 mt-2 w-52 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono space-y-1 backdrop-blur-xl"
+                onMouseLeave={() => setIsExportOpen(false)}
+              >
+                <button
+                  onClick={() => { onExportReport('html'); setIsExportOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-amber-500/15 text-slate-200 hover:text-amber-300 flex items-center justify-between transition-colors"
+                >
+                  <span>📄 Standalone HTML (Print PDF)</span>
+                </button>
+                <button
+                  onClick={() => { onExportReport('json'); setIsExportOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors"
+                >
+                  <span>📦 Full JSON Payload</span>
+                </button>
+                <button
+                  onClick={() => { onExportReport('csv-dns'); setIsExportOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors"
+                >
+                  <span>📊 DNS Zones (CSV)</span>
+                </button>
+                <button
+                  onClick={() => { onExportReport('csv-subs'); setIsExportOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors"
+                >
+                  <span>🌐 Subdomains (CSV)</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

@@ -108,6 +108,41 @@ export interface SnapshotComparison {
   evolutionSummary: string;
 }
 
+export interface CertificateRecord {
+  id: string;
+  issuer: string;
+  commonName: string;
+  notBefore: string;
+  notAfter: string;
+  status: 'active' | 'expired';
+  serialNumber?: string;
+  sans: string[];
+}
+
+export interface AsnInfo {
+  ip: string;
+  asn: string;
+  org: string;
+  country: string;
+  isp?: string;
+  cidr?: string;
+}
+
+export interface DomainComparisonResult {
+  domainA: string;
+  domainB: string;
+  yearsA: number;
+  yearsB: number;
+  sharedTech: Technology[];
+  exclusiveTechA: Technology[];
+  exclusiveTechB: Technology[];
+  subdomainsCountA: number;
+  subdomainsCountB: number;
+  securityRatingA: string;
+  securityRatingB: string;
+  summaryNarrative: string;
+}
+
 export interface Investigation {
   id: string;
   domain: string;
@@ -125,5 +160,7 @@ export interface Investigation {
   changes: ChangeEvent[];
   relationships: RelationshipData;
   evidence: EvidenceItem[];
+  certificates?: CertificateRecord[];
+  asnInfo?: AsnInfo[];
 }
 

@@ -4,20 +4,24 @@ import { detectTechnologies } from './tech';
 import { fetchHistoricalSnapshots } from './history';
 import { computeChangeEvents, computeStoryMilestones, generateExecutiveSummary } from './diff';
 import { discoverSubdomains } from './subdomains';
+import { fetchCertificateHistory } from './certificates';
+import { lookupAsnInfo } from './asn';
 
 export async function createInvestigation(domainInput: string): Promise<Investigation> {
   const domain = domainInput.replace(/^https?:\/\//, '').replace(/\/.*$/, '').trim().toLowerCase();
   const targetUrl = `https://${domain}`;
   const now = new Date().toISOString();
 
-  // Run DNS lookup, subdomain discovery, and historical snapshots concurrently
-  const [dnsResult, subdomains, snapshots] = await Promise.all([
+  // Run DNS lookup, subdomain discovery, historical snapshots, and certificate logs concurrently
+  const [dnsResult, subdomains, snapshots, certificates] = await Promise.all([
     lookupDnsRecords(domain),
     discoverSubdomains(domain),
-    fetchHistoricalSnapshots(domain)
+    fetchHistoricalSnapshots(domain),
+    fetchCertificateHistory(domain)
   ]);
 
   const { ipAddresses, dnsRecords } = dnsResult;
+  const asnInfo = lookupAsnInfo(ipAddresses);
 
   // Fetch live website headers & HTML if accessible
   let detectedTech: Technology[] = [];
@@ -161,7 +165,9 @@ export async function createInvestigation(domainInput: string): Promise<Investig
     snapshots,
     changes,
     relationships: { nodes, edges },
-    evidence
+    evidence,
+    certificates,
+    asnInfo
   };
 
   return investigation;

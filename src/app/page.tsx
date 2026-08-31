@@ -8,12 +8,16 @@ import { SubdomainsView } from '@/components/SubdomainsView';
 import { TechStack } from '@/components/TechStack';
 import { Timeline } from '@/components/Timeline';
 import { SnapshotComparison } from '@/components/SnapshotComparison';
+import { CertificateHistory } from '@/components/CertificateHistory';
+import { DnsHistoryMap } from '@/components/DnsHistoryMap';
+import { DomainVsDomain } from '@/components/DomainVsDomain';
 import { ChangeDetector } from '@/components/ChangeDetector';
 import { RelationshipGraph } from '@/components/RelationshipGraph';
 import { EvidenceList } from '@/components/EvidenceList';
 import { SavedInvestigations } from '@/components/SavedInvestigations';
 import { Investigation } from '@/types/osint';
 import { getSavedInvestigations, saveInvestigation, deleteInvestigation } from '@/lib/osint/storage';
+import { generateHtmlReport, exportDnsToCsv, exportSubdomainsToCsv, exportChangesToCsv } from '@/lib/osint/export';
 import { 
   Globe, 
   Cpu, 
@@ -30,13 +34,17 @@ import {
   ArrowRight,
   Search,
   CheckCircle2,
-  Terminal
+  Terminal,
+  Lock,
+  Server,
+  Swords
 } from 'lucide-react';
 
 const LOADING_STAGES = [
-  { label: 'Resolving Cloudflare DoH & Authoritative DNS Zones...', progress: 25 },
-  { label: 'Querying Certificate Transparency & Subdomain Registers...', progress: 50 },
-  { label: 'Indexing Wayback Machine CDX Historical Snapshots...', progress: 75 },
+  { label: 'Resolving Cloudflare DoH & Authoritative DNS Zones...', progress: 20 },
+  { label: 'Querying Certificate Transparency & Subdomain Registers...', progress: 40 },
+  { label: 'Analyzing IP Routing, Autonomous Systems (ASN) & TLS...', progress: 60 },
+  { label: 'Indexing Wayback Machine CDX Historical Snapshots...', progress: 80 },
   { label: 'Analyzing Tech Fingerprints & Synthesizing Story...', progress: 95 }
 ];
 
@@ -45,7 +53,9 @@ export default function Home() {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [loadingStage, setLoadingStage] = React.useState<number>(0);
   const [error, setError] = React.useState<string | null>(null);
-  const [activeTab, setActiveTab] = React.useState<'story' | 'compare' | 'subdomains' | 'overview' | 'tech' | 'timeline' | 'changes' | 'graph' | 'evidence'>('story');
+  const [activeTab, setActiveTab] = React.useState<
+    'story' | 'compare' | 'subdomains' | 'certs' | 'infra' | 'vs' | 'overview' | 'tech' | 'timeline' | 'changes' | 'graph' | 'evidence'
+  >('story');
   const [savedList, setSavedList] = React.useState<Investigation[]>([]);
   const [isSavedModalOpen, setIsSavedModalOpen] = React.useState<boolean>(false);
   const [copiedValue, setCopiedValue] = React.useState<string | null>(null);
@@ -124,7 +134,7 @@ export default function Home() {
     // Progress stage animation timers
     const stageInterval = setInterval(() => {
       setLoadingStage((prev) => (prev < LOADING_STAGES.length - 1 ? prev + 1 : prev));
-    }, 900);
+    }, 700);
 
     try {
       const res = await fetch('/api/investigate', {
@@ -155,13 +165,45 @@ export default function Home() {
     setSavedList(getSavedInvestigations());
   };
 
-  const handleExportReport = () => {
+  const handleExportReport = (format: 'json' | 'html' | 'csv-dns' | 'csv-subs') => {
     if (!investigation) return;
-    const blob = new Blob([JSON.stringify(investigation, null, 2)], { type: 'application/json' });
+
+    let blob: Blob;
+    let filename: string;
+
+    const dateStr = new Date().toISOString().split('T')[0];
+
+    switch (format) {
+      case 'html': {
+        const htmlContent = generateHtmlReport(investigation);
+        blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+        filename = `osint-audit-report-${investigation.domain}-${dateStr}.html`;
+        break;
+      }
+      case 'csv-dns': {
+        const csvContent = exportDnsToCsv(investigation);
+        blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+        filename = `dns-zones-${investigation.domain}-${dateStr}.csv`;
+        break;
+      }
+      case 'csv-subs': {
+        const csvContent = exportSubdomainsToCsv(investigation);
+        blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+        filename = `subdomains-${investigation.domain}-${dateStr}.csv`;
+        break;
+      }
+      case 'json':
+      default: {
+        blob = new Blob([JSON.stringify(investigation, null, 2)], { type: 'application/json' });
+        filename = `osint-report-${investigation.domain}-${dateStr}.json`;
+        break;
+      }
+    }
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `osint-report-${investigation.domain}-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -248,11 +290,11 @@ export default function Home() {
             <DomainOverview investigation={investigation} />
 
             {/* Navigation Tabs Bar */}
-            <div className="flex flex-wrap border-b border-slate-800/80 gap-2 font-mono text-xs p-1.5 bg-slate-900/50 rounded-2xl backdrop-blur-md">
+            <div className="flex flex-wrap border-b border-slate-800/80 gap-1.5 font-mono text-xs p-1.5 bg-slate-900/50 rounded-2xl backdrop-blur-md">
               {/* 1. What Happened / Evolution Story Tab */}
               <button
                 onClick={() => setActiveTab('story')}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
                   activeTab === 'story'
                     ? 'border-amber-500/60 bg-amber-500/15 text-amber-300 shadow-md glow-amber'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
@@ -270,20 +312,20 @@ export default function Home() {
               {/* 2. Before / After Comparison Tab */}
               <button
                 onClick={() => setActiveTab('compare')}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
                   activeTab === 'compare'
                     ? 'border-amber-500/60 bg-amber-500/15 text-amber-300 shadow-md glow-amber'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
                 }`}
               >
                 <GitCompare className="w-4 h-4 text-amber-400" />
-                <span>Before / After Diff</span>
+                <span>Diff Viewer</span>
               </button>
 
               {/* 3. Subdomains Recon Tab */}
               <button
                 onClick={() => setActiveTab('subdomains')}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
                   activeTab === 'subdomains'
                     ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-300 shadow-md glow-emerald'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
@@ -293,10 +335,49 @@ export default function Home() {
                 <span>Subdomains ({investigation.subdomains?.length || 0})</span>
               </button>
 
-              {/* 4. Tech Stack Tab */}
+              {/* 4. SSL/TLS Certificates Tab */}
+              <button
+                onClick={() => setActiveTab('certs')}
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
+                  activeTab === 'certs'
+                    ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-300 shadow-md'
+                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
+                }`}
+              >
+                <Lock className="w-4 h-4 text-cyan-400" />
+                <span>Certificates ({investigation.certificates?.length || 0})</span>
+              </button>
+
+              {/* 5. IP & ASN Infrastructure Tab */}
+              <button
+                onClick={() => setActiveTab('infra')}
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
+                  activeTab === 'infra'
+                    ? 'border-blue-500/60 bg-blue-500/15 text-blue-300 shadow-md'
+                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
+                }`}
+              >
+                <Server className="w-4 h-4 text-blue-400" />
+                <span>IP & ASN ({investigation.asnInfo?.length || 0})</span>
+              </button>
+
+              {/* 6. Target vs Target Comparator Tab */}
+              <button
+                onClick={() => setActiveTab('vs')}
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
+                  activeTab === 'vs'
+                    ? 'border-amber-500/60 bg-amber-500/15 text-amber-300 shadow-md glow-amber'
+                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
+                }`}
+              >
+                <Swords className="w-4 h-4 text-amber-400" />
+                <span>Target vs Target</span>
+              </button>
+
+              {/* 7. Tech Stack Tab */}
               <button
                 onClick={() => setActiveTab('tech')}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
                   activeTab === 'tech'
                     ? 'border-purple-500/60 bg-purple-500/15 text-purple-300 shadow-md'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
@@ -306,10 +387,10 @@ export default function Home() {
                 <span>Tech Stack ({investigation.technologies.length})</span>
               </button>
 
-              {/* 5. Historical Archive Timeline Tab */}
+              {/* 8. Historical Archive Timeline Tab */}
               <button
                 onClick={() => setActiveTab('timeline')}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
                   activeTab === 'timeline'
                     ? 'border-amber-500/60 bg-amber-500/15 text-amber-300 shadow-md'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
@@ -319,23 +400,23 @@ export default function Home() {
                 <span>Timeline ({investigation.snapshots.length})</span>
               </button>
 
-              {/* 6. Delta Changes Tab */}
+              {/* 9. Delta Changes Tab */}
               <button
                 onClick={() => setActiveTab('changes')}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
                   activeTab === 'changes'
                     ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-300 shadow-md'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
                 }`}
               >
                 <GitCompare className="w-4 h-4 text-cyan-400" />
-                <span>Delta Changes ({investigation.changes.length})</span>
+                <span>Delta ({investigation.changes.length})</span>
               </button>
 
-              {/* 7. DNS Zone Records Tab */}
+              {/* 10. DNS Zone Records Tab */}
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
                   activeTab === 'overview'
                     ? 'border-blue-500/60 bg-blue-500/15 text-blue-300 shadow-md'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
@@ -345,10 +426,10 @@ export default function Home() {
                 <span>DNS Zone ({investigation.dnsRecords.length})</span>
               </button>
 
-              {/* 8. Entity Relationship Graph Tab */}
+              {/* 11. Entity Relationship Graph Tab */}
               <button
                 onClick={() => setActiveTab('graph')}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
                   activeTab === 'graph'
                     ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-300 shadow-md glow-emerald'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
@@ -358,10 +439,10 @@ export default function Home() {
                 <span>Entity Graph</span>
               </button>
 
-              {/* 9. Forensic Evidence Chain Tab */}
+              {/* 12. Forensic Evidence Chain Tab */}
               <button
                 onClick={() => setActiveTab('evidence')}
-                className={`flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
                   activeTab === 'evidence'
                     ? 'border-slate-600 bg-slate-800 text-slate-200 shadow-md'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
@@ -402,6 +483,27 @@ export default function Home() {
                 <SubdomainsView
                   subdomains={investigation.subdomains || []}
                   rootDomain={investigation.domain}
+                />
+              )}
+
+              {activeTab === 'certs' && (
+                <CertificateHistory
+                  certificates={investigation.certificates}
+                  domain={investigation.domain}
+                />
+              )}
+
+              {activeTab === 'infra' && (
+                <DnsHistoryMap
+                  asnInfo={investigation.asnInfo}
+                  dnsRecords={investigation.dnsRecords}
+                  domain={investigation.domain}
+                />
+              )}
+
+              {activeTab === 'vs' && (
+                <DomainVsDomain
+                  currentInvestigation={investigation}
                 />
               )}
 
@@ -482,4 +584,5 @@ export default function Home() {
     </div>
   );
 }
+
 

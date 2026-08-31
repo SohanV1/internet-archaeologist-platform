@@ -44,11 +44,25 @@
 - Snapshot detail cards with HTTP status codes, payload bytes, detected tech signatures, and direct Wayback archive links.
 - One-click jump to the Before/After Comparison viewer.
 
-### 6. 🌐 Authoritative DNS Zone Records
+### 6. 📜 SSL/TLS Certificate History & Transparency Ledger
+- Queries public Certificate Transparency logs (`crt.sh`) for issuance history, root CAs (*Let's Encrypt, DigiCert, Sectigo, Cloudflare Inc ECC CA*), validity windows, and Subject Alternative Names (SANs).
+
+### 7. 🌐 IP Routing & Autonomous System (ASN) Infrastructure Map
+- Resolves Autonomous System Numbers (ASN), ISP / Hosting Organizations (*Cloudflare AS13335, AWS AS16509, Fastly, Google, Akamai*), and maps BGP network CIDR routing.
+
+### 8. ⚔️ Target-vs-Target Multi-Domain Comparator
+- Compares two distinct web entities side-by-side (e.g. `github.com` vs `gitlab.com`).
+- Generates tech stack overlap matrices, exclusive stack components, subdomain attack surface deltas, and longevity comparisons.
+
+### 9. 🌐 Authoritative DNS Zone Records
 - Resolves DNS zone records (`A`, `AAAA`, `MX`, `TXT`, `NS`, `CNAME`, `SOA`) using DNS-over-HTTPS (DoH).
 
-### 7. 🕸️ Entity Relationship Topology Graph
-- Visualizes topological connections between root domains, discovered subdomains, resolved IP nodes, authoritative nameservers, and detected web technologies.
+### 10. 🕸️ Entity Relationship Topology Graph
+- Visualizes topological connections between root domains, discovered subdomains, resolved IP nodes, authoritative nameservers, and detected web technologies with live entity filtering and search.
+
+### 11. 📄 Multi-Format Forensic Exporter
+- **Standalone HTML / PDF Audit Report**: Print-optimized executive forensic report.
+- **CSV Data Exporter**: 1-click export of DNS zone records, Subdomains, and Change events.
 
 ---
 
