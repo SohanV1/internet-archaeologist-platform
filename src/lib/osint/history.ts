@@ -12,10 +12,12 @@ export async function fetchHistoricalSnapshots(domain: string): Promise<WebSnaps
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 1) {
-        // Skip header row data[0]
         const rows = data.slice(1);
+        const seenTimestamps = new Set<string>();
         for (let i = 0; i < rows.length; i++) {
           const [timestamp, original, mime, statuscode, length] = rows[i];
+          if (!timestamp || seenTimestamps.has(timestamp)) continue;
+          seenTimestamps.add(timestamp);
           
           // Format timestamp YYYYMMDDhhmmss -> ISO
           const year = timestamp.substring(0, 4);
@@ -30,20 +32,20 @@ export async function fetchHistoricalSnapshots(domain: string): Promise<WebSnaps
           
           // Sample tech detection simulated based on archive era
           const sampleTech: Technology[] = [
-            { id: 'html5', name: 'HTML5', category: 'Other', confidence: 100, evidence: 'Historical crawl page source' }
+            { id: `html5-${i}`, name: 'HTML5', category: 'Other', confidence: 100, evidence: 'Historical crawl page source' }
           ];
 
           if (parseInt(year) < 2018) {
-            sampleTech.push({ id: 'jquery', name: 'jQuery 1.12', category: 'JavaScript Framework', confidence: 90, evidence: 'Legacy archive script tag' });
-            sampleTech.push({ id: 'apache', name: 'Apache HTTPd 2.2', category: 'Web Server', confidence: 85, evidence: 'Legacy header snapshot' });
+            sampleTech.push({ id: `jquery-${i}`, name: 'jQuery 1.12', category: 'JavaScript Framework', confidence: 90, evidence: 'Legacy archive script tag' });
+            sampleTech.push({ id: `apache-${i}`, name: 'Apache HTTPd 2.2', category: 'Web Server', confidence: 85, evidence: 'Legacy header snapshot' });
           } else {
-            sampleTech.push({ id: 'react', name: 'React', category: 'JavaScript Framework', confidence: 90, evidence: 'Modern web component hydration' });
-            sampleTech.push({ id: 'nginx', name: 'Nginx 1.22', category: 'Web Server', confidence: 95, evidence: 'Wayback header metadata' });
-            sampleTech.push({ id: 'cloudflare', name: 'Cloudflare CDN', category: 'CDN/Hosting', confidence: 90, evidence: 'Edge server node response' });
+            sampleTech.push({ id: `react-${i}`, name: 'React', category: 'JavaScript Framework', confidence: 90, evidence: 'Modern web component hydration' });
+            sampleTech.push({ id: `nginx-${i}`, name: 'Nginx 1.22', category: 'Web Server', confidence: 95, evidence: 'Wayback header metadata' });
+            sampleTech.push({ id: `cloudflare-${i}`, name: 'Cloudflare CDN', category: 'CDN/Hosting', confidence: 90, evidence: 'Edge server node response' });
           }
 
           snapshots.push({
-            id: `snap-${timestamp}`,
+            id: `snap-${timestamp}-${i}`,
             timestamp: isoDate,
             archiveUrl,
             statusCode: parseInt(statuscode) || 200,

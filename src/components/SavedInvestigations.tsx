@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Investigation } from '@/types/osint';
-import { Shield, Trash2, Globe, Calendar, X } from 'lucide-react';
+import { Shield, Trash2, Globe, Calendar, X, ArrowUpRight } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
@@ -22,51 +22,65 @@ export const SavedInvestigations: React.FC<Props> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl space-y-4 p-5">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div className="flex items-center space-x-2">
-            <Shield className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-lg font-bold text-slate-100">Saved Research Projects</h3>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl space-y-4 p-6 glow-amber">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/30">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-100 font-mono">Saved Target Investigations</h3>
+              <p className="text-xs text-slate-400 font-mono">Locally stored intelligence dossiers</p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-slate-800 text-slate-400 rounded-lg transition-colors"
+            className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {savedList.length === 0 ? (
-          <p className="text-slate-400 text-sm py-8 text-center">
-            No saved research investigations found. Investigate a domain to save your project.
-          </p>
+          <div className="text-center py-12 text-slate-400 font-mono text-sm border border-dashed border-slate-800 rounded-xl">
+            No saved target investigations found. Investigate a domain to save its intelligence report.
+          </div>
         ) : (
           <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
             {savedList.map((inv) => (
               <div
                 key={inv.id}
-                className="bg-slate-950 border border-slate-800 rounded-lg p-3.5 flex items-center justify-between hover:border-slate-700 transition-colors"
+                className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-amber-500/50 transition-all group"
               >
-                <div className="space-y-1 cursor-pointer flex-1" onClick={() => { onSelect(inv); onClose(); }}>
+                <div className="space-y-2 cursor-pointer flex-1" onClick={() => { onSelect(inv); onClose(); }}>
                   <div className="flex items-center space-x-2">
                     <Globe className="w-4 h-4 text-amber-400" />
-                    <span className="font-bold text-slate-100 text-base">{inv.domain}</span>
+                    <span className="font-bold text-slate-100 text-base font-mono group-hover:text-amber-400 transition-colors">
+                      {inv.domain}
+                    </span>
+                    <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
                   </div>
-                  <div className="flex items-center space-x-4 text-xs text-slate-400 font-mono">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 font-mono">
                     <span className="flex items-center space-x-1">
-                      <Calendar className="w-3.5 h-3.5" />
+                      <Calendar className="w-3.5 h-3.5 text-slate-500" />
                       <span>{new Date(inv.createdAt).toLocaleDateString()}</span>
                     </span>
-                    <span>IPs: {inv.ipAddresses.length}</span>
-                    <span>Tech: {inv.technologies.length}</span>
-                    <span>Snapshots: {inv.snapshots.length}</span>
+                    <span className="px-2 py-0.5 bg-slate-900 rounded border border-slate-800 text-blue-400">
+                      IPs: {inv.ipAddresses.length}
+                    </span>
+                    <span className="px-2 py-0.5 bg-slate-900 rounded border border-slate-800 text-purple-400">
+                      Tech: {inv.technologies.length}
+                    </span>
+                    <span className="px-2 py-0.5 bg-slate-900 rounded border border-slate-800 text-emerald-400">
+                      Snapshots: {inv.snapshots.length}
+                    </span>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => onDelete(inv.id)}
-                  className="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-900 rounded-md transition-colors"
+                  onClick={(e) => { e.stopPropagation(); onDelete(inv.id); }}
+                  className="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-900 rounded-lg transition-colors cursor-pointer ml-3"
                   title="Delete stored research"
                 >
                   <Trash2 className="w-4 h-4" />

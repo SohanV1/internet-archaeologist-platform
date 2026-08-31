@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, History, Shield, FileText, Download } from 'lucide-react';
+import { Search, Shield, Download, Radar, Sparkles, Terminal } from 'lucide-react';
 
 interface NavbarProps {
   currentDomain: string;
@@ -10,6 +10,8 @@ interface NavbarProps {
   savedCount: number;
   onToggleSavedModal: () => void;
 }
+
+const PRESET_DOMAINS = ['example.com', 'github.com', 'wikipedia.org', 'cloudflare.com'];
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentDomain,
@@ -20,6 +22,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [inputVal, setInputVal] = React.useState(currentDomain);
 
+  React.useEffect(() => {
+    setInputVal(currentDomain);
+  }, [currentDomain]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputVal.trim()) {
@@ -28,55 +34,75 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="bg-slate-900 text-slate-100 border-b border-slate-800 sticky top-0 z-50 px-4 py-3 shadow-md">
+    <header className="bg-slate-950/80 backdrop-blur-md text-slate-100 border-b border-slate-800/80 sticky top-0 z-50 px-4 py-3 shadow-xl">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Logo / Title */}
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onSearch('example.com')}>
-          <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30">
-            <History className="w-6 h-6" />
+        <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => onSearch('example.com')}>
+          <div className="p-2.5 bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-400 rounded-xl border border-amber-500/30 group-hover:border-amber-400 transition-all glow-amber">
+            <Radar className="w-6 h-6 animate-pulse" />
           </div>
           <div>
-            <h1 className="font-bold text-lg leading-tight tracking-wide text-amber-400 flex items-center gap-2">
-              Internet Archaeologist
-              <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 font-mono font-normal">
+            <h1 className="font-extrabold text-lg leading-tight tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 flex items-center gap-2">
+              INTERNET ARCHAEOLOGIST
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-mono font-semibold">
                 OSINT v1.0
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Public Footprint & Web Time Machine</p>
+            <p className="text-xs text-slate-400 flex items-center gap-1.5 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              Public Footprint & Web Time Machine Engine
+            </p>
           </div>
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSubmit} className="flex-1 max-w-xl w-full flex items-center gap-2">
-          <div className="relative w-full">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={inputVal}
-              onChange={(e) => setInputVal(e.target.value)}
-              placeholder="Enter domain (e.g. example.com, github.com)"
-              className="w-full bg-slate-950 border border-slate-700 rounded-md pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
-            />
+        {/* Search Bar & Quick Presets */}
+        <div className="flex-1 max-w-xl w-full flex flex-col gap-1.5">
+          <form onSubmit={handleSubmit} className="w-full flex items-center gap-2">
+            <div className="relative w-full">
+              <Terminal className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500/70" />
+              <input
+                type="text"
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
+                placeholder="Enter domain (e.g. example.com, github.com)..."
+                className="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 font-mono transition-all shadow-inner"
+              />
+            </div>
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm rounded-xl transition-all shadow-lg hover:shadow-amber-500/20 whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+            >
+              <Search className="w-4 h-4" />
+              <span>Scan Target</span>
+            </button>
+          </form>
+
+          {/* Preset Domain Tags */}
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono overflow-x-auto">
+            <span className="text-slate-500 flex items-center gap-1"><Sparkles className="w-3 h-3 text-amber-400" /> Presets:</span>
+            {PRESET_DOMAINS.map((domain) => (
+              <button
+                key={domain}
+                onClick={() => { setInputVal(domain); onSearch(domain); }}
+                className="px-2 py-0.5 rounded bg-slate-900 hover:bg-amber-500/10 hover:text-amber-300 border border-slate-800 hover:border-amber-500/40 transition-colors"
+              >
+                {domain}
+              </button>
+            ))}
           </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-medium text-sm rounded-md transition-colors whitespace-nowrap"
-          >
-            Investigate
-          </button>
-        </form>
+        </div>
 
         {/* Quick Actions */}
         <div className="flex items-center space-x-2">
           <button
             onClick={onToggleSavedModal}
-            className="flex items-center space-x-1.5 px-3 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-md border border-slate-700 transition-colors"
+            className="flex items-center space-x-2 px-3.5 py-2 text-xs bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl border border-slate-800 hover:border-slate-700 transition-all font-medium shadow-sm cursor-pointer"
             title="View saved research projects"
           >
             <Shield className="w-4 h-4 text-emerald-400" />
             <span>Saved Projects</span>
             {savedCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 font-mono rounded-full border border-emerald-500/30">
+              <span className="ml-1 px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 font-mono rounded-full border border-emerald-500/40 font-bold">
                 {savedCount}
               </span>
             )}
@@ -84,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={onExportReport}
-            className="flex items-center space-x-1.5 px-3 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-md border border-slate-700 transition-colors"
+            className="flex items-center space-x-2 px-3.5 py-2 text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/30 hover:border-amber-500/60 transition-all font-medium cursor-pointer"
             title="Export Findings Report"
           >
             <Download className="w-4 h-4 text-amber-400" />

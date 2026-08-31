@@ -2,7 +2,9 @@ node_modules/
 .next/
 out/
 build/
-dev.log
+.netlify/
+*.log
+*.tsbuildinfo
 .DS_Store
 *.pem
 .env
@@ -13,3 +15,4 @@ dev.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+

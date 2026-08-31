@@ -2,17 +2,24 @@ import { Investigation, DnsRecord, Technology, WebSnapshot, EvidenceItem, GraphN
 import { lookupDnsRecords } from './dns';
 import { detectTechnologies } from './tech';
 import { fetchHistoricalSnapshots } from './history';
-import { computeChangeEvents } from './diff';
+import { computeChangeEvents, computeStoryMilestones, generateExecutiveSummary } from './diff';
+import { discoverSubdomains } from './subdomains';
 
 export async function createInvestigation(domainInput: string): Promise<Investigation> {
   const domain = domainInput.replace(/^https?:\/\//, '').replace(/\/.*$/, '').trim().toLowerCase();
   const targetUrl = `https://${domain}`;
   const now = new Date().toISOString();
 
-  // 1. Fetch DNS records
-  const { ipAddresses, dnsRecords } = await lookupDnsRecords(domain);
+  // Run DNS lookup, subdomain discovery, and historical snapshots concurrently
+  const [dnsResult, subdomains, snapshots] = await Promise.all([
+    lookupDnsRecords(domain),
+    discoverSubdomains(domain),
+    fetchHistoricalSnapshots(domain)
+  ]);
 
-  // 2. Fetch live website headers & HTML if accessible
+  const { ipAddresses, dnsRecords } = dnsResult;
+
+  // Fetch live website headers & HTML if accessible
   let detectedTech: Technology[] = [];
   let rawResponseHeaders = 'Server: nginx\nContent-Type: text/html; charset=UTF-8\nX-Powered-By: Next.js\nStrict-Transport-Security: max-age=31536000';
   let htmlSample = '<!DOCTYPE html><html><head><title>Observed Site</title></head><body><div id="__next"></div></body></html>';
@@ -37,13 +44,14 @@ export async function createInvestigation(domainInput: string): Promise<Investig
     detectedTech = detectTechnologies({ 'server': 'nginx', 'x-powered-by': 'Next.js' }, htmlSample);
   }
 
-  // 3. Fetch historical web archive snapshots
-  const snapshots = await fetchHistoricalSnapshots(domain);
-
-  // 4. Compute chronological change events
+  // Compute chronological delta events
   const changes = computeChangeEvents(snapshots, dnsRecords);
 
-  // 5. Build Evidence Items with source, raw data, timestamps
+  // Synthesize Website Story Milestones & Executive Summary
+  const milestones = computeStoryMilestones(snapshots, subdomains, detectedTech, domain);
+  const summary = generateExecutiveSummary(domain, snapshots, subdomains, detectedTech, milestones);
+
+  // Build Evidence Items with source, raw data, timestamps
   const evidence: EvidenceItem[] = [
     {
       id: `ev-dns-${Date.now()}`,
@@ -52,6 +60,14 @@ export async function createInvestigation(domainInput: string): Promise<Investig
       evidenceType: 'DNS',
       rawData: JSON.stringify(dnsRecords, null, 2),
       notes: `Discovered ${dnsRecords.length} public DNS records`
+    },
+    {
+      id: `ev-subdomains-${Date.now()}`,
+      timestamp: now,
+      source: 'Certificate Transparency Logs & Public Index',
+      evidenceType: 'Subdomain Recon',
+      rawData: JSON.stringify(subdomains, null, 2),
+      notes: `Identified ${subdomains.length} associated subdomains across public certificate & archive registers`
     },
     {
       id: `ev-http-${Date.now()}`,
@@ -71,11 +87,17 @@ export async function createInvestigation(domainInput: string): Promise<Investig
     }
   ];
 
-  // 6. Build Relationship Graph Nodes & Edges
+  // Build Relationship Graph Nodes & Edges
   const nodes: GraphNode[] = [
     { id: domain, label: domain, type: 'domain' }
   ];
   const edges: GraphEdge[] = [];
+
+  // Add Subdomain nodes
+  subdomains.slice(0, 10).forEach(sub => {
+    nodes.push({ id: sub.fullDomain, label: sub.subdomain, type: 'subdomain' });
+    edges.push({ source: sub.fullDomain, target: domain, relationship: 'subdomain_of' });
+  });
 
   // Add IP nodes
   ipAddresses.forEach(ip => {
@@ -107,6 +129,9 @@ export async function createInvestigation(domainInput: string): Promise<Investig
     createdAt: now,
     lastUpdated: now,
     status: 'completed',
+    summary,
+    milestones,
+    subdomains,
     ipAddresses,
     dnsRecords,
     technologies: detectedTech,
@@ -118,3 +143,4 @@ export async function createInvestigation(domainInput: string): Promise<Investig
 
   return investigation;
 }
+
