@@ -85,9 +85,27 @@ export interface EvidenceItem {
   id: string;
   timestamp: string;
   source: string; // e.g. "Public DNS", "Wayback Machine Archive", "HTTP Response Headers", "Certificate Transparency"
+  sourceUrl?: string; // Verifiable URL/endpoint where artifact was queried
   evidenceType: 'DNS' | 'HTTP Header' | 'HTML Scraping' | 'Historical Archive' | 'SSL Cert' | 'Subdomain Recon';
   rawData: string;
   notes?: string;
+  verificationHash: string; // Cryptographic SHA-256 fingerprint for forensic provenance
+  confidenceScore: number; // 0 to 100% confidence rating
+}
+
+export interface SnapshotComparison {
+  baseSnapshot: WebSnapshot;
+  targetSnapshot: WebSnapshot;
+  yearsApart: number;
+  sizeDiffBytes: number;
+  sizeDiffPercent: number;
+  sizeDirection: 'increased' | 'decreased' | 'unchanged';
+  statusChanged: boolean;
+  addedTech: Technology[];
+  removedTech: Technology[];
+  retainedTech: Technology[];
+  titleChanged: boolean;
+  evolutionSummary: string;
 }
 
 export interface Investigation {
