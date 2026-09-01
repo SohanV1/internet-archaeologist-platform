@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Shield, Download, Radar, Sparkles, Terminal } from 'lucide-react';
+import { Search, Shield, Download, Radar, Sparkles, Terminal, Share2, Check } from 'lucide-react';
 
 interface NavbarProps {
   currentDomain: string;
@@ -22,6 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [inputVal, setInputVal] = React.useState(currentDomain);
   const [isExportOpen, setIsExportOpen] = React.useState(false);
+  const [isCopiedPermalink, setIsCopiedPermalink] = React.useState(false);
 
   React.useEffect(() => {
     setInputVal(currentDomain);
@@ -31,6 +32,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     e.preventDefault();
     if (inputVal.trim()) {
       onSearch(inputVal.trim());
+    }
+  };
+
+  const handleSharePermalink = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setIsCopiedPermalink(true);
+      setTimeout(() => setIsCopiedPermalink(false), 2500);
     }
   };
 
@@ -46,7 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <h1 className="font-extrabold text-lg leading-tight tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 flex items-center gap-2">
               INTERNET ARCHAEOLOGIST PLATFORM
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-mono font-semibold">
-                v1.0
+                v1.5
               </span>
             </h1>
             <p className="text-xs text-slate-400 flex items-center gap-1.5 font-mono">
@@ -95,6 +104,25 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Quick Actions */}
         <div className="flex items-center space-x-2 relative">
+          {/* Share Permalink Button */}
+          <button
+            onClick={handleSharePermalink}
+            className="flex items-center space-x-1.5 px-3.5 py-2 text-xs bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl border border-slate-800 hover:border-slate-700 transition-all font-medium shadow-sm cursor-pointer"
+            title="Share domain investigation permalink"
+          >
+            {isCopiedPermalink ? (
+              <>
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-300 font-bold">Link Copied!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-4 h-4 text-amber-400" />
+                <span>Share</span>
+              </>
+            )}
+          </button>
+
           <button
             onClick={onToggleSavedModal}
             className="flex items-center space-x-2 px-3.5 py-2 text-xs bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl border border-slate-800 hover:border-slate-700 transition-all font-medium shadow-sm cursor-pointer"
@@ -129,25 +157,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => { onExportReport('html'); setIsExportOpen(false); }}
                   className="w-full text-left px-3 py-2 rounded-lg hover:bg-amber-500/15 text-slate-200 hover:text-amber-300 flex items-center justify-between transition-colors"
                 >
-                  <span>📄 Standalone HTML (Print PDF)</span>
+                  <span>Standalone HTML (Print PDF)</span>
                 </button>
                 <button
                   onClick={() => { onExportReport('json'); setIsExportOpen(false); }}
                   className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors"
                 >
-                  <span>📦 Full JSON Payload</span>
+                  <span>Full JSON Payload</span>
                 </button>
                 <button
                   onClick={() => { onExportReport('csv-dns'); setIsExportOpen(false); }}
                   className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors"
                 >
-                  <span>📊 DNS Zones (CSV)</span>
+                  <span>DNS Zones (CSV)</span>
                 </button>
                 <button
                   onClick={() => { onExportReport('csv-subs'); setIsExportOpen(false); }}
                   className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors"
                 >
-                  <span>🌐 Subdomains (CSV)</span>
+                  <span>Subdomains (CSV)</span>
                 </button>
               </div>
             )}

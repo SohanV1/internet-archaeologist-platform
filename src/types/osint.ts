@@ -173,6 +173,68 @@ export interface DomainComparisonResult {
   summaryNarrative: string;
 }
 
+export type TechLifecycleStatus = 'introduced' | 'retained' | 'deprecated';
+
+export interface TechEvolutionItem {
+  technology: Technology;
+  lifecycle: TechLifecycleStatus;
+  firstSeenTimestamp: string;
+  firstSeenEra: string;
+  lastSeenTimestamp?: string;
+  lastSeenEra?: string;
+  replacedBy?: string;
+  evidenceId?: string;
+}
+
+export interface TechEvolutionEra {
+  era: string; // e.g. "Early Era (1998-2006)", "Web 2.0 (2007-2014)", "SPA & Cloud (2015-2020)", "Modern Jamstack (2021-Present)"
+  yearRange: string;
+  snapshotsCount: number;
+  activeStack: Technology[];
+  introduced: Technology[];
+  deprecated: Technology[];
+  dominantFrontend: string;
+  dominantInfrastructure: string;
+}
+
+export interface TechEvolutionAnalysis {
+  eras: TechEvolutionEra[];
+  lifecycleItems: TechEvolutionItem[];
+  stackShiftNarrative: string;
+  frontendEvolutionTrail: string[];
+  infrastructureEvolutionTrail: string[];
+  totalTechsDetectedHistorically: number;
+}
+
+export interface DnsDriftEvent {
+  id: string;
+  timestamp: string;
+  recordType: 'A' | 'NS' | 'MX' | 'TXT' | 'CNAME';
+  category: 'Nameserver Shift' | 'Mail Routing Shift' | 'Security Policy Adoption' | 'IP Pool Migration';
+  description: string;
+  oldValue?: string;
+  newValue: string;
+  severity: 'low' | 'medium' | 'high';
+  evidenceId?: string;
+}
+
+export interface VisualReconstruction {
+  id: string;
+  era: string;
+  year: string;
+  snapshotId: string;
+  timestamp: string;
+  archiveUrl: string;
+  title: string;
+  layoutStyle: 'early-table-based' | 'web2-skeuomorphic' | 'flat-responsive' | 'modern-dark-spa';
+  browserFrameType: 'win98-ie' | 'win7-chrome' | 'modern-dark';
+  colorPalette: string[];
+  keyElements: string[];
+  detectedTechNames: string[];
+  contentLength: number;
+  statusCode: number;
+}
+
 export interface Investigation {
   id: string;
   domain: string;
@@ -192,5 +254,9 @@ export interface Investigation {
   evidence: EvidenceItem[];
   certificates?: CertificateRecord[];
   asnInfo?: AsnInfo[];
+  techEvolution?: TechEvolutionAnalysis;
+  dnsDrifts?: DnsDriftEvent[];
+  visualReconstructions?: VisualReconstruction[];
 }
+
 

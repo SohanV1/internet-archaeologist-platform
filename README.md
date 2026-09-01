@@ -1,4 +1,4 @@
-# 🏛️ Internet Archaeologist Platform
+# 🏛️ Internet Archaeologist Platform (v1.5)
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.3.1-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -13,56 +13,64 @@
 
 ---
 
-## 🌟 Key Capabilities & Features
+## 🌟 What's New in Version 1.5
 
-### 1. 📖 Website Evolution Story & "What Happened?" Engine
+### 🚀 1. Historical Tech Stack Evolution Matrix
+- **Chronological Era Breakdown**: Analyzes technology signatures across 4 distinct web archeology eras (*Genesis 1998-2006*, *Web 2.0 2007-2014*, *Cloud/SPA 2015-2020*, *Modern Jamstack 2021-Present*).
+- **Stack Migration River**: Visualizes step-by-step evolution trails for client-side libraries and backend/cloud hosting providers.
+- **Full Lifecycle Directory**: Tracks technology statuses with interactive badges (`✨ Introduced`, `🟢 Active Stack`, `🔴 Sunset / Replaced`), confidence scores, and direct 1-click forensic evidence tracing.
+
+### 🖼️ 2. Visual Archeology & Interface Slider Diff
+- **Interactive Split-Screen Swipe Slider**: Swipe side-by-side between historical captures to visually compare UI transformations across decades.
+- **Authentic Layout Wireframe Mockups**: Reconstructs vintage table-based HTML4 structures, glossy Web 2.0 skeuomorphism, responsive flat layouts, and modern dark-mode glassmorphic themes.
+- **Retro Browser Frames**: Previews historical web pages inside authentic Windows 98 / Windows 7 / Modern chrome viewports with direct Wayback Machine source links.
+
+### 📡 3. Historical DNS Infrastructure & Mail Drift Tracker
+- **Drift Event Ledger**: Logs nameserver delegations, mail exchanger (MX) routing migrations (e.g. *Self-Hosted MTA ➔ Google Workspace / Microsoft 365*), and SPF/DMARC email security adoption.
+- **Impact Severity Ratings**: Flags critical routing shifts with high/medium/low severity badges and 1-click configuration payload copying.
+
+---
+
+## 🔍 Core Platform Capabilities
+
+### 📖 Website Evolution Story & "What Happened?" Engine
 - Synthesizes decades of public web crawl captures into an executive narrative.
 - Identifies major framework migrations (e.g. *jQuery/WordPress ➔ React/Next.js*), security posture overhauls, and infrastructure modernization.
-- Chronological milestone cards categorized by **Framework Migration**, **UI/UX Redesign**, **Subdomain Expansion**, and **Security & CDN**.
+- Chronological milestone cards with live search and category filtering.
 
-### 2. ⚖️ Before / After Historical Snapshot Comparison
-- Interactive split diff comparator allowing side-by-side inspection between any two historical eras (e.g. *2018 vs 2024*).
-- Automatic diffing of page titles, HTTP status transitions, payload size shifts ($+X\%$ / $-Y\%$), and tech stack additions/removals.
-- Categorized technology migration cards:
-  - 🟢 **Adopted Technologies**
-  - 🔴 **Decommissioned Stack Components**
-  - ⚪ **Retained Technologies Across Eras**
+### ⚖️ Before / After Historical Snapshot Comparison
+- Side-by-side snapshot comparator with automatic diffing of page titles, HTTP status codes, payload bytes ($+X%$ / $-Y%$), and tech stack additions/removals.
 
-### 3. 🛡️ Cryptographic Evidence Chain & Provenance Audit
+### 🛡️ Cryptographic Evidence Chain & Provenance Audit
 - Strict `Evidence ➔ Source ➔ Timestamp ➔ Verification Hash` audit trail.
 - Authoritative source attribution tags (`Cloudflare DoH RFC 8484`, `crt.sh Certificate Transparency`, `Wayback CDX API`, `Active Probe`).
 - Deterministic SHA-256 fingerprinting for forensic chain-of-custody verification.
 - Confidence scoring meters (0–100%) and instant raw payload copying.
-- Real-time search & type filtering across evidence records.
 
-### 4. 🌐 Passive Subdomain Discovery & Infrastructure Recon
+### 🌐 Passive Subdomain Discovery & Infrastructure Recon
 - Enumerates subdomains using public SSL/TLS Certificate Transparency logs and historical index queries without invasive active brute-forcing.
-- Live search directory with 1-click clipboard copy and direct protocol links.
 
-### 5. ⏳ Interactive Historical Web Archive Timeline
+### ⏳ Interactive Historical Web Archive Timeline
 - Interactive horizontal node scrubber with era filters (*All Years, Decade selectors*).
 - Snapshot detail cards with HTTP status codes, payload bytes, detected tech signatures, and direct Wayback archive links.
-- One-click jump to the Before/After Comparison viewer.
 
-### 6. 📜 SSL/TLS Certificate History & Transparency Ledger
+### 📜 SSL/TLS Certificate History & Transparency Ledger
 - Queries public Certificate Transparency logs (`crt.sh`) for issuance history, root CAs (*Let's Encrypt, DigiCert, Sectigo, Cloudflare Inc ECC CA*), validity windows, and Subject Alternative Names (SANs).
 
-### 7. 🌐 IP Routing & Autonomous System (ASN) Infrastructure Map
+### 🌐 IP Routing & Autonomous System (ASN) Infrastructure Map
 - Resolves Autonomous System Numbers (ASN), ISP / Hosting Organizations (*Cloudflare AS13335, AWS AS16509, Fastly, Google, Akamai*), and maps BGP network CIDR routing.
 
-### 8. ⚔️ Target-vs-Target Multi-Domain Comparator
+### ⚔️ Target-vs-Target Multi-Domain Comparator
 - Compares two distinct web entities side-by-side (e.g. `github.com` vs `gitlab.com`).
 - Generates tech stack overlap matrices, exclusive stack components, subdomain attack surface deltas, and longevity comparisons.
 
-### 9. 🌐 Authoritative DNS Zone Records
-- Resolves DNS zone records (`A`, `AAAA`, `MX`, `TXT`, `NS`, `CNAME`, `SOA`) using DNS-over-HTTPS (DoH).
-
-### 10. 🕸️ Entity Relationship Topology Graph
+### 🕸️ Entity Relationship Topology Graph
 - Visualizes topological connections between root domains, discovered subdomains, resolved IP nodes, authoritative nameservers, and detected web technologies with live entity filtering and search.
 
-### 11. 📄 Multi-Format Forensic Exporter
+### 📄 Multi-Format Forensic Exporter
 - **Standalone HTML / PDF Audit Report**: Print-optimized executive forensic report.
 - **CSV Data Exporter**: 1-click export of DNS zone records, Subdomains, and Change events.
+- **Full JSON Payload**: Complete machine-readable OSINT dataset.
 
 ---
 
@@ -85,7 +93,8 @@
                      ┌─────────────────────────────┐
                      │ Investigation Engine Core   │
                      │  - Heuristic Tech Profiler  │
-                     │  - Evolution Diff Engine    │
+                     │  - Evolution Drift Engine   │
+                     │  - Visual Reconstructor     │
                      │  - Provenance Hasher        │
                      └──────────────┬──────────────┘
                                     │
@@ -93,7 +102,9 @@
                      ┌─────────────────────────────┐
                      │ Dynamic Multi-Tab Dashboard │
                      │  - Executive Story Hero     │
-                     │  - Before/After Comparator  │
+                     │  - Tech Drift Matrix (v1.5) │
+                     │  - Visual Diff Slider (v1.5)│
+                     │  - DNS Zone Drift (v1.5)    │
                      │  - Subdomain Directory      │
                      │  - Interactive Timeline     │
                      │  - Cryptographic Evidence   │
@@ -133,46 +144,6 @@ npm run build
 
 # Run production server
 npm start
-```
-
----
-
-## 📡 API Reference
-
-### `POST /api/investigate`
-Performs an automated passive reconnaissance and historical archive analysis for a domain.
-
-**Request Body:**
-```json
-{
-  "domain": "example.com"
-}
-```
-
-**Response Payload Structure:**
-```json
-{
-  "id": "inv-1725114800-abcde",
-  "domain": "example.com",
-  "targetUrl": "https://example.com",
-  "createdAt": "2026-08-31T14:30:00.000Z",
-  "status": "completed",
-  "summary": {
-    "headline": "Modern Cloud & Edge Infrastructure",
-    "narrative": "...",
-    "firstRecordedDate": "2001-10-26",
-    "totalYearsActive": 25,
-    "primaryFrameworkEvolution": "Static HTML -> Next.js / Edge",
-    "securityRating": "High"
-  },
-  "milestones": [...],
-  "subdomains": [...],
-  "technologies": [...],
-  "snapshots": [...],
-  "changes": [...],
-  "relationships": { "nodes": [...], "edges": [...] },
-  "evidence": [...]
-}
 ```
 
 ---

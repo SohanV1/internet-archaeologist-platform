@@ -6,6 +6,9 @@ import { computeChangeEvents, computeStoryMilestones, generateExecutiveSummary }
 import { discoverSubdomains } from './subdomains';
 import { fetchCertificateHistory } from './certificates';
 import { lookupAsnInfo } from './asn';
+import { analyzeTechEvolution } from './techEvolution';
+import { detectDnsDrift } from './dnsDrift';
+import { reconstructVisualSnapshots } from './visualReconstructor';
 
 export async function createInvestigation(domainInput: string): Promise<Investigation> {
   const domain = domainInput.replace(/^https?:\/\//, '').replace(/\/.*$/, '').trim().toLowerCase();
@@ -97,6 +100,11 @@ export async function createInvestigation(domainInput: string): Promise<Investig
     evidenceId: waybackEvidenceId
   }));
   const summary = generateExecutiveSummary(domain, linkedSnapshots, linkedSubdomains, detectedTech, milestones);
+
+  // Compute Version 1.5 Engines: Tech Evolution, DNS Drift, Visual Reconstructions
+  const techEvolution = analyzeTechEvolution(domain, linkedSnapshots, detectedTech);
+  const dnsDrifts = detectDnsDrift(domain, linkedDnsRecords, linkedAsnInfo);
+  const visualReconstructions = reconstructVisualSnapshots(domain, linkedSnapshots);
 
   // Lightweight deterministic SHA-256-like hash helper for cryptographic forensic audit trail
   const generateProvenanceHash = (input: string) => {
@@ -286,7 +294,10 @@ export async function createInvestigation(domainInput: string): Promise<Investig
     relationships: { nodes, edges },
     evidence,
     certificates: linkedCertificates,
-    asnInfo: linkedAsnInfo
+    asnInfo: linkedAsnInfo,
+    techEvolution,
+    dnsDrifts,
+    visualReconstructions
   };
 
   return investigation;

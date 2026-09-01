@@ -5,9 +5,7 @@ import { WebsiteStoryMilestone, ExecutiveSummary, SubdomainRecord, Technology } 
 import { 
   Sparkles, 
   GitCommit, 
-  Layers, 
   Compass, 
-  Globe, 
   ShieldCheck, 
   Calendar, 
   Clock, 
@@ -38,13 +36,18 @@ export const WebsiteStory: React.FC<Props> = ({
   onNavigateToTab,
   onTraceEvidence
 }) => {
+  const [searchTerm, setSearchTerm] = React.useState('');
   const [filterCategory, setFilterCategory] = React.useState<string>('all');
 
   const categories = ['all', 'Framework Migration', 'UI/UX Redesign', 'Subdomain Expansion', 'Security & CDN'];
 
-  const filteredMilestones = filterCategory === 'all'
-    ? milestones
-    : milestones.filter(m => m.category === filterCategory);
+  const filteredMilestones = milestones.filter(m => {
+    const matchesCat = filterCategory === 'all' || m.category === filterCategory;
+    const matchesSearch = m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          m.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (m.details && m.details.some(d => d.toLowerCase().includes(searchTerm.toLowerCase())));
+    return matchesCat && matchesSearch;
+  });
 
   const getCategoryIcon = (cat: string) => {
     switch (cat) {
@@ -80,7 +83,6 @@ export const WebsiteStory: React.FC<Props> = ({
     <div className="space-y-6">
       {/* Executive Story Narrative Hero Card */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-        {/* Glow backdrop decoration */}
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -199,7 +201,7 @@ export const WebsiteStory: React.FC<Props> = ({
 
       {/* Chronological Milestones Feed */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl backdrop-blur-xl space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
           <div className="space-y-1">
             <h3 className="text-xl font-extrabold text-slate-100 font-mono flex items-center gap-2.5">
               <Compass className="w-5 h-5 text-amber-400" />
@@ -210,21 +212,29 @@ export const WebsiteStory: React.FC<Props> = ({
             </p>
           </div>
 
-          {/* Filter Pills */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-mono">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilterCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg transition-all capitalize cursor-pointer ${
-                  filterCategory === cat
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-transparent'
-                }`}
-              >
-                {cat === 'all' ? 'All Findings' : cat}
-              </button>
-            ))}
+          {/* Search Input and Category Filters */}
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full lg:w-auto">
+            <div className="relative w-full sm:w-56">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search milestones..."
+                className="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setFilterCategory(cat)}
+                  className={`px-2.5 py-1 rounded-lg transition-all capitalize cursor-pointer text-[11px] ${filterCategory === cat ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900 border-transparent'}`}
+                >
+                  {cat === 'all' ? 'All' : cat.split(' ')[0]}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -232,7 +242,7 @@ export const WebsiteStory: React.FC<Props> = ({
         <div className="space-y-4 relative before:absolute before:inset-0 before:left-5 before:w-0.5 before:bg-slate-800 before:hidden md:before:block">
           {filteredMilestones.length === 0 ? (
             <div className="text-center py-12 text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-xl">
-              No milestones found matching the selected category.
+              No milestones found matching your search or filter.
             </div>
           ) : (
             filteredMilestones.map((m, mIdx) => (
@@ -321,4 +331,3 @@ export const WebsiteStory: React.FC<Props> = ({
     </div>
   );
 };
-
