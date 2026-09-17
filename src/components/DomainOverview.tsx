@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { Investigation } from '@/types/osint';
-import { Globe, Server, Database, ShieldCheck, Copy, Check, Network, Calendar, Sparkles } from 'lucide-react';
+import { Globe, Server, Database, ShieldCheck, Copy, Check, Network, Calendar, Sparkles, Activity } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
 
 interface Props {
   investigation: Investigation;
@@ -150,6 +151,74 @@ export const DomainOverview: React.FC<Props> = ({ investigation, onTraceEvidence
           <p className="text-[11px] text-purple-300 font-mono truncate">
             {investigation.technologies.slice(0, 2).map(t => t.name).join(', ') || 'Analyzed'}
           </p>
+        </div>
+      </div>
+
+      {/* Reconnaissance Footprint Distribution Bar Chart */}
+      <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 md:p-5 space-y-3">
+        <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <div className="text-xs font-mono text-slate-200 font-bold uppercase tracking-wider flex items-center gap-2">
+            <Activity className="w-4 h-4 text-amber-400" />
+            Reconnaissance Surface & Asset Inventory
+          </div>
+          <span className="text-[11px] font-mono text-slate-500">
+            Relative discovery volume across target dimensions
+          </span>
+        </div>
+
+        <div className="h-36 w-full pt-1">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={[
+                { dimension: 'Resolved IPs', count: investigation.ipAddresses.length, color: '#3b82f6' },
+                { dimension: 'Subdomains', count: investigation.subdomains?.length || 0, color: '#10b981' },
+                { dimension: 'DNS Zone', count: investigation.dnsRecords.length, color: '#06b6d4' },
+                { dimension: 'Active Tech', count: investigation.technologies.length, color: '#a855f7' },
+                { dimension: 'Captures', count: investigation.snapshots.length, color: '#f59e0b' },
+                { dimension: 'Evidence Trail', count: investigation.evidence?.length || 0, color: '#f43f5e' },
+              ]}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <XAxis
+                dataKey="dimension"
+                stroke="#64748b"
+                tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }}
+                tickLine={false}
+              />
+              <YAxis
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
+                tickLine={false}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl shadow-2xl font-mono text-xs text-slate-200">
+                        <div className="font-bold" style={{ color: data.color }}>{data.dimension}</div>
+                        <div className="text-slate-300">Total Discovered: <span className="font-bold text-white">{data.count}</span></div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                {[
+                  '#3b82f6',
+                  '#10b981',
+                  '#06b6d4',
+                  '#a855f7',
+                  '#f59e0b',
+                  '#f43f5e',
+                ].map((col, index) => (
+                  <Cell key={`cell-${index}`} fill={col} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

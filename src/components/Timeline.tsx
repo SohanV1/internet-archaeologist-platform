@@ -3,6 +3,7 @@
 import React from 'react';
 import { WebSnapshot } from '@/types/osint';
 import { History, ExternalLink, Calendar, FileCode, CheckCircle, Clock, GitCompare, Filter } from 'lucide-react';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 interface Props {
   snapshots: WebSnapshot[];
@@ -72,6 +73,86 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
               {yr}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Snapshot Activity & Payload Size Over Time Chart */}
+      <div className="bg-slate-950/90 border border-slate-800/90 rounded-xl p-4 md:p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-mono text-slate-300 font-bold uppercase tracking-wider flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            Payload Size & Capture Frequency (KB)
+          </div>
+          <span className="text-[11px] font-mono text-slate-500">
+            Click any point on the chart to inspect that capture
+          </span>
+        </div>
+
+        <div className="h-44 w-full pt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={snapshots.map((s) => ({
+                id: s.id,
+                date: s.timestamp.split('T')[0],
+                sizeKB: parseFloat((s.contentLength / 1024).toFixed(1)),
+                techCount: s.detectedTech.length,
+                statusCode: s.statusCode,
+                raw: s
+              }))}
+              onClick={(state: any) => {
+                if (state && state.activePayload && state.activePayload[0]) {
+                  const raw = state.activePayload[0].payload.raw;
+                  if (raw) setSelectedSnapshot(raw);
+                }
+              }}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="timelineAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <XAxis
+                dataKey="date"
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
+                tickLine={false}
+              />
+              <YAxis
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
+                tickLine={false}
+                unit="KB"
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl shadow-2xl font-mono text-xs text-slate-200">
+                        <div className="text-amber-400 font-bold">{data.date}</div>
+                        <div className="text-slate-300">Payload: <span className="font-bold text-white">{data.sizeKB} KB</span></div>
+                        <div className="text-emerald-400">HTTP {data.statusCode} OK</div>
+                        <div className="text-purple-400">{data.techCount} Technologies Detected</div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="sizeKB"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#timelineAreaGrad)"
+                activeDot={{ r: 6, fill: '#fbbf24', stroke: '#78350f', strokeWidth: 2 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

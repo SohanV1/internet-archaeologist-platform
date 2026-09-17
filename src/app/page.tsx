@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Navbar } from '@/components/Navbar';
+import { TabBar } from '@/components/TabBar';
 import { DomainOverview } from '@/components/DomainOverview';
 import { WebsiteStory } from '@/components/WebsiteStory';
 import { TechEvolutionMatrix } from '@/components/TechEvolutionMatrix';
@@ -23,25 +24,11 @@ import { getSavedInvestigations, saveInvestigation, deleteInvestigation } from '
 import { generateHtmlReport, exportDnsToCsv, exportSubdomainsToCsv } from '@/lib/osint/export';
 import { 
   Globe, 
-  Cpu, 
-  History, 
-  GitCompare, 
-  Network, 
-  Shield, 
   Loader2, 
   Copy, 
   Check, 
-  Sparkles, 
-  Layers, 
   AlertTriangle,
-  ArrowRight,
   Terminal,
-  Lock,
-  Server,
-  Swords,
-  Sliders,
-  Eye,
-  Clock
 } from 'lucide-react';
 
 const LOADING_STAGES = [
@@ -356,217 +343,18 @@ export default function Home() {
               onTraceEvidence={handleTraceEvidence}
             />
 
-            {/* Navigation Tabs Bar */}
-            <div className="flex flex-wrap border-b border-slate-800/80 gap-1.5 font-mono text-xs p-1.5 bg-slate-900/50 rounded-2xl backdrop-blur-md">
-              {/* 1. What Happened / Evolution Story Tab */}
-              <button
-                onClick={() => handleTabChange('story')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'story'
-                    ? 'border-amber-500/60 bg-amber-500/15 text-amber-300 shadow-md glow-amber'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span>Story & Evolution</span>
-                {investigation.milestones?.length > 0 && (
-                  <span className="text-[10px] px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30">
-                    {investigation.milestones.length}
-                  </span>
-                )}
-              </button>
-
-              {/* 2. Version 1.5: Tech Evolution Matrix */}
-              <button
-                onClick={() => handleTabChange('tech-evolution')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'tech-evolution'
-                    ? 'border-purple-500/60 bg-purple-500/15 text-purple-300 shadow-md'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Cpu className="w-4 h-4 text-purple-400" />
-                <span>Tech Drift Matrix</span>
-                <span className="text-[10px] px-1.5 py-0.2 bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30">
-                  v1.5
-                </span>
-              </button>
-
-              {/* 3. Version 1.5: Visual Archeology & Slider */}
-              <button
-                onClick={() => handleTabChange('visual-archeology')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'visual-archeology'
-                    ? 'border-amber-500/60 bg-amber-500/15 text-amber-300 shadow-md glow-amber'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Sliders className="w-4 h-4 text-amber-400" />
-                <span>Visual Slider Diff</span>
-                <span className="text-[10px] px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30">
-                  v1.5
-                </span>
-              </button>
-
-              {/* 4. Version 1.5: Historical DNS Drift Tracker */}
-              <button
-                onClick={() => handleTabChange('dns-drift')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'dns-drift'
-                    ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-300 shadow-md'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Network className="w-4 h-4 text-cyan-400" />
-                <span>DNS Zone Drift</span>
-                <span className="text-[10px] px-1.5 py-0.2 bg-cyan-500/20 text-cyan-300 rounded-full border border-cyan-500/30">
-                  v1.5
-                </span>
-              </button>
-
-              {/* 5. Subdomains Recon Tab */}
-              <button
-                onClick={() => handleTabChange('subdomains')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'subdomains'
-                    ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-300 shadow-md glow-emerald'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Network className="w-4 h-4 text-emerald-400" />
-                <span>Subdomains ({investigation.subdomains?.length || 0})</span>
-              </button>
-
-              {/* 6. SSL/TLS Certificates Tab */}
-              <button
-                onClick={() => handleTabChange('certs')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'certs'
-                    ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-300 shadow-md'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Lock className="w-4 h-4 text-cyan-400" />
-                <span>Certificates ({investigation.certificates?.length || 0})</span>
-              </button>
-
-              {/* 7. IP & ASN Infrastructure Tab */}
-              <button
-                onClick={() => handleTabChange('infra')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'infra'
-                    ? 'border-blue-500/60 bg-blue-500/15 text-blue-300 shadow-md'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Server className="w-4 h-4 text-blue-400" />
-                <span>IP & ASN ({investigation.asnInfo?.length || 0})</span>
-              </button>
-
-              {/* 8. Target vs Target Comparator Tab */}
-              <button
-                onClick={() => handleTabChange('vs')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'vs'
-                    ? 'border-amber-500/60 bg-amber-500/15 text-amber-300 shadow-md glow-amber'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Swords className="w-4 h-4 text-amber-400" />
-                <span>Target vs Target</span>
-              </button>
-
-              {/* 9. Historical Timeline Tab */}
-              <button
-                onClick={() => handleTabChange('timeline')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'timeline'
-                    ? 'border-amber-500/60 bg-amber-500/15 text-amber-300 shadow-md'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <History className="w-4 h-4 text-amber-400" />
-                <span>Timeline ({investigation.snapshots.length})</span>
-              </button>
-
-              {/* 10. Snapshot Diff Viewer Tab */}
-              <button
-                onClick={() => handleTabChange('compare')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'compare'
-                    ? 'border-amber-500/60 bg-amber-500/15 text-amber-300 shadow-md glow-amber'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <GitCompare className="w-4 h-4 text-amber-400" />
-                <span>Diff Viewer</span>
-              </button>
-
-              {/* 11. Delta Changes Tab */}
-              <button
-                onClick={() => handleTabChange('changes')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'changes'
-                    ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-300 shadow-md'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <GitCompare className="w-4 h-4 text-cyan-400" />
-                <span>Delta ({investigation.changes.length})</span>
-              </button>
-
-              {/* 12. Active Tech Stack Tab */}
-              <button
-                onClick={() => handleTabChange('tech')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'tech'
-                    ? 'border-purple-500/60 bg-purple-500/15 text-purple-300 shadow-md'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Cpu className="w-4 h-4 text-purple-400" />
-                <span>Tech Stack ({investigation.technologies.length})</span>
-              </button>
-
-              {/* 13. DNS Zone Records Tab */}
-              <button
-                onClick={() => handleTabChange('overview')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'overview'
-                    ? 'border-blue-500/60 bg-blue-500/15 text-blue-300 shadow-md'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Globe className="w-4 h-4 text-blue-400" />
-                <span>DNS Zone ({investigation.dnsRecords.length})</span>
-              </button>
-
-              {/* 14. Entity Relationship Graph Tab */}
-              <button
-                onClick={() => handleTabChange('graph')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'graph'
-                    ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-300 shadow-md glow-emerald'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Layers className="w-4 h-4 text-emerald-400" />
-                <span>Entity Graph</span>
-              </button>
-
-              {/* 15. Forensic Evidence Chain Tab */}
-              <button
-                onClick={() => handleTabChange('evidence')}
-                className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border transition-all cursor-pointer font-bold ${
-                  activeTab === 'evidence'
-                    ? 'border-slate-600 bg-slate-800 text-slate-200 shadow-md'
-                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                }`}
-              >
-                <Shield className="w-4 h-4 text-emerald-400" />
-                <span>Evidence Log ({investigation.evidence.length})</span>
-              </button>
-            </div>
+            {/* Categorized Navigation Tab Bar */}
+            <TabBar
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              counts={{
+                subdomains: investigation.subdomains?.length,
+                evidence: investigation.evidence?.length,
+                graphNodes: investigation.relationships?.nodes.length,
+                dnsRecords: investigation.dnsRecords?.length,
+                snapshots: investigation.snapshots?.length,
+              }}
+            />
 
             {/* Tab Views Content */}
             <div className="space-y-6">
@@ -718,6 +506,7 @@ export default function Home() {
                   onTraceEvidence={handleTraceEvidence}
                 />
               )}
+
               {activeTab === 'timeline' && (
                 <Timeline 
                   snapshots={investigation.snapshots} 
@@ -725,8 +514,18 @@ export default function Home() {
                   onTraceEvidence={handleTraceEvidence}
                 />
               )}
-              {activeTab === 'changes' && <ChangeDetector changes={investigation.changes} />}
-              {activeTab === 'graph' && <RelationshipGraph data={investigation.relationships} />}
+
+              {activeTab === 'changes' && (
+                <ChangeDetector changes={investigation.changes} />
+              )}
+
+              {activeTab === 'graph' && (
+                <RelationshipGraph 
+                  data={investigation.relationships} 
+                  onSelectEvidence={handleTraceEvidence} 
+                />
+              )}
+
               {activeTab === 'evidence' && (
                 <EvidenceList 
                   evidence={investigation.evidence} 

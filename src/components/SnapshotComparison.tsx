@@ -13,11 +13,22 @@ import {
   Calendar, 
   FileCode, 
   TrendingUp, 
-  Sparkles,
-  Layers,
-  ArrowUpRight,
-  ArrowDownRight
+  Sparkles, 
+  Layers, 
+  ArrowUpRight, 
+  ArrowDownRight,
+  BarChart2
 } from 'lucide-react';
+import { 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  CartesianGrid, 
+  Cell 
+} from 'recharts';
 
 interface Props {
   snapshots: WebSnapshot[];
@@ -114,6 +125,72 @@ export const SnapshotComparison: React.FC<Props> = ({ snapshots, domain }) => {
           <p className="text-slate-200 font-sans text-sm leading-relaxed">
             {comparison.evolutionSummary}
           </p>
+        </div>
+      </div>
+
+      {/* Visual Payload Size & Stack Count Comparison BarChart */}
+      <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 md:p-5 space-y-3">
+        <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <div className="text-xs font-mono text-slate-200 font-bold uppercase tracking-wider flex items-center gap-2">
+            <BarChart2 className="w-4 h-4 text-amber-400" />
+            Payload Size (KB) & Tech Count Metric Contrast
+          </div>
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <span className="text-amber-400">Baseline ({baseYear})</span>
+            <span className="text-slate-600">vs</span>
+            <span className="text-emerald-400">Target ({targetYear})</span>
+          </div>
+        </div>
+
+        <div className="h-44 w-full pt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={[
+                {
+                  metric: 'Payload Size (KB)',
+                  baseline: parseFloat((baseSnapshot.contentLength / 1024).toFixed(1)),
+                  target: parseFloat((targetSnapshot.contentLength / 1024).toFixed(1)),
+                },
+                {
+                  metric: 'Detected Technologies',
+                  baseline: baseSnapshot.detectedTech.length,
+                  target: targetSnapshot.detectedTech.length,
+                }
+              ]}
+              layout="vertical"
+              margin={{ top: 10, right: 30, left: 40, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
+              <XAxis
+                type="number"
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
+              />
+              <YAxis
+                type="category"
+                dataKey="metric"
+                stroke="#64748b"
+                tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }}
+                width={140}
+              />
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl shadow-2xl font-mono text-xs text-slate-200 space-y-1">
+                        <div className="text-slate-400 font-bold">{label}</div>
+                        <div className="text-amber-400">Baseline ({baseYear}): <span className="font-bold">{payload[0]?.value}</span></div>
+                        <div className="text-emerald-400">Target ({targetYear}): <span className="font-bold">{payload[1]?.value}</span></div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar dataKey="baseline" name={`Baseline (${baseYear})`} fill="#f59e0b" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="target" name={`Target (${targetYear})`} fill="#10b981" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

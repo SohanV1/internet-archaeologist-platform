@@ -15,8 +15,19 @@ import {
   Cpu, 
   CheckCircle,
   FileCode,
-  ArrowRight
+  ArrowRight,
+  BarChart2
 } from 'lucide-react';
+import { 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Legend, 
+  CartesianGrid 
+} from 'recharts';
 
 interface Props {
   currentInvestigation: Investigation;
@@ -100,158 +111,138 @@ export const DomainVsDomain: React.FC<Props> = ({ currentInvestigation }) => {
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-xl font-mono flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md disabled:opacity-50"
+            className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold text-xs font-mono rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Swords className="w-4 h-4" />}
-            <span>Compare Targets</span>
+            <span>Execute Dual Scan</span>
           </button>
         </form>
-      </div>
 
-      {error && (
-        <div className="p-4 bg-red-950/40 border border-red-800/80 text-red-300 rounded-xl text-xs font-mono">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="text-xs font-mono text-red-400 bg-red-950/40 p-2.5 rounded-lg border border-red-800/60">
+            {error}
+          </div>
+        )}
+      </div>
 
       {/* Comparison Results */}
       {comparison && competitorInv && (
-        <div className="space-y-6">
-          {/* Executive Delta Finding */}
-          <div className="bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-emerald-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3 shadow-inner">
-            <Sparkles className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-            <div className="space-y-1 text-xs font-mono">
-              <span className="font-bold text-amber-300 uppercase tracking-wider block">Cross-Domain Intelligence Finding:</span>
-              <p className="text-slate-200 font-sans text-sm leading-relaxed">
-                {comparison.summaryNarrative}
-              </p>
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Comparative Metrics Chart */}
+          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 md:p-5 space-y-3">
+            <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2.5">
+              <div className="text-xs font-mono text-slate-200 font-bold uppercase tracking-wider flex items-center gap-2">
+                <BarChart2 className="w-4 h-4 text-amber-400" />
+                Footprint & Attack Surface Contrast
+              </div>
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <span className="text-amber-400 font-bold">{comparison.domainA}</span>
+                <span className="text-slate-600">vs</span>
+                <span className="text-emerald-400 font-bold">{comparison.domainB}</span>
+              </div>
+            </div>
+
+            <div className="h-44 w-full pt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    {
+                      metric: 'Years Active',
+                      [comparison.domainA]: comparison.yearsA,
+                      [comparison.domainB]: comparison.yearsB
+                    },
+                    {
+                      metric: 'Subdomains',
+                      [comparison.domainA]: comparison.subdomainsCountA,
+                      [comparison.domainB]: comparison.subdomainsCountB
+                    },
+                    {
+                      metric: 'Tech Signatures',
+                      [comparison.domainA]: currentInvestigation.technologies.length,
+                      [comparison.domainB]: competitorInv.technologies.length
+                    },
+                    {
+                      metric: 'DNS Records',
+                      [comparison.domainA]: currentInvestigation.dnsRecords.length,
+                      [comparison.domainB]: competitorInv.dnsRecords.length
+                    },
+                    {
+                      metric: 'Captures',
+                      [comparison.domainA]: currentInvestigation.snapshots.length,
+                      [comparison.domainB]: competitorInv.snapshots.length
+                    }
+                  ]}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                  <XAxis
+                    dataKey="metric"
+                    stroke="#64748b"
+                    tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    stroke="#64748b"
+                    tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl font-mono text-xs text-slate-200 shadow-xl space-y-1">
+                            <div className="text-slate-300 font-bold border-b border-slate-800 pb-1">{label}</div>
+                            <div className="text-amber-400">{comparison.domainA}: <span className="font-bold text-white">{payload[0]?.value}</span></div>
+                            <div className="text-emerald-400">{comparison.domainB}: <span className="font-bold text-white">{payload[1]?.value}</span></div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontFamily: 'monospace', fontSize: 11 }} />
+                  <Bar dataKey={comparison.domainA} fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey={comparison.domainB} fill="#10b981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Metric Comparison Table */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Domain A Card */}
-            <div className="bg-slate-950/90 border border-amber-500/30 rounded-xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h4 className="text-base font-extrabold text-amber-400 font-mono">{comparison.domainA}</h4>
-                <span className="text-xs px-2.5 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded font-mono font-bold">
-                  Target A
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Total Longevity</span>
-                  <span className="text-base font-bold text-slate-100">{comparison.yearsA} Years</span>
-                </div>
-                <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Subdomains Sprawl</span>
-                  <span className="text-base font-bold text-emerald-400">{comparison.subdomainsCountA} Hosts</span>
-                </div>
-                <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Security Posture</span>
-                  <span className="text-base font-bold text-purple-300">{comparison.securityRatingA}</span>
-                </div>
-                <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Tech Signatures</span>
-                  <span className="text-base font-bold text-cyan-300">{currentInvestigation.technologies.length} Stack Components</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Domain B Card */}
-            <div className="bg-slate-950/90 border border-blue-500/30 rounded-xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h4 className="text-base font-extrabold text-blue-400 font-mono">{comparison.domainB}</h4>
-                <span className="text-xs px-2.5 py-0.5 bg-blue-500/10 text-blue-300 border border-blue-500/30 rounded font-mono font-bold">
-                  Target B
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Total Longevity</span>
-                  <span className="text-base font-bold text-slate-100">{comparison.yearsB} Years</span>
-                </div>
-                <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Subdomains Sprawl</span>
-                  <span className="text-base font-bold text-emerald-400">{comparison.subdomainsCountB} Hosts</span>
-                </div>
-                <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Security Posture</span>
-                  <span className="text-base font-bold text-purple-300">{comparison.securityRatingB}</span>
-                </div>
-                <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Tech Signatures</span>
-                  <span className="text-base font-bold text-cyan-300">{competitorInv.technologies.length} Stack Components</span>
-                </div>
-              </div>
-            </div>
+          {/* Narrative Summary */}
+          <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-2">
+            <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider block">
+              Comparative Intelligence Narrative:
+            </span>
+            <p className="text-sm text-slate-200 font-sans leading-relaxed">
+              {comparison.summaryNarrative}
+            </p>
           </div>
 
-          {/* Technology Overlap Matrix */}
-          <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-4">
-            <h4 className="text-xs font-bold uppercase text-slate-400 font-mono tracking-wider flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-purple-400" />
-              <span>Technology Overlap & Architectural Exclusives:</span>
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
-              {/* Shared Tech */}
-              <div className="bg-slate-900/80 border border-purple-500/30 rounded-xl p-4 space-y-2">
-                <span className="text-purple-300 font-bold block flex items-center justify-between">
-                  <span>Shared Technologies</span>
-                  <span className="text-[10px] bg-purple-500/20 px-2 py-0.5 rounded-full">{comparison.sharedTech.length}</span>
-                </span>
-                {comparison.sharedTech.length === 0 ? (
-                  <p className="text-slate-500 text-xs italic">No shared frameworks</p>
-                ) : (
-                  <div className="space-y-1 pt-1">
-                    {comparison.sharedTech.map((t, idx) => (
-                      <div key={idx} className="bg-slate-950 p-2 rounded border border-slate-800 text-purple-200">
-                        {t.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
+          {/* Head-to-Head Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+            {/* Target A */}
+            <div className="bg-slate-950/80 border border-amber-500/40 rounded-xl p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span className="text-base font-extrabold text-amber-400">{comparison.domainA}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">Primary Target</span>
               </div>
-
-              {/* Exclusive to A */}
-              <div className="bg-slate-900/80 border border-amber-500/30 rounded-xl p-4 space-y-2">
-                <span className="text-amber-300 font-bold block flex items-center justify-between">
-                  <span>Exclusive to {comparison.domainA}</span>
-                  <span className="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full">{comparison.exclusiveTechA.length}</span>
-                </span>
-                {comparison.exclusiveTechA.length === 0 ? (
-                  <p className="text-slate-500 text-xs italic">None</p>
-                ) : (
-                  <div className="space-y-1 pt-1">
-                    {comparison.exclusiveTechA.map((t, idx) => (
-                      <div key={idx} className="bg-slate-950 p-2 rounded border border-slate-800 text-amber-200">
-                        {t.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <div className="space-y-1.5 text-slate-300">
+                <div className="flex justify-between"><span>Years Active:</span><strong className="text-white">{comparison.yearsA} yrs</strong></div>
+                <div className="flex justify-between"><span>Subdomains:</span><strong className="text-white">{comparison.subdomainsCountA}</strong></div>
+                <div className="flex justify-between"><span>Security Posture:</span><strong className="text-emerald-400">{comparison.securityRatingA}</strong></div>
               </div>
+            </div>
 
-              {/* Exclusive to B */}
-              <div className="bg-slate-900/80 border border-blue-500/30 rounded-xl p-4 space-y-2">
-                <span className="text-blue-300 font-bold block flex items-center justify-between">
-                  <span>Exclusive to {comparison.domainB}</span>
-                  <span className="text-[10px] bg-blue-500/20 px-2 py-0.5 rounded-full">{comparison.exclusiveTechB.length}</span>
-                </span>
-                {comparison.exclusiveTechB.length === 0 ? (
-                  <p className="text-slate-500 text-xs italic">None</p>
-                ) : (
-                  <div className="space-y-1 pt-1">
-                    {comparison.exclusiveTechB.map((t, idx) => (
-                      <div key={idx} className="bg-slate-950 p-2 rounded border border-slate-800 text-blue-200">
-                        {t.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
+            {/* Target B */}
+            <div className="bg-slate-950/80 border border-emerald-500/40 rounded-xl p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span className="text-base font-extrabold text-emerald-400">{comparison.domainB}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">Comparison Target</span>
+              </div>
+              <div className="space-y-1.5 text-slate-300">
+                <div className="flex justify-between"><span>Years Active:</span><strong className="text-white">{comparison.yearsB} yrs</strong></div>
+                <div className="flex justify-between"><span>Subdomains:</span><strong className="text-white">{comparison.subdomainsCountB}</strong></div>
+                <div className="flex justify-between"><span>Security Posture:</span><strong className="text-emerald-400">{comparison.securityRatingB}</strong></div>
               </div>
             </div>
           </div>

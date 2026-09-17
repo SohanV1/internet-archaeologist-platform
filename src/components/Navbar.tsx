@@ -48,19 +48,25 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Logo / Title */}
         <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => onSearch('example.com')}>
-          <div className="p-2.5 bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-400 rounded-xl border border-amber-500/30 group-hover:border-amber-400 transition-all glow-amber">
-            <Radar className="w-6 h-6 animate-pulse" />
+          <div className="p-2.5 bg-gradient-to-br from-amber-500/20 via-amber-600/10 to-transparent text-amber-400 rounded-xl border border-amber-500/30 group-hover:border-amber-400 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.4" strokeDasharray="2 2" />
+              <circle cx="12" cy="12" r="6" stroke="currentColor" strokeOpacity="0.7" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" />
+              <path d="M12 2v20M2 12h20" stroke="currentColor" strokeOpacity="0.3" />
+              <path d="M12 12l7 -7" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" className="animate-spin origin-center" style={{ animationDuration: '4s' }} />
+            </svg>
           </div>
           <div>
-            <h1 className="font-extrabold text-lg leading-tight tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 flex items-center gap-2">
-              INTERNET ARCHAEOLOGIST PLATFORM
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-mono font-semibold">
-                v1.5
+            <h1 className="font-extrabold text-lg leading-tight tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 flex items-center gap-2 font-mono">
+              INTERNET ARCHAEOLOGIST
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-mono font-semibold">
+                PRO v2.0
               </span>
             </h1>
             <p className="text-xs text-slate-400 flex items-center gap-1.5 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              Public Footprint & Web Time Machine Engine
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              OSINT Reconnaissance & Temporal Forensics
             </p>
           </div>
         </div>
@@ -68,19 +74,24 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Search Bar & Quick Presets */}
         <div className="flex-1 max-w-xl w-full flex flex-col gap-1.5">
           <form onSubmit={handleSubmit} className="w-full flex items-center gap-2">
-            <div className="relative w-full">
-              <Terminal className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500/70" />
+            <div className="relative w-full group">
+              <Terminal className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500/70 group-focus-within:text-amber-400 transition-colors" />
               <input
                 type="text"
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
-                placeholder="Enter domain (e.g. example.com, github.com)..."
-                className="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 font-mono transition-all shadow-inner"
+                placeholder="Target domain (e.g. example.com, github.com)..."
+                className="w-full bg-slate-900/95 border border-slate-700/80 rounded-xl pl-10 pr-16 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 font-mono transition-all shadow-inner"
               />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none">
+                <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-800/80 border border-slate-700 rounded shadow-sm">
+                  ↵ Enter
+                </kbd>
+              </div>
             </div>
             <button
               type="submit"
-              className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm rounded-xl transition-all shadow-lg hover:shadow-amber-500/20 whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm rounded-xl transition-all shadow-lg hover:shadow-amber-500/20 whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
               <Search className="w-4 h-4" />
               <span>Scan Target</span>

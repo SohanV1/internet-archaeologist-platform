@@ -12,9 +12,20 @@ import {
   Clock, 
   Search, 
   ShieldCheck, 
-  Server,
-  Code
+  Server, 
+  Code,
+  BarChart3
 } from 'lucide-react';
+import { 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Legend, 
+  CartesianGrid 
+} from 'recharts';
 
 interface Props {
   techEvolution?: TechEvolutionAnalysis;
@@ -144,6 +155,77 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Stack Evolution Dynamics Chart */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl space-y-4 backdrop-blur-xl">
+        <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-3 gap-3">
+          <div className="space-y-0.5">
+            <h3 className="text-lg font-bold text-slate-100 font-mono flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-purple-400" />
+              Technology Turnover Dynamics by Era
+            </h3>
+            <p className="text-xs text-slate-400 font-mono">
+              Quantitative distribution of newly adopted, retained active, and sunsetted technologies.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" /> Adopted
+            </span>
+            <span className="flex items-center gap-1.5 text-blue-400">
+              <span className="w-2.5 h-2.5 rounded-sm bg-blue-500" /> Retained
+            </span>
+            <span className="flex items-center gap-1.5 text-red-400">
+              <span className="w-2.5 h-2.5 rounded-sm bg-red-500" /> Sunsetted
+            </span>
+          </div>
+        </div>
+
+        <div className="h-56 w-full pt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={eras.map(era => ({
+                name: era.yearRange,
+                adopted: era.introduced?.length || 0,
+                retained: era.activeStack?.length || 0,
+                deprecated: era.deprecated?.length || 0,
+              }))}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <XAxis
+                dataKey="name"
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 11, fontFamily: 'monospace' }}
+                tickLine={false}
+              />
+              <YAxis
+                stroke="#64748b"
+                tick={{ fill: '#64748b', fontSize: 11, fontFamily: 'monospace' }}
+                tickLine={false}
+              />
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-slate-900 border border-slate-700 p-3 rounded-xl shadow-2xl font-mono text-xs text-slate-200 space-y-1">
+                        <div className="text-purple-300 font-bold border-b border-slate-800 pb-1">{label} Era</div>
+                        <div className="text-emerald-400">Adopted: {payload.find(p => p.dataKey === 'adopted')?.value} tech</div>
+                        <div className="text-blue-400">Retained: {payload.find(p => p.dataKey === 'retained')?.value} tech</div>
+                        <div className="text-red-400">Sunsetted: {payload.find(p => p.dataKey === 'deprecated')?.value} tech</div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar dataKey="adopted" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="retained" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="deprecated" fill="#ef4444" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

@@ -2,7 +2,17 @@
 
 import React from 'react';
 import { SubdomainRecord } from '@/types/osint';
-import { Network, Search, Copy, Check, ExternalLink, ShieldCheck, Globe, Shield, ArrowRight } from 'lucide-react';
+import { Network, Search, Copy, Check, ExternalLink, ShieldCheck, Globe, Shield, ArrowRight, BarChart2 } from 'lucide-react';
+import { 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  CartesianGrid, 
+  Cell 
+} from 'recharts';
 
 interface Props {
   subdomains: SubdomainRecord[];
@@ -26,6 +36,18 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
     setTimeout(() => setCopiedDomain(null), 2000);
   };
 
+  // Group by discovery source
+  const sourceStats = React.useMemo(() => {
+    const map = new Map<string, number>();
+    subdomains.forEach(s => {
+      map.set(s.source, (map.get(s.source) || 0) + 1);
+    });
+    return Array.from(map.entries()).map(([source, count]) => ({
+      source,
+      count
+    }));
+  }, [subdomains]);
+
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 backdrop-blur-xl">
       <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-5 gap-4">
@@ -46,6 +68,59 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
           </span>
         </div>
       </div>
+
+      {/* Subdomain Discovery Source Distribution Chart */}
+      {subdomains.length > 0 && (
+        <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 md:p-5 space-y-3">
+          <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2.5">
+            <div className="text-xs font-mono text-slate-200 font-bold uppercase tracking-wider flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-emerald-400" />
+              Subdomain Discovery Vectors & Intelligence Sources
+            </div>
+            <span className="text-[11px] font-mono text-slate-500">
+              Host distribution by reconnaissance channel
+            </span>
+          </div>
+
+          <div className="h-32 w-full pt-1">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={sourceStats} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                <XAxis
+                  dataKey="source"
+                  stroke="#64748b"
+                  tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke="#64748b"
+                  tick={{ fill: '#64748b', fontSize: 11, fontFamily: 'monospace' }}
+                  tickLine={false}
+                />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl font-mono text-xs text-slate-200 shadow-xl">
+                          <div className="text-emerald-400 font-bold">{data.source}</div>
+                          <div className="text-slate-300">Hosts Found: <span className="text-white font-bold">{data.count}</span></div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]}>
+                  {sourceStats.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={['#10b981', '#3b82f6', '#06b6d4', '#a855f7'][index % 4]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
@@ -101,44 +176,38 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-sm font-mono font-bold text-slate-200 group-hover:text-emerald-300 transition-colors block truncate">
+                  <div className="text-xs font-mono text-slate-200 font-semibold truncate" title={item.fullDomain}>
                     {item.fullDomain}
-                  </span>
-                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 pt-1">
-                    <span>Source: {item.source}</span>
-                    {item.firstSeen && (
-                      <span className="text-slate-400">Seen {item.firstSeen}</span>
-                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-500">
+                    <span>Source:</span>
+                    <span className="text-slate-400 font-medium">{item.source}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-2.5 border-t border-slate-800/80 space-y-2">
-                <div className="flex items-center justify-between text-[11px] font-mono">
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                    {item.status}
-                  </span>
-                  <a
-                    href={`https://${item.fullDomain}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-slate-400 hover:text-amber-400 flex items-center gap-1 transition-colors"
-                  >
-                    <span>Visit Host</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-
-                {onTraceEvidence && (
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono">
+                {onTraceEvidence ? (
                   <button
                     onClick={() => onTraceEvidence(item.evidenceId || item.fullDomain)}
-                    className="w-full inline-flex items-center justify-center gap-1.5 text-[11px] text-emerald-400 hover:text-emerald-300 font-mono transition-colors cursor-pointer bg-emerald-500/5 hover:bg-emerald-500/10 py-1 rounded-lg border border-emerald-500/20"
+                    className="text-[11px] text-emerald-400 hover:text-emerald-300 font-mono flex items-center gap-1 transition-colors cursor-pointer"
                   >
-                    <Shield className="w-3 h-3" />
-                    <span>Trace Subdomain Evidence</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ShieldCheck className="w-3 h-3" />
+                    <span>Evidence</span>
                   </button>
+                ) : (
+                  <span className="text-slate-500 text-[10px]">Verified</span>
                 )}
+
+                <a
+                  href={`https://${item.fullDomain}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[11px]"
+                >
+                  <span>Visit Host</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
             </div>
           ))}
@@ -147,4 +216,3 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
     </div>
   );
 };
-

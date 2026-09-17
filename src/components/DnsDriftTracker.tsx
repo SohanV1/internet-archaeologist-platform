@@ -11,8 +11,18 @@ import {
   Search, 
   Copy, 
   Check, 
-  Globe
+  Globe,
+  BarChart2
 } from 'lucide-react';
+import { 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  CartesianGrid 
+} from 'recharts';
 
 interface Props {
   dnsDrifts?: DnsDriftEvent[];
@@ -124,6 +134,61 @@ export const DnsDriftTracker: React.FC<Props> = ({ dnsDrifts = [], dnsRecords, d
             <span className="text-[11px] text-slate-400 truncate block">
               {dnsRecords.some(r => r.type === 'TXT' && r.value.includes('spf1')) ? 'SPF Enforced ✓' : 'Standard TXT'}
             </span>
+          </div>
+        </div>
+
+        {/* DNS Zone Records & Drift Events Visual Distribution */}
+        <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 md:p-5 space-y-3">
+          <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2.5">
+            <div className="text-xs font-mono text-slate-200 font-bold uppercase tracking-wider flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-cyan-400" />
+              DNS Zone Record Topology & Historical Shifts
+            </div>
+            <span className="text-[11px] font-mono text-slate-500">
+              Distribution of active DNS entries by record type
+            </span>
+          </div>
+
+          <div className="h-44 w-full pt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={['A', 'AAAA', 'NS', 'MX', 'TXT', 'CNAME', 'SOA'].map(type => ({
+                  type,
+                  count: dnsRecords.filter(r => r.type === type).length,
+                  shifts: dnsDrifts.filter(d => d.recordType === type).length
+                })).filter(d => d.count > 0 || d.shifts > 0)}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                <XAxis
+                  dataKey="type"
+                  stroke="#64748b"
+                  tick={{ fill: '#64748b', fontSize: 11, fontFamily: 'monospace' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke="#64748b"
+                  tick={{ fill: '#64748b', fontSize: 11, fontFamily: 'monospace' }}
+                  tickLine={false}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl shadow-2xl font-mono text-xs text-slate-200 space-y-1">
+                          <div className="text-cyan-400 font-bold">{label} Records</div>
+                          <div className="text-slate-300">Active Entries: <span className="font-bold text-white">{payload[0]?.value}</span></div>
+                          <div className="text-amber-400">Historical Shifts: <span className="font-bold">{payload[1]?.value || 0}</span></div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="count" name="Active Records" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="shifts" name="Drift Events" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
