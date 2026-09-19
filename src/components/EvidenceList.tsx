@@ -3,22 +3,22 @@
 import React from 'react';
 import { EvidenceItem } from '@/types/osint';
 import { EvidenceModal } from './EvidenceModal';
-import { 
-  Shield, 
-  FileCheck, 
-  Copy, 
-  Check, 
-  Terminal, 
-  Search, 
-  ExternalLink, 
-  Fingerprint, 
-  CheckCircle2, 
+import {
+  Shield,
+  FileCheck,
+  Copy,
+  Check,
+  Terminal,
+  Search,
+  ExternalLink,
+  Fingerprint,
+  CheckCircle2,
   AlertCircle,
   Clock,
   Maximize2,
   Filter,
   Eye,
-  FileText
+  FileText,
 } from 'lucide-react';
 
 interface Props {
@@ -35,22 +35,22 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
   const [modalEvidence, setModalEvidence] = React.useState<EvidenceItem | null>(null);
 
   const types = [
-    'all', 
-    'Historical Archive', 
-    'DNS', 
-    'HTTP Header', 
-    'Subdomain Recon', 
-    'Technology Detection', 
-    'Certificate Transparency'
+    'all',
+    'Historical Archive',
+    'DNS',
+    'HTTP Header',
+    'Subdomain Recon',
+    'Technology Detection',
+    'Certificate Transparency',
   ];
 
   const confidenceLevels = ['all', 'HIGH', 'MEDIUM', 'LOW'];
 
-  const filtered = (evidence || []).filter(ev => {
+  const filtered = (evidence || []).filter((ev) => {
     const matchesType = selectedType === 'all' || ev.evidenceType === selectedType;
     const matchesConfidence = selectedConfidence === 'all' || ev.confidence === selectedConfidence;
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       (ev.source && ev.source.toLowerCase().includes(searchLower)) ||
       (ev.rawData && ev.rawData.toLowerCase().includes(searchLower)) ||
       (ev.notes && ev.notes.toLowerCase().includes(searchLower)) ||
@@ -69,7 +69,7 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
   };
 
   const toggleExpandRaw = (id: string) => {
-    setExpandedCardRawIds(prev => ({ ...prev, [id]: !prev[id] }));
+    setExpandedCardRawIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const getConfidenceBadge = (confidence: string, score?: number) => {
@@ -143,7 +143,8 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
             Forensic Evidence Chain & Provenance Audit
           </h3>
           <p className="text-xs text-slate-400 font-mono">
-            Strict evidence traceability with explicit confidence ratings, collection methodology, and cryptographic provenance.
+            Strict evidence traceability with explicit confidence ratings, collection methodology,
+            and cryptographic provenance.
           </p>
         </div>
 
@@ -213,7 +214,9 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
       {filtered.length === 0 ? (
         <div className="text-center py-14 text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-xl space-y-2">
           <AlertCircle className="w-8 h-8 text-slate-600 mx-auto" />
-          <p className="font-bold text-slate-400">No forensic evidence records matched your criteria.</p>
+          <p className="font-bold text-slate-400">
+            No forensic evidence records matched your criteria.
+          </p>
           <p className="text-slate-500">Try adjusting your keyword search or filter settings.</p>
         </div>
       ) : (
@@ -224,12 +227,12 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
             const isHighlighted = highlightId === ev.id;
 
             return (
-              <div 
-                key={`${ev.id}-${idx}`} 
+              <div
+                key={`${ev.id}-${idx}`}
                 id={`evidence-${ev.id}`}
                 className={`bg-slate-950/85 border rounded-xl p-5 space-y-3.5 transition-all shadow-md ${
-                  isHighlighted 
-                    ? 'border-amber-500/80 ring-1 ring-amber-500/50 bg-amber-500/5' 
+                  isHighlighted
+                    ? 'border-amber-500/80 ring-1 ring-amber-500/50 bg-amber-500/5'
                     : 'border-slate-800/90 hover:border-slate-700'
                 }`}
               >
@@ -239,7 +242,7 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
                     <FileCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span className="font-bold text-slate-100 text-sm font-mono">{ev.source}</span>
                   </div>
-                  
+
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[11px] px-2.5 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded-md font-mono font-bold">
                       {ev.evidenceType}
@@ -281,8 +284,12 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
                   {/* Method */}
                   <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-800/80 space-y-1">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Collection Method:</span>
-                    <p className="text-slate-300 text-[11px] leading-snug">{ev.collectionMethod || 'Passive OSINT query'}</p>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold block">
+                      Collection Method:
+                    </span>
+                    <p className="text-slate-300 text-[11px] leading-snug">
+                      {ev.collectionMethod || 'Passive OSINT query'}
+                    </p>
                   </div>
 
                   {/* Timestamp & Source Link */}
@@ -308,7 +315,9 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
                           <span>Open Source</span>
                         </a>
                       ) : (
-                        <span className="text-[10px] text-slate-500 italic">Source URL unavailable</span>
+                        <span className="text-[10px] text-slate-500 italic">
+                          Source URL unavailable
+                        </span>
                       )}
 
                       {ev.verificationHash && (
@@ -336,7 +345,9 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
                       <span className="underline decoration-slate-700">
                         {isExpanded ? 'Hide Raw Evidence Payload' : 'View Raw Evidence Payload'}
                       </span>
-                      <span className="text-[10px] text-slate-500">({ev.rawData.length} bytes)</span>
+                      <span className="text-[10px] text-slate-500">
+                        ({ev.rawData.length} bytes)
+                      </span>
                     </button>
 
                     <button
@@ -378,5 +389,3 @@ export const EvidenceList: React.FC<Props> = ({ evidence, highlightId }) => {
     </div>
   );
 };
-
-

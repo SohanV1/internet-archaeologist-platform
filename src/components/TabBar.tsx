@@ -1,23 +1,26 @@
 'use client';
 
-import React from 'react';
-import { 
-  Globe, 
-  Cpu, 
-  History, 
-  GitCompare, 
-  Network, 
-  Shield, 
-  Sparkles, 
-  Layers, 
-  Eye, 
-  Lock, 
-  Server, 
-  Swords, 
-  Sliders, 
-  Clock, 
+import React, { useState, useMemo, memo } from 'react';
+import {
+  Globe,
+  Cpu,
+  History,
+  GitCompare,
+  Network,
+  Shield,
+  Sparkles,
+  Layers,
+  Eye,
+  Lock,
+  Swords,
+  Sliders,
+  Clock,
   Database,
-  ChevronDown
+  BarChart2,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  X,
 } from 'lucide-react';
 import { NavigationTab } from '@/app/page';
 
@@ -47,164 +50,231 @@ interface TabBarProps {
   };
 }
 
-export const TabBar: React.FC<TabBarProps> = ({
-  activeTab,
-  onTabChange,
-  counts = {}
-}) => {
-  const categories: TabCategory[] = React.useMemo(() => [
-    {
-      id: 'core',
-      label: 'Core Overview',
-      tabs: [
-        { id: 'story', label: 'Website Story', shortLabel: 'Story', icon: Sparkles },
-        { id: 'overview', label: 'Domain Overview', shortLabel: 'Overview', icon: Globe },
-        { id: 'visual-archeology', label: 'Visual Archeology', shortLabel: 'Visuals', icon: Eye },
-      ]
-    },
-    {
-      id: 'recon',
-      label: 'Recon & Network',
-      tabs: [
-        { id: 'graph', label: 'Entity Topology', shortLabel: 'Topology', icon: Network, badge: counts.graphNodes },
-        { id: 'subdomains', label: 'Subdomains', shortLabel: 'Subdomains', icon: Layers, badge: counts.subdomains },
-        { id: 'infra', label: 'DNS Zone Map', shortLabel: 'DNS Zone', icon: Database, badge: counts.dnsRecords },
-        { id: 'certs', label: 'TLS & Certificates', shortLabel: 'Certs', icon: Lock },
-      ]
-    },
-    {
-      id: 'forensic',
-      label: 'Forensics & History',
-      tabs: [
-        { id: 'timeline', label: 'Wayback Timeline', shortLabel: 'Timeline', icon: Clock, badge: counts.snapshots },
-        { id: 'tech-evolution', label: 'Tech Evolution', shortLabel: 'Tech Drift', icon: History },
-        { id: 'dns-drift', label: 'DNS Drift Tracker', shortLabel: 'DNS Drift', icon: Sliders },
-        { id: 'changes', label: 'Content Diffs', shortLabel: 'Diffs', icon: GitCompare },
-        { id: 'compare', label: 'Snapshot Comparison', shortLabel: 'Compare', icon: Layers },
-        { id: 'tech', label: 'Current Tech Stack', shortLabel: 'Tech Stack', icon: Cpu },
-      ]
-    },
-    {
-      id: 'intel',
-      label: 'Comparative & Audit',
-      tabs: [
-        { id: 'vs', label: 'Domain vs Domain', shortLabel: 'Domain VS', icon: Swords },
-        { id: 'evidence', label: 'Evidence Ledger', shortLabel: 'Evidence', icon: Shield, badge: counts.evidence },
-      ]
-    }
-  ], [counts]);
+export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange, counts = {} }) => {
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
 
-  // Determine which category the active tab belongs to
-  const activeCategoryId = React.useMemo(() => {
-    for (const cat of categories) {
-      if (cat.tabs.some(t => t.id === activeTab)) {
-        return cat.id;
-      }
-    }
-    return categories[0].id;
-  }, [activeTab, categories]);
-
-  const [selectedCategory, setSelectedCategory] = React.useState<string>(activeCategoryId);
-
-  React.useEffect(() => {
-    setSelectedCategory(activeCategoryId);
-  }, [activeCategoryId]);
-
-  const currentCategoryTabs = categories.find(c => c.id === selectedCategory)?.tabs || categories[0].tabs;
-  const activeTabMeta = categories.flatMap(c => c.tabs).find(t => t.id === activeTab);
+  const categories: TabCategory[] = useMemo(
+    () => [
+      {
+        id: 'core',
+        label: 'Core Overview',
+        tabs: [
+          { id: 'story', label: 'Website Story', shortLabel: 'Story', icon: Sparkles },
+          { id: 'overview', label: 'Domain Overview', shortLabel: 'Overview', icon: Globe },
+          { id: 'visual-archeology', label: 'Visual Archeology', shortLabel: 'Visuals', icon: Eye },
+          {
+            id: 'analytics',
+            label: 'Codebase Analytics',
+            shortLabel: 'Analytics',
+            icon: BarChart2,
+          },
+        ],
+      },
+      {
+        id: 'recon',
+        label: 'Recon & Network',
+        tabs: [
+          {
+            id: 'graph',
+            label: 'Entity Topology',
+            shortLabel: 'Topology',
+            icon: Network,
+            badge: counts.graphNodes,
+          },
+          {
+            id: 'subdomains',
+            label: 'Subdomains',
+            shortLabel: 'Subdomains',
+            icon: Layers,
+            badge: counts.subdomains,
+          },
+          {
+            id: 'infra',
+            label: 'DNS Zone Map',
+            shortLabel: 'DNS Zone',
+            icon: Database,
+            badge: counts.dnsRecords,
+          },
+          { id: 'certs', label: 'TLS & Certificates', shortLabel: 'Certs', icon: Lock },
+        ],
+      },
+      {
+        id: 'forensic',
+        label: 'Forensics & History',
+        tabs: [
+          {
+            id: 'timeline',
+            label: 'Wayback Timeline',
+            shortLabel: 'Timeline',
+            icon: Clock,
+            badge: counts.snapshots,
+          },
+          {
+            id: 'tech-evolution',
+            label: 'Tech Evolution',
+            shortLabel: 'Tech Drift',
+            icon: History,
+          },
+          { id: 'dns-drift', label: 'DNS Drift Tracker', shortLabel: 'DNS Drift', icon: Sliders },
+          { id: 'changes', label: 'Content Diffs', shortLabel: 'Diffs', icon: GitCompare },
+          { id: 'compare', label: 'Snapshot Comparison', shortLabel: 'Compare', icon: Layers },
+          { id: 'tech', label: 'Current Tech Stack', shortLabel: 'Tech Stack', icon: Cpu },
+        ],
+      },
+      {
+        id: 'intel',
+        label: 'Comparative & Audit',
+        tabs: [
+          { id: 'vs', label: 'Domain vs Domain', shortLabel: 'Domain VS', icon: Swords },
+          {
+            id: 'evidence',
+            label: 'Evidence Ledger',
+            shortLabel: 'Evidence',
+            icon: Shield,
+            badge: counts.evidence,
+          },
+        ],
+      },
+    ],
+    [counts]
+  );
 
   return (
-    <div className="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-2.5 md:p-3 shadow-2xl backdrop-blur-xl space-y-2.5">
-      {/* Mobile Selector Header */}
-      <div className="md:hidden flex items-center justify-between gap-2 p-2 bg-slate-950/70 rounded-xl border border-slate-800">
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
-          {activeTabMeta && (
-            <>
-              <activeTabMeta.icon className="w-4 h-4 text-amber-400" />
-              <span className="font-bold text-amber-300">{activeTabMeta.label}</span>
-            </>
-          )}
-        </div>
-        <div className="relative">
-          <select
-            value={activeTab}
-            onChange={(e) => onTabChange(e.target.value as NavigationTab)}
-            className="appearance-none bg-slate-900 border border-slate-700/80 text-slate-100 text-xs font-mono py-1.5 pl-3 pr-8 rounded-lg focus:outline-none focus:border-amber-500 cursor-pointer"
+    <>
+      {/* Mobile Toggle Button (Visible only on screens < lg) */}
+      <div className="lg:hidden flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl mb-4 shadow-md">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg transition-colors cursor-pointer"
+            aria-label="Toggle Navigation Sidebar"
           >
-            {categories.map((cat) => (
-              <optgroup key={cat.id} label={cat.label}>
-                {cat.tabs.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.label} {t.badge ? `(${t.badge})` : ''}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+          <span className="font-mono text-xs text-slate-300 font-bold uppercase">
+            Active: <span className="text-amber-400">{activeTab}</span>
+          </span>
         </div>
+
+        <span className="text-[11px] font-mono text-slate-500">16 Modules</span>
       </div>
 
-      {/* Category Level Filter Pills (Desktop & Tablet) */}
-      <div className="hidden md:flex items-center justify-between border-b border-slate-800/80 pb-2 px-1">
-        <div className="flex items-center space-x-2">
-          {categories.map((cat) => {
-            const isCatActive = selectedCategory === cat.id;
-            const hasActiveTab = cat.tabs.some(t => t.id === activeTab);
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`text-xs font-mono px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
-                  isCatActive
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
-                }`}
-              >
-                <span>{cat.label}</span>
-                {hasActiveTab && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+      {/* Sidebar Container */}
+      <aside
+        className={`
+          ${isMobileOpen ? 'fixed inset-y-0 left-0 z-50 w-72 bg-slate-950 p-4 shadow-2xl overflow-y-auto block' : 'hidden'}
+          lg:block shrink-0 transition-all duration-300 ease-in-out
+          ${isCollapsed ? 'lg:w-18' : 'lg:w-64'}
+          bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-2xl backdrop-blur-xl relative
+        `}
+      >
+        {/* Top Controls: Collapse Toggle & Header */}
+        <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-800">
+          {!isCollapsed && (
+            <div className="hidden lg:flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="font-mono text-xs font-bold text-slate-300 uppercase tracking-wider">
+                Recon Modules
+              </span>
+            </div>
+          )}
 
-        <div className="text-[11px] font-mono text-slate-500">
-          Active: <span className="text-amber-400 font-bold">{activeTabMeta?.label}</span>
-        </div>
-      </div>
-
-      {/* Tabs Row for Selected Category */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-800">
-        {currentCategoryTabs.map((t) => {
-          const isActive = activeTab === t.id;
-          const Icon = t.icon;
-          return (
+          {/* Mobile close button */}
+          {isMobileOpen && (
             <button
-              key={t.id}
-              onClick={() => onTabChange(t.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-medium transition-all whitespace-nowrap cursor-pointer border ${
-                isActive
-                  ? 'bg-gradient-to-r from-amber-500/25 to-amber-600/15 border-amber-500/50 text-amber-200 shadow-lg shadow-amber-500/10 font-bold'
-                  : 'bg-slate-950/60 border-slate-800/90 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 hover:border-slate-700'
-              }`}
+              onClick={() => setIsMobileOpen(false)}
+              className="lg:hidden p-1 text-slate-400 hover:text-white ml-auto"
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-slate-500'}`} />
-              <span>{t.label}</span>
-              {t.badge !== undefined && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  isActive 
-                    ? 'bg-amber-500/30 text-amber-200 border border-amber-400/40' 
-                    : 'bg-slate-800 text-slate-400 border border-slate-700'
-                }`}>
-                  {t.badge}
-                </span>
-              )}
+              <X className="w-5 h-5" />
             </button>
-          );
-        })}
-      </div>
-    </div>
+          )}
+
+          {/* Desktop Collapsible Toggle */}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="hidden lg:flex items-center justify-center p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-amber-400 transition-colors ml-auto cursor-pointer"
+            title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            aria-label="Toggle Sidebar Collapse"
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+
+        {/* Navigation Categories & Tabs */}
+        <div className="space-y-4">
+          {categories.map((cat) => (
+            <div key={cat.id} className="space-y-1">
+              {!isCollapsed && (
+                <div className="px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">
+                  {cat.label}
+                </div>
+              )}
+
+              <div className="space-y-0.5">
+                {cat.tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        onTabChange(tab.id);
+                        setIsMobileOpen(false);
+                      }}
+                      className={`
+                        w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-mono transition-all cursor-pointer group relative
+                        ${
+                          isActive
+                            ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow-sm font-bold'
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                        }
+                        ${isCollapsed ? 'justify-center px-2' : 'justify-between'}
+                      `}
+                      title={isCollapsed ? tab.label : undefined}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Icon
+                          className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-amber-400' : 'text-slate-400 group-hover:text-amber-300'}`}
+                        />
+                        {!isCollapsed && <span className="truncate">{tab.label}</span>}
+                      </div>
+
+                      {!isCollapsed && Boolean(tab.badge) && (
+                        <span
+                          className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono shrink-0 ${isActive ? 'bg-amber-500/30 text-amber-200' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
+                        >
+                          {tab.badge}
+                        </span>
+                      )}
+
+                      {/* Dot badge indicator when collapsed */}
+                      {isCollapsed && Boolean(tab.badge) && (
+                        <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      {/* Backdrop overlay for mobile drawer */}
+      {isMobileOpen && (
+        <div
+          onClick={() => setIsMobileOpen(false)}
+          className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm lg:hidden"
+        />
+      )}
+    </>
   );
 };
+
+export const TabBar = memo(TabBarComponent);

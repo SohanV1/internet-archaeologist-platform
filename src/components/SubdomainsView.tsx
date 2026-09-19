@@ -2,16 +2,27 @@
 
 import React from 'react';
 import { SubdomainRecord } from '@/types/osint';
-import { Network, Search, Copy, Check, ExternalLink, ShieldCheck, Globe, Shield, ArrowRight, BarChart2 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  CartesianGrid, 
-  Cell 
+import {
+  Network,
+  Search,
+  Copy,
+  Check,
+  ExternalLink,
+  ShieldCheck,
+  Globe,
+  Shield,
+  ArrowRight,
+  BarChart2,
+} from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Cell,
 } from 'recharts';
 
 interface Props {
@@ -24,10 +35,11 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
   const [searchTerm, setSearchTerm] = React.useState('');
   const [copiedDomain, setCopiedDomain] = React.useState<string | null>(null);
 
-  const filtered = subdomains.filter(s => 
-    s.subdomain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.fullDomain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.source.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = subdomains.filter(
+    (s) =>
+      s.subdomain.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.fullDomain.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.source.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const copyToClipboard = (text: string) => {
@@ -39,12 +51,12 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
   // Group by discovery source
   const sourceStats = React.useMemo(() => {
     const map = new Map<string, number>();
-    subdomains.forEach(s => {
+    subdomains.forEach((s) => {
       map.set(s.source, (map.get(s.source) || 0) + 1);
     });
     return Array.from(map.entries()).map(([source, count]) => ({
       source,
-      count
+      count,
     }));
   }, [subdomains]);
 
@@ -57,7 +69,8 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
             Passive Subdomain & Hostname Reconnaissance
           </h3>
           <p className="text-xs text-slate-400 font-mono">
-            Ecosystem hostnames identified via Certificate Transparency (crt.sh) and public web crawls with linked provenance.
+            Ecosystem hostnames identified via Certificate Transparency (crt.sh) and public web
+            crawls with linked provenance.
           </p>
         </div>
 
@@ -104,7 +117,9 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
                       return (
                         <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl font-mono text-xs text-slate-200 shadow-xl">
                           <div className="text-emerald-400 font-bold">{data.source}</div>
-                          <div className="text-slate-300">Hosts Found: <span className="text-white font-bold">{data.count}</span></div>
+                          <div className="text-slate-300">
+                            Hosts Found: <span className="text-white font-bold">{data.count}</span>
+                          </div>
                         </div>
                       );
                     }
@@ -113,7 +128,10 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
                 />
                 <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]}>
                   {sourceStats.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={['#10b981', '#3b82f6', '#06b6d4', '#a855f7'][index % 4]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={['#10b981', '#3b82f6', '#06b6d4', '#a855f7'][index % 4]}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -135,7 +153,8 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
           />
         </div>
         <div className="text-xs font-mono text-slate-400">
-          Showing <span className="text-slate-200 font-bold">{filtered.length}</span> of {subdomains.length} subdomains
+          Showing <span className="text-slate-200 font-bold">{filtered.length}</span> of{' '}
+          {subdomains.length} subdomains
         </div>
       </div>
 
@@ -176,7 +195,10 @@ export const SubdomainsView: React.FC<Props> = ({ subdomains, rootDomain, onTrac
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-xs font-mono text-slate-200 font-semibold truncate" title={item.fullDomain}>
+                  <div
+                    className="text-xs font-mono text-slate-200 font-semibold truncate"
+                    title={item.fullDomain}
+                  >
                     {item.fullDomain}
                   </div>
                   <div className="flex items-center justify-between text-[11px] font-mono text-slate-500">

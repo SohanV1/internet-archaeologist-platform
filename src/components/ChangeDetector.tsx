@@ -2,16 +2,23 @@
 
 import React from 'react';
 import { ChangeEvent } from '@/types/osint';
-import { GitCompare, AlertTriangle, ArrowUpRight, ShieldCheck, Activity, BarChart2 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  CartesianGrid, 
-  Cell 
+import {
+  GitCompare,
+  AlertTriangle,
+  ArrowUpRight,
+  ShieldCheck,
+  Activity,
+  BarChart2,
+} from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Cell,
 } from 'recharts';
 
 interface Props {
@@ -21,18 +28,18 @@ interface Props {
 export const ChangeDetector: React.FC<Props> = ({ changes }) => {
   const categoryStats = React.useMemo(() => {
     const map = new Map<string, number>();
-    changes.forEach(c => {
+    changes.forEach((c) => {
       map.set(c.category, (map.get(c.category) || 0) + 1);
     });
     return Array.from(map.entries()).map(([category, count]) => ({
       category,
-      count
+      count,
     }));
   }, [changes]);
 
-  const highSev = changes.filter(c => c.severity === 'high').length;
-  const medSev = changes.filter(c => c.severity === 'medium').length;
-  const lowSev = changes.filter(c => c.severity === 'low').length;
+  const highSev = changes.filter((c) => c.severity === 'high').length;
+  const medSev = changes.filter((c) => c.severity === 'medium').length;
+  const lowSev = changes.filter((c) => c.severity === 'low').length;
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 backdrop-blur-xl">
@@ -43,7 +50,8 @@ export const ChangeDetector: React.FC<Props> = ({ changes }) => {
             Infrastructure & Tech Stack Delta Engine
           </h3>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Automated detection of hosting shifts, framework migrations, & security header changes across history.
+            Automated detection of hosting shifts, framework migrations, & security header changes
+            across history.
           </p>
         </div>
         <span className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3.5 py-1 rounded-full font-mono font-bold flex items-center gap-1.5">
@@ -103,7 +111,9 @@ export const ChangeDetector: React.FC<Props> = ({ changes }) => {
                         return (
                           <div className="bg-slate-900 border border-slate-700 p-2 rounded-xl font-mono text-xs text-slate-200 shadow-xl">
                             <div className="text-amber-400 font-bold">{data.category}</div>
-                            <div className="text-slate-300">Events: <span className="text-white font-bold">{data.count}</span></div>
+                            <div className="text-slate-300">
+                              Events: <span className="text-white font-bold">{data.count}</span>
+                            </div>
                           </div>
                         );
                       }
@@ -112,7 +122,10 @@ export const ChangeDetector: React.FC<Props> = ({ changes }) => {
                   />
                   <Bar dataKey="count" fill="#f59e0b" radius={[4, 4, 0, 0]}>
                     {categoryStats.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={['#a855f7', '#06b6d4', '#10b981', '#f59e0b', '#f43f5e'][index % 5]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={['#a855f7', '#06b6d4', '#10b981', '#f59e0b', '#f43f5e'][index % 5]}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
@@ -133,15 +146,15 @@ export const ChangeDetector: React.FC<Props> = ({ changes }) => {
               c.severity === 'high'
                 ? 'border-red-500/40 bg-red-950/20 text-red-300 hover:border-red-500/70'
                 : c.severity === 'medium'
-                ? 'border-amber-500/40 bg-amber-950/20 text-amber-300 hover:border-amber-500/70'
-                : 'border-slate-800 bg-slate-950/80 text-slate-300 hover:border-slate-700';
+                  ? 'border-amber-500/40 bg-amber-950/20 text-amber-300 hover:border-amber-500/70'
+                  : 'border-slate-800 bg-slate-950/80 text-slate-300 hover:border-slate-700';
 
             const severityBadge =
               c.severity === 'high'
                 ? 'bg-red-500/20 text-red-300 border-red-500/40'
                 : c.severity === 'medium'
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
 
             return (
               <div
@@ -153,7 +166,9 @@ export const ChangeDetector: React.FC<Props> = ({ changes }) => {
                     <span className="text-[11px] px-2.5 py-0.5 rounded-md bg-slate-900 font-mono font-bold uppercase text-amber-400 border border-slate-800">
                       {c.category}
                     </span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold border uppercase ${severityBadge}`}>
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold border uppercase ${severityBadge}`}
+                    >
                       {c.severity} priority
                     </span>
                     <span className="text-xs font-mono text-slate-400 ml-auto">

@@ -16,7 +16,9 @@ export function saveInvestigation(investigation: Investigation): void {
   if (typeof window === 'undefined') return;
   try {
     const list = getSavedInvestigations();
-    const existingIndex = list.findIndex(i => i.id === investigation.id || i.domain === investigation.domain);
+    const existingIndex = list.findIndex(
+      (i) => i.id === investigation.id || i.domain === investigation.domain
+    );
     if (existingIndex >= 0) {
       list[existingIndex] = investigation;
     } else {
@@ -31,7 +33,7 @@ export function saveInvestigation(investigation: Investigation): void {
 export function deleteInvestigation(id: string): void {
   if (typeof window === 'undefined') return;
   try {
-    const list = getSavedInvestigations().filter(i => i.id !== id);
+    const list = getSavedInvestigations().filter((i) => i.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
   } catch {
     // ignore

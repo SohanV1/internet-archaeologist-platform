@@ -65,7 +65,7 @@ export function generateHtmlReport(inv: Investigation): string {
         <tr><th>Type</th><th>Value</th><th>TTL</th></tr>
       </thead>
       <tbody>
-        ${inv.dnsRecords.map(r => `<tr><td style="color: #f59e0b; font-weight: bold;">${r.type}</td><td>${r.value}</td><td>${r.ttl || 3600}s</td></tr>`).join('')}
+        ${inv.dnsRecords.map((r) => `<tr><td style="color: #f59e0b; font-weight: bold;">${r.type}</td><td>${r.value}</td><td>${r.ttl || 3600}s</td></tr>`).join('')}
       </tbody>
     </table>
 
@@ -75,7 +75,7 @@ export function generateHtmlReport(inv: Investigation): string {
         <tr><th>Technology</th><th>Category</th><th>Confidence</th></tr>
       </thead>
       <tbody>
-        ${inv.technologies.map(t => `<tr><td>${t.name}</td><td>${t.category}</td><td style="color: #10b981;">${t.confidence}%</td></tr>`).join('')}
+        ${inv.technologies.map((t) => `<tr><td>${t.name}</td><td>${t.category}</td><td style="color: #10b981;">${t.confidence}%</td></tr>`).join('')}
       </tbody>
     </table>
 
@@ -85,7 +85,7 @@ export function generateHtmlReport(inv: Investigation): string {
         <tr><th>Source</th><th>Type</th><th>SHA-256 Provenance Hash</th></tr>
       </thead>
       <tbody>
-        ${inv.evidence.map(e => `<tr><td>${e.source}</td><td>${e.evidenceType}</td><td style="color: #38bdf8; font-size: 11px;">${e.verificationHash || 'N/A'}</td></tr>`).join('')}
+        ${inv.evidence.map((e) => `<tr><td>${e.source}</td><td>${e.evidenceType}</td><td style="color: #38bdf8; font-size: 11px;">${e.verificationHash || 'N/A'}</td></tr>`).join('')}
       </tbody>
     </table>
 
@@ -99,24 +99,29 @@ export function generateHtmlReport(inv: Investigation): string {
 
 export function exportDnsToCsv(inv: Investigation): string {
   const rows = [['Type', 'Value', 'TTL']];
-  inv.dnsRecords.forEach(r => {
+  inv.dnsRecords.forEach((r) => {
     rows.push([r.type, `"${r.value.replace(/"/g, '""')}"`, (r.ttl || 3600).toString()]);
   });
-  return rows.map(r => r.join(',')).join('\n');
+  return rows.map((r) => r.join(',')).join('\n');
 }
 
 export function exportSubdomainsToCsv(inv: Investigation): string {
   const rows = [['Subdomain', 'Root Domain', 'Source', 'Status']];
-  inv.subdomains.forEach(s => {
+  inv.subdomains.forEach((s) => {
     rows.push([`"${s.subdomain}"`, `"${s.fullDomain}"`, `"${s.source}"`, s.status]);
   });
-  return rows.map(r => r.join(',')).join('\n');
+  return rows.map((r) => r.join(',')).join('\n');
 }
 
 export function exportChangesToCsv(inv: Investigation): string {
   const rows = [['Timestamp', 'Category', 'Severity', 'Description']];
-  inv.changes.forEach(c => {
-    rows.push([c.timestamp, `"${c.category}"`, c.severity, `"${c.description.replace(/"/g, '""')}"`]);
+  inv.changes.forEach((c) => {
+    rows.push([
+      c.timestamp,
+      `"${c.category}"`,
+      c.severity,
+      `"${c.description.replace(/"/g, '""')}"`,
+    ]);
   });
-  return rows.map(r => r.join(',')).join('\n');
+  return rows.map((r) => r.join(',')).join('\n');
 }

@@ -2,8 +2,25 @@
 
 import React from 'react';
 import { WebSnapshot } from '@/types/osint';
-import { History, ExternalLink, Calendar, FileCode, CheckCircle, Clock, GitCompare, Filter } from 'lucide-react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import {
+  History,
+  ExternalLink,
+  Calendar,
+  FileCode,
+  CheckCircle,
+  Clock,
+  GitCompare,
+  Filter,
+} from 'lucide-react';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from 'recharts';
 
 interface Props {
   snapshots: WebSnapshot[];
@@ -18,11 +35,14 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
   const [selectedEra, setSelectedEra] = React.useState<string>('all');
 
   // Extract available years/decades
-  const years = Array.from(new Set(snapshots.map(s => new Date(s.timestamp).getFullYear().toString()))).sort();
-  
-  const filteredSnapshots = selectedEra === 'all'
-    ? snapshots
-    : snapshots.filter(s => new Date(s.timestamp).getFullYear().toString() === selectedEra);
+  const years = Array.from(
+    new Set(snapshots.map((s) => new Date(s.timestamp).getFullYear().toString()))
+  ).sort();
+
+  const filteredSnapshots =
+    selectedEra === 'all'
+      ? snapshots
+      : snapshots.filter((s) => new Date(s.timestamp).getFullYear().toString() === selectedEra);
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 backdrop-blur-xl">
@@ -33,7 +53,8 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
             Interactive Historical Timeline & Web Snapshots
           </h3>
           <p className="text-xs text-slate-400 font-mono">
-            Explore chronological website captures, inspected tech fingerprints, and historical payloads.
+            Explore chronological website captures, inspected tech fingerprints, and historical
+            payloads.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -60,7 +81,7 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
           >
             All Years ({snapshots.length})
           </button>
-          {years.map(yr => (
+          {years.map((yr) => (
             <button
               key={yr}
               onClick={() => setSelectedEra(yr)}
@@ -97,7 +118,7 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
                 sizeKB: parseFloat((s.contentLength / 1024).toFixed(1)),
                 techCount: s.detectedTech.length,
                 statusCode: s.statusCode,
-                raw: s
+                raw: s,
               }))}
               onClick={(state: any) => {
                 if (state && state.activePayload && state.activePayload[0]) {
@@ -133,9 +154,13 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
                     return (
                       <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl shadow-2xl font-mono text-xs text-slate-200">
                         <div className="text-amber-400 font-bold">{data.date}</div>
-                        <div className="text-slate-300">Payload: <span className="font-bold text-white">{data.sizeKB} KB</span></div>
+                        <div className="text-slate-300">
+                          Payload: <span className="font-bold text-white">{data.sizeKB} KB</span>
+                        </div>
                         <div className="text-emerald-400">HTTP {data.statusCode} OK</div>
-                        <div className="text-purple-400">{data.techCount} Technologies Detected</div>
+                        <div className="text-purple-400">
+                          {data.techCount} Technologies Detected
+                        </div>
                       </div>
                     );
                   }
@@ -160,7 +185,9 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
       <div className="bg-slate-950/90 border border-slate-800/90 rounded-xl p-4 space-y-2">
         <div className="text-xs font-mono text-slate-400 font-bold uppercase tracking-wider mb-2 flex items-center justify-between">
           <span>Select Timeline Snapshot:</span>
-          <span className="text-slate-500 text-[11px]">Showing {filteredSnapshots.length} Nodes</span>
+          <span className="text-slate-500 text-[11px]">
+            Showing {filteredSnapshots.length} Nodes
+          </span>
         </div>
         <div className="relative overflow-x-auto pb-2">
           <div className="flex items-center space-x-3 min-w-max">
@@ -200,11 +227,13 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
               <Calendar className="w-4 h-4 text-amber-400" />
               <span>Snapshot Timestamp: {new Date(selectedSnapshot.timestamp).toUTCString()}</span>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-2">
               {onTraceEvidence && (
                 <button
-                  onClick={() => onTraceEvidence(selectedSnapshot.evidenceId || selectedSnapshot.id)}
+                  onClick={() =>
+                    onTraceEvidence(selectedSnapshot.evidenceId || selectedSnapshot.id)
+                  }
                   className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 rounded-lg border border-emerald-500/30 text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm"
                 >
                   <span>Trace Archive Evidence</span>
@@ -235,16 +264,28 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono text-slate-300">
             <div className="bg-slate-900/80 border border-slate-800/80 p-3.5 rounded-lg">
-              <span className="text-slate-500 uppercase block mb-1 font-bold text-[10px]">HTTP Response Code</span>
-              <span className="font-bold text-emerald-400 text-base">{selectedSnapshot.statusCode} OK</span>
+              <span className="text-slate-500 uppercase block mb-1 font-bold text-[10px]">
+                HTTP Response Code
+              </span>
+              <span className="font-bold text-emerald-400 text-base">
+                {selectedSnapshot.statusCode} OK
+              </span>
             </div>
             <div className="bg-slate-900/80 border border-slate-800/80 p-3.5 rounded-lg">
-              <span className="text-slate-500 uppercase block mb-1 font-bold text-[10px]">Page Payload Size</span>
-              <span className="font-bold text-slate-200 text-base">{selectedSnapshot.contentLength.toLocaleString()} bytes</span>
+              <span className="text-slate-500 uppercase block mb-1 font-bold text-[10px]">
+                Page Payload Size
+              </span>
+              <span className="font-bold text-slate-200 text-base">
+                {selectedSnapshot.contentLength.toLocaleString()} bytes
+              </span>
             </div>
             <div className="bg-slate-900/80 border border-slate-800/80 p-3.5 rounded-lg">
-              <span className="text-slate-500 uppercase block mb-1 font-bold text-[10px]">Archive Record Key</span>
-              <span className="font-bold text-amber-300 text-xs truncate block">{selectedSnapshot.id}</span>
+              <span className="text-slate-500 uppercase block mb-1 font-bold text-[10px]">
+                Archive Record Key
+              </span>
+              <span className="font-bold text-amber-300 text-xs truncate block">
+                {selectedSnapshot.id}
+              </span>
             </div>
           </div>
 
@@ -254,7 +295,10 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
             </span>
             <div className="flex flex-wrap gap-2">
               {selectedSnapshot.detectedTech.map((t, idx) => (
-                <span key={`${t.id}-${idx}`} className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-slate-200 rounded-lg text-xs flex items-center gap-2 font-mono hover:border-slate-700">
+                <span
+                  key={`${t.id}-${idx}`}
+                  className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-slate-200 rounded-lg text-xs flex items-center gap-2 font-mono hover:border-slate-700"
+                >
                   <FileCode className="w-4 h-4 text-blue-400" />
                   {t.name}
                   <span className="text-[10px] text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">
@@ -269,4 +313,3 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
     </div>
   );
 };
-

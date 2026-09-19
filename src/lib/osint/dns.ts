@@ -1,6 +1,9 @@
 import { DnsRecord } from '@/types/osint';
+import { fetchWithRetry } from './fetchWithRetry';
 
-export async function lookupDnsRecords(domain: string): Promise<{ ipAddresses: string[]; dnsRecords: DnsRecord[] }> {
+export async function lookupDnsRecords(
+  domain: string
+): Promise<{ ipAddresses: string[]; dnsRecords: DnsRecord[] }> {
   const records: DnsRecord[] = [];
   const ipAddresses: string[] = [];
 
@@ -8,11 +11,15 @@ export async function lookupDnsRecords(domain: string): Promise<{ ipAddresses: s
 
   for (const type of types) {
     try {
-      const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${type}`, {
-        headers: { Accept: 'application/dns-json' },
-        next: { revalidate: 3600 }
-      });
-      
+      const res = await fetchWithRetry(
+        `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${type}`,
+        {
+          headers: { Accept: 'application/dns-json' },
+          next: { revalidate: 3600 },
+        },
+        { retries: 2, timeoutMs: 3500 }
+      );
+
       if (res.ok) {
         const data = await res.json();
         if (data.Answer && Array.isArray(data.Answer)) {
@@ -20,7 +27,7 @@ export async function lookupDnsRecords(domain: string): Promise<{ ipAddresses: s
             const rec: DnsRecord = {
               type: type as DnsRecord['type'],
               value: ans.data,
-              ttl: ans.TTL
+              ttl: ans.TTL,
             };
             records.push(rec);
             if (type === 'A' || type === 'AAAA') {

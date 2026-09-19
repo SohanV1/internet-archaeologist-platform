@@ -1,4 +1,4 @@
-export type EvidenceType = 
+export type EvidenceType =
   | 'Historical Archive'
   | 'DNS'
   | 'HTTP Header'
@@ -23,7 +23,15 @@ export interface DnsRecord {
 export interface Technology {
   id: string;
   name: string;
-  category: 'CMS' | 'Web Server' | 'JavaScript Framework' | 'Analytics' | 'Security' | 'CDN/Hosting' | 'Database' | 'Other';
+  category:
+    | 'CMS'
+    | 'Web Server'
+    | 'JavaScript Framework'
+    | 'Analytics'
+    | 'Security'
+    | 'CDN/Hosting'
+    | 'Database'
+    | 'Other';
   confidence: number; // 0 to 100
   confidenceLevel?: ConfidenceLevel;
   version?: string;
@@ -60,7 +68,12 @@ export interface WebsiteStoryMilestone {
   timestamp: string;
   title: string;
   description: string;
-  category: 'Framework Migration' | 'UI/UX Redesign' | 'Subdomain Expansion' | 'Security & CDN' | 'Status & Outage';
+  category:
+    | 'Framework Migration'
+    | 'UI/UX Redesign'
+    | 'Subdomain Expansion'
+    | 'Security & CDN'
+    | 'Status & Outage';
   impact: 'critical' | 'major' | 'moderate' | 'info';
   details?: string[];
   evidenceId?: string;
@@ -80,7 +93,13 @@ export interface ExecutiveSummary {
 export interface ChangeEvent {
   id: string;
   timestamp: string;
-  category: 'Tech Added' | 'Tech Removed' | 'DNS Change' | 'Header Change' | 'Status Change' | 'UI/UX Redesign';
+  category:
+    | 'Tech Added'
+    | 'Tech Removed'
+    | 'DNS Change'
+    | 'Header Change'
+    | 'Status Change'
+    | 'UI/UX Redesign';
   description: string;
   severity: 'low' | 'medium' | 'high';
   evidenceId?: string;
@@ -210,7 +229,8 @@ export interface DnsDriftEvent {
   id: string;
   timestamp: string;
   recordType: 'A' | 'NS' | 'MX' | 'TXT' | 'CNAME';
-  category: 'Nameserver Shift' | 'Mail Routing Shift' | 'Security Policy Adoption' | 'IP Pool Migration';
+  category:
+    'Nameserver Shift' | 'Mail Routing Shift' | 'Security Policy Adoption' | 'IP Pool Migration';
   description: string;
   oldValue?: string;
   newValue: string;
@@ -258,5 +278,3 @@ export interface Investigation {
   dnsDrifts?: DnsDriftEvent[];
   visualReconstructions?: VisualReconstruction[];
 }
-
-

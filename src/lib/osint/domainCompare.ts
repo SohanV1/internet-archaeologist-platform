@@ -1,14 +1,17 @@
 import { Investigation, DomainComparisonResult, Technology } from '@/types/osint';
 
-export function compareInvestigations(invA: Investigation, invB: Investigation): DomainComparisonResult {
-  const techNamesA = new Set(invA.technologies.map(t => t.name));
-  const techNamesB = new Set(invB.technologies.map(t => t.name));
+export function compareInvestigations(
+  invA: Investigation,
+  invB: Investigation
+): DomainComparisonResult {
+  const techNamesA = new Set(invA.technologies.map((t) => t.name));
+  const techNamesB = new Set(invB.technologies.map((t) => t.name));
 
   const sharedTech: Technology[] = [];
   const exclusiveTechA: Technology[] = [];
   const exclusiveTechB: Technology[] = [];
 
-  invA.technologies.forEach(t => {
+  invA.technologies.forEach((t) => {
     if (techNamesB.has(t.name)) {
       sharedTech.push(t);
     } else {
@@ -16,7 +19,7 @@ export function compareInvestigations(invA: Investigation, invB: Investigation):
     }
   });
 
-  invB.technologies.forEach(t => {
+  invB.technologies.forEach((t) => {
     if (!techNamesA.has(t.name)) {
       exclusiveTechB.push(t);
     }
@@ -29,7 +32,7 @@ export function compareInvestigations(invA: Investigation, invB: Investigation):
 
   let summaryNarrative = `Competitive & Architectural Analysis between ${invA.domain} and ${invB.domain}: `;
   if (sharedTech.length > 0) {
-    summaryNarrative += `Both domains share foundational stack signatures including [${sharedTech.map(t => t.name).join(', ')}]. `;
+    summaryNarrative += `Both domains share foundational stack signatures including [${sharedTech.map((t) => t.name).join(', ')}]. `;
   } else {
     summaryNarrative += `Both targets operate on distinct, non-overlapping architectural stacks. `;
   }
@@ -52,6 +55,6 @@ export function compareInvestigations(invA: Investigation, invB: Investigation):
     subdomainsCountB: subCountB,
     securityRatingA: invA.summary?.securityRating || 'Moderate',
     securityRatingB: invB.summary?.securityRating || 'Moderate',
-    summaryNarrative
+    summaryNarrative,
   };
 }

@@ -13,25 +13,25 @@ import {
   MarkerType,
   Node,
   Edge,
-  NodeProps
+  NodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { RelationshipData, GraphNode as OSINTGraphNode } from '@/types/osint';
-import { 
-  Network, 
-  Server, 
-  Globe, 
-  Cpu, 
-  Database, 
-  Shield, 
-  Search, 
-  Filter, 
-  Maximize2, 
-  Info, 
+import {
+  Network,
+  Server,
+  Globe,
+  Cpu,
+  Database,
+  Shield,
+  Search,
+  Filter,
+  Maximize2,
+  Info,
   X,
   ExternalLink,
   Layers,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 
 interface Props {
@@ -48,14 +48,17 @@ interface CustomNodeData extends Record<string, unknown> {
   isSelected?: boolean;
 }
 
-const TYPE_CONFIG: Record<string, {
-  label: string;
-  color: string;
-  borderColor: string;
-  bgGradient: string;
-  glowColor: string;
-  icon: React.ElementType;
-}> = {
+const TYPE_CONFIG: Record<
+  string,
+  {
+    label: string;
+    color: string;
+    borderColor: string;
+    bgGradient: string;
+    glowColor: string;
+    icon: React.ElementType;
+  }
+> = {
   domain: {
     label: 'Domain Target',
     color: 'text-amber-300',
@@ -132,8 +135,17 @@ const CyberNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ data }) => {
           : `${cfg.borderColor} hover:border-slate-400 hover:scale-[1.02]`
       }`}
     >
-      <Handle type="target" position={Position.Top} className="!w-2.5 !h-2.5 !bg-amber-400 !border-slate-900" />
-      <Handle type="target" position={Position.Left} id="left" className="!w-2.5 !h-2.5 !bg-cyan-400 !border-slate-900" />
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!w-2.5 !h-2.5 !bg-amber-400 !border-slate-900"
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="left"
+        className="!w-2.5 !h-2.5 !bg-cyan-400 !border-slate-900"
+      />
 
       <div className="flex items-center gap-2.5">
         <div className={`p-1.5 rounded-lg bg-slate-950/90 border border-slate-800 ${cfg.color}`}>
@@ -149,8 +161,17 @@ const CyberNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ data }) => {
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} id="right" className="!w-2.5 !h-2.5 !bg-emerald-400 !border-slate-900" />
-      <Handle type="source" position={Position.Bottom} className="!w-2.5 !h-2.5 !bg-amber-400 !border-slate-900" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        className="!w-2.5 !h-2.5 !bg-emerald-400 !border-slate-900"
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!w-2.5 !h-2.5 !bg-amber-400 !border-slate-900"
+      />
     </div>
   );
 };
@@ -167,16 +188,16 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
 
   // Compute Layout Positions (Radial Tree / Hierarchical)
   const computeInitialElements = React.useCallback(() => {
-    const rootNode = data.nodes.find(n => n.type === 'domain') || data.nodes[0];
-    const otherNodes = data.nodes.filter(n => n.id !== rootNode?.id);
+    const rootNode = data.nodes.find((n) => n.type === 'domain') || data.nodes[0];
+    const otherNodes = data.nodes.filter((n) => n.id !== rootNode?.id);
 
     // Group other nodes by type
-    const subdomains = otherNodes.filter(n => n.type === 'subdomain');
-    const ips = otherNodes.filter(n => n.type === 'ip');
-    const nameservers = otherNodes.filter(n => n.type === 'nameserver');
-    const technologies = otherNodes.filter(n => n.type === 'technology');
+    const subdomains = otherNodes.filter((n) => n.type === 'subdomain');
+    const ips = otherNodes.filter((n) => n.type === 'ip');
+    const nameservers = otherNodes.filter((n) => n.type === 'nameserver');
+    const technologies = otherNodes.filter((n) => n.type === 'technology');
     const others = otherNodes.filter(
-      n => !['subdomain', 'ip', 'nameserver', 'technology'].includes(n.type)
+      (n) => !['subdomain', 'ip', 'nameserver', 'technology'].includes(n.type)
     );
 
     const initialNodes: Node<CustomNodeData>[] = [];
@@ -187,7 +208,10 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
       initialNodes.push({
         id: rootNode.id,
         type: 'cyberNode',
-        position: layoutMode === 'radial' ? { x: centerX - 90, y: centerY - 30 } : { x: centerX - 90, y: 50 },
+        position:
+          layoutMode === 'radial'
+            ? { x: centerX - 90, y: centerY - 30 }
+            : { x: centerX - 90, y: 50 },
         data: {
           label: rootNode.label,
           type: rootNode.type,
@@ -202,7 +226,12 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
       // Nameservers: Top-Right (angles 315 to 45 deg)
       // Technologies: Bottom-Right (angles 45 to 135 deg)
       // IPs: Bottom-Left (angles 225 to 315 deg)
-      const placeInArc = (group: OSINTGraphNode[], startAngle: number, endAngle: number, baseRadius: number) => {
+      const placeInArc = (
+        group: OSINTGraphNode[],
+        startAngle: number,
+        endAngle: number,
+        baseRadius: number
+      ) => {
         if (group.length === 0) return;
         const step = group.length === 1 ? 0 : (endAngle - startAngle) / (group.length - 1);
         group.forEach((node, i) => {
@@ -251,24 +280,40 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
         });
       };
 
-      placeTier([...subdomains, ...nameservers], 220, Math.min(1000, (subdomains.length + nameservers.length) * 200));
-      placeTier([...ips, ...technologies, ...others], 420, Math.min(1100, (ips.length + technologies.length + others.length) * 210));
+      placeTier(
+        [...subdomains, ...nameservers],
+        220,
+        Math.min(1000, (subdomains.length + nameservers.length) * 200)
+      );
+      placeTier(
+        [...ips, ...technologies, ...others],
+        420,
+        Math.min(1100, (ips.length + technologies.length + others.length) * 210)
+      );
     }
 
     // Convert Edges
     const initialEdges: Edge[] = data.edges.map((edge, idx) => {
-      const sourceNode = data.nodes.find(n => n.id === edge.source);
-      const targetNode = data.nodes.find(n => n.id === edge.target);
-      const edgeColor = targetNode?.type === 'subdomain' ? '#10b981' :
-                        targetNode?.type === 'ip' ? '#3b82f6' :
-                        targetNode?.type === 'nameserver' ? '#06b6d4' :
-                        targetNode?.type === 'technology' ? '#a855f7' : '#f59e0b';
+      const sourceNode = data.nodes.find((n) => n.id === edge.source);
+      const targetNode = data.nodes.find((n) => n.id === edge.target);
+      const edgeColor =
+        targetNode?.type === 'subdomain'
+          ? '#10b981'
+          : targetNode?.type === 'ip'
+            ? '#3b82f6'
+            : targetNode?.type === 'nameserver'
+              ? '#06b6d4'
+              : targetNode?.type === 'technology'
+                ? '#a855f7'
+                : '#f59e0b';
 
       return {
         id: `e-${edge.source}-${edge.target}-${idx}`,
         source: edge.source,
         target: edge.target,
-        animated: edge.relationship.toLowerCase().includes('resolves') || edge.relationship.toLowerCase().includes('hosts'),
+        animated:
+          edge.relationship.toLowerCase().includes('resolves') ||
+          edge.relationship.toLowerCase().includes('hosts'),
         style: { stroke: edgeColor, strokeWidth: 1.75, opacity: 0.7 },
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -282,7 +327,10 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
     return { nodes: initialNodes, edges: initialEdges };
   }, [data, layoutMode]);
 
-  const { nodes: initialNodes, edges: initialEdges } = React.useMemo(() => computeInitialElements(), [computeInitialElements]);
+  const { nodes: initialNodes, edges: initialEdges } = React.useMemo(
+    () => computeInitialElements(),
+    [computeInitialElements]
+  );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -297,7 +345,8 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
   React.useEffect(() => {
     setNodes((nds) =>
       nds.map((node) => {
-        const matchesSearch = searchTerm === '' || 
+        const matchesSearch =
+          searchTerm === '' ||
           node.data.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
           node.data.type.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesType = selectedType === 'all' || node.data.type === selectedType;
@@ -320,7 +369,7 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
 
   // Handle Node Click
   const handleNodeClick = (_: React.MouseEvent, node: Node) => {
-    const raw = data.nodes.find(n => n.id === node.id);
+    const raw = data.nodes.find((n) => n.id === node.id);
     if (raw) {
       setSelectedNodeInfo(raw);
     }
@@ -332,7 +381,7 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
   const nodeRelationships = React.useMemo(() => {
     if (!selectedNodeInfo) return [];
     return data.edges.filter(
-      e => e.source === selectedNodeInfo.id || e.target === selectedNodeInfo.id
+      (e) => e.source === selectedNodeInfo.id || e.target === selectedNodeInfo.id
     );
   }, [selectedNodeInfo, data.edges]);
 
@@ -346,7 +395,8 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
             Interactive Network Topology Graph
           </h3>
           <p className="text-xs text-slate-400 font-mono">
-            Visual node-link topology linking root target, authoritative DNS, resolved IPs, and tech footprints.
+            Visual node-link topology linking root target, authoritative DNS, resolved IPs, and tech
+            footprints.
           </p>
         </div>
 
@@ -493,13 +543,18 @@ export const RelationshipGraph: React.FC<Props> = ({ data, onSelectEvidence }) =
             </div>
 
             <div className="space-y-2 text-xs font-mono">
-              <div className="text-[11px] text-slate-400 uppercase font-bold">Connections ({nodeRelationships.length}):</div>
+              <div className="text-[11px] text-slate-400 uppercase font-bold">
+                Connections ({nodeRelationships.length}):
+              </div>
               <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
                 {nodeRelationships.length === 0 ? (
                   <div className="text-slate-500 text-[11px]">No direct connections found.</div>
                 ) : (
                   nodeRelationships.map((rel, i) => (
-                    <div key={i} className="p-2 rounded-lg bg-slate-950/80 border border-slate-800/80 text-[11px] text-slate-300">
+                    <div
+                      key={i}
+                      className="p-2 rounded-lg bg-slate-950/80 border border-slate-800/80 text-[11px] text-slate-300"
+                    >
                       <span className="text-amber-400 font-bold">{rel.relationship}</span>
                       <div className="text-slate-400 truncate mt-0.5">
                         {rel.source === selectedNodeInfo.id ? `→ ${rel.target}` : `← ${rel.source}`}

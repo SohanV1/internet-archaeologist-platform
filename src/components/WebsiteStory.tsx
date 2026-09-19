@@ -1,20 +1,25 @@
 'use client';
 
 import React from 'react';
-import { WebsiteStoryMilestone, ExecutiveSummary, SubdomainRecord, Technology } from '@/types/osint';
-import { 
-  Sparkles, 
-  GitCommit, 
-  Compass, 
-  ShieldCheck, 
-  Calendar, 
-  Clock, 
+import {
+  WebsiteStoryMilestone,
+  ExecutiveSummary,
+  SubdomainRecord,
+  Technology,
+} from '@/types/osint';
+import {
+  Sparkles,
+  GitCommit,
+  Compass,
+  ShieldCheck,
+  Calendar,
+  Clock,
   ArrowRight,
   ChevronRight,
   TrendingUp,
   Cpu,
   Palette,
-  Network
+  Network,
 } from 'lucide-react';
 
 interface Props {
@@ -34,18 +39,25 @@ export const WebsiteStory: React.FC<Props> = ({
   subdomains,
   technologies,
   onNavigateToTab,
-  onTraceEvidence
+  onTraceEvidence,
 }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filterCategory, setFilterCategory] = React.useState<string>('all');
 
-  const categories = ['all', 'Framework Migration', 'UI/UX Redesign', 'Subdomain Expansion', 'Security & CDN'];
+  const categories = [
+    'all',
+    'Framework Migration',
+    'UI/UX Redesign',
+    'Subdomain Expansion',
+    'Security & CDN',
+  ];
 
-  const filteredMilestones = milestones.filter(m => {
+  const filteredMilestones = milestones.filter((m) => {
     const matchesCat = filterCategory === 'all' || m.category === filterCategory;
-    const matchesSearch = m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          m.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (m.details && m.details.some(d => d.toLowerCase().includes(searchTerm.toLowerCase())));
+    const matchesSearch =
+      m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      m.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (m.details && m.details.some((d) => d.toLowerCase().includes(searchTerm.toLowerCase())));
     return matchesCat && matchesSearch;
   });
 
@@ -97,14 +109,22 @@ export const WebsiteStory: React.FC<Props> = ({
                 <span className="text-xs text-slate-400 font-mono">Forensic Timeline Analysis</span>
               </div>
               <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 font-mono tracking-tight pt-1">
-                What Happened to <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500">{domain}</span>?
+                What Happened to{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500">
+                  {domain}
+                </span>
+                ?
               </h2>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono px-3.5 py-1.5 rounded-full bg-slate-950 border border-slate-800 text-slate-300 flex items-center gap-2">
                 <Calendar className="w-3.5 h-3.5 text-amber-400" />
-                Active Since: <strong className="text-slate-100">{summary.firstRecordedDate.split('-')[0]}</strong> ({summary.totalYearsActive} yrs)
+                Active Since:{' '}
+                <strong className="text-slate-100">
+                  {summary.firstRecordedDate.split('-')[0]}
+                </strong>{' '}
+                ({summary.totalYearsActive} yrs)
               </span>
             </div>
           </div>
@@ -128,18 +148,24 @@ export const WebsiteStory: React.FC<Props> = ({
             {/* Framework Evolution Pathway */}
             <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
               <div className="flex items-center gap-2">
-                <span className="text-slate-500 font-semibold uppercase tracking-wider">Framework Evolution:</span>
+                <span className="text-slate-500 font-semibold uppercase tracking-wider">
+                  Framework Evolution:
+                </span>
                 <span className="px-3 py-1 rounded-md bg-purple-500/10 border border-purple-500/30 text-purple-300 font-bold">
                   {summary.primaryFrameworkEvolution}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-slate-500 font-semibold uppercase tracking-wider">Security Posture:</span>
-                <span className={`px-2.5 py-0.5 rounded font-bold ${
-                  summary.securityRating === 'High' 
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' 
-                    : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                }`}>
+                <span className="text-slate-500 font-semibold uppercase tracking-wider">
+                  Security Posture:
+                </span>
+                <span
+                  className={`px-2.5 py-0.5 rounded font-bold ${
+                    summary.securityRating === 'High'
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                  }`}
+                >
                   {summary.securityRating}
                 </span>
               </div>
@@ -148,51 +174,69 @@ export const WebsiteStory: React.FC<Props> = ({
 
           {/* Key Stat Cards Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-            <div 
+            <div
               onClick={() => onNavigateToTab?.('tech')}
               className="bg-slate-950/60 border border-slate-800/80 hover:border-purple-500/50 p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-                <span className="flex items-center gap-1.5"><Cpu className="w-3.5 h-3.5 text-purple-400" /> Active Stack</span>
+                <span className="flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-purple-400" /> Active Stack
+                </span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-purple-400 transition-colors" />
               </div>
-              <p className="text-xl font-extrabold text-purple-300 font-mono">{technologies.length} Techs</p>
-              <p className="text-[11px] text-slate-500 font-mono truncate">{technologies[0]?.name || 'Modern Stack'}</p>
+              <p className="text-xl font-extrabold text-purple-300 font-mono">
+                {technologies.length} Techs
+              </p>
+              <p className="text-[11px] text-slate-500 font-mono truncate">
+                {technologies[0]?.name || 'Modern Stack'}
+              </p>
             </div>
 
-            <div 
+            <div
               onClick={() => onNavigateToTab?.('timeline')}
               className="bg-slate-950/60 border border-slate-800/80 hover:border-amber-500/50 p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-                <span className="flex items-center gap-1.5"><Palette className="w-3.5 h-3.5 text-amber-400" /> UI/UX Shifts</span>
+                <span className="flex items-center gap-1.5">
+                  <Palette className="w-3.5 h-3.5 text-amber-400" /> UI/UX Shifts
+                </span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-amber-400 transition-colors" />
               </div>
-              <p className="text-xl font-extrabold text-amber-300 font-mono">{summary.majorRedesignsCount} Redesigns</p>
+              <p className="text-xl font-extrabold text-amber-300 font-mono">
+                {summary.majorRedesignsCount} Redesigns
+              </p>
               <p className="text-[11px] text-slate-500 font-mono">Structural Overhauls</p>
             </div>
 
-            <div 
+            <div
               onClick={() => onNavigateToTab?.('subdomains')}
               className="bg-slate-950/60 border border-slate-800/80 hover:border-emerald-500/50 p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-                <span className="flex items-center gap-1.5"><Network className="w-3.5 h-3.5 text-emerald-400" /> Subdomains</span>
+                <span className="flex items-center gap-1.5">
+                  <Network className="w-3.5 h-3.5 text-emerald-400" /> Subdomains
+                </span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-emerald-400 transition-colors" />
               </div>
-              <p className="text-xl font-extrabold text-emerald-300 font-mono">{subdomains.length} Detected</p>
+              <p className="text-xl font-extrabold text-emerald-300 font-mono">
+                {subdomains.length} Detected
+              </p>
               <p className="text-[11px] text-slate-500 font-mono">Ecosystem Sprawl</p>
             </div>
 
-            <div 
+            <div
               onClick={() => onNavigateToTab?.('changes')}
               className="bg-slate-950/60 border border-slate-800/80 hover:border-cyan-500/50 p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-cyan-400" /> History Span</span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-cyan-400" /> History Span
+                </span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-cyan-400 transition-colors" />
               </div>
-              <p className="text-xl font-extrabold text-cyan-300 font-mono">{summary.totalYearsActive} Years</p>
+              <p className="text-xl font-extrabold text-cyan-300 font-mono">
+                {summary.totalYearsActive} Years
+              </p>
               <p className="text-[11px] text-slate-500 font-mono">{milestones.length} Milestones</p>
             </div>
           </div>
@@ -208,7 +252,8 @@ export const WebsiteStory: React.FC<Props> = ({
               Key Evolutionary Milestones & Findings
             </h3>
             <p className="text-xs text-slate-400 font-mono">
-              Chronological log of major architectural rewrites, interface overhauls, and infrastructure events.
+              Chronological log of major architectural rewrites, interface overhauls, and
+              infrastructure events.
             </p>
           </div>
 
@@ -266,7 +311,9 @@ export const WebsiteStory: React.FC<Props> = ({
                 <div className="flex-1 space-y-2.5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs px-2.5 py-0.5 rounded-full border font-mono font-semibold flex items-center gap-1.5 ${getCategoryBadgeStyle(m.category)}`}>
+                      <span
+                        className={`text-xs px-2.5 py-0.5 rounded-full border font-mono font-semibold flex items-center gap-1.5 ${getCategoryBadgeStyle(m.category)}`}
+                      >
                         {getCategoryIcon(m.category)}
                         {m.category}
                       </span>

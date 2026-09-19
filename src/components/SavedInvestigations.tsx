@@ -17,7 +17,7 @@ export const SavedInvestigations: React.FC<Props> = ({
   onClose,
   savedList,
   onSelect,
-  onDelete
+  onDelete,
 }) => {
   if (!isOpen) return null;
 
@@ -30,8 +30,12 @@ export const SavedInvestigations: React.FC<Props> = ({
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-100 font-mono">Saved Target Investigations</h3>
-              <p className="text-xs text-slate-400 font-mono">Locally stored intelligence dossiers</p>
+              <h3 className="text-lg font-bold text-slate-100 font-mono">
+                Saved Target Investigations
+              </h3>
+              <p className="text-xs text-slate-400 font-mono">
+                Locally stored intelligence dossiers
+              </p>
             </div>
           </div>
           <button
@@ -44,7 +48,8 @@ export const SavedInvestigations: React.FC<Props> = ({
 
         {savedList.length === 0 ? (
           <div className="text-center py-12 text-slate-400 font-mono text-sm border border-dashed border-slate-800 rounded-xl">
-            No saved target investigations found. Investigate a domain to save its intelligence report.
+            No saved target investigations found. Investigate a domain to save its intelligence
+            report.
           </div>
         ) : (
           <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
@@ -53,7 +58,13 @@ export const SavedInvestigations: React.FC<Props> = ({
                 key={inv.id}
                 className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-amber-500/50 transition-all group"
               >
-                <div className="space-y-2 cursor-pointer flex-1" onClick={() => { onSelect(inv); onClose(); }}>
+                <div
+                  className="space-y-2 cursor-pointer flex-1"
+                  onClick={() => {
+                    onSelect(inv);
+                    onClose();
+                  }}
+                >
                   <div className="flex items-center space-x-2">
                     <Globe className="w-4 h-4 text-amber-400" />
                     <span className="font-bold text-slate-100 text-base font-mono group-hover:text-amber-400 transition-colors">
@@ -79,7 +90,10 @@ export const SavedInvestigations: React.FC<Props> = ({
                 </div>
 
                 <button
-                  onClick={(e) => { e.stopPropagation(); onDelete(inv.id); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(inv.id);
+                  }}
                   className="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-900 rounded-lg transition-colors cursor-pointer ml-3"
                   title="Delete stored research"
                 >

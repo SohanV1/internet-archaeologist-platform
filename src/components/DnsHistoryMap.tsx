@@ -2,29 +2,29 @@
 
 import React from 'react';
 import { AsnInfo, DnsRecord } from '@/types/osint';
-import { 
-  Server, 
-  Globe2, 
-  Network, 
-  ShieldCheck, 
-  MapPin, 
-  Cpu, 
-  ArrowRight, 
-  Copy, 
-  Check, 
+import {
+  Server,
+  Globe2,
+  Network,
+  ShieldCheck,
+  MapPin,
+  Cpu,
+  ArrowRight,
+  Copy,
+  Check,
   Database,
   ExternalLink,
-  BarChart2
+  BarChart2,
 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  CartesianGrid, 
-  Cell 
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Cell,
 } from 'recharts';
 
 interface Props {
@@ -34,7 +34,12 @@ interface Props {
   onTraceEvidence?: (evidenceIdOrEntity: string) => void;
 }
 
-export const DnsHistoryMap: React.FC<Props> = ({ asnInfo = [], dnsRecords, domain, onTraceEvidence }) => {
+export const DnsHistoryMap: React.FC<Props> = ({
+  asnInfo = [],
+  dnsRecords,
+  domain,
+  onTraceEvidence,
+}) => {
   const [copiedText, setCopiedText] = React.useState<string | null>(null);
 
   const handleCopy = (text: string) => {
@@ -46,14 +51,17 @@ export const DnsHistoryMap: React.FC<Props> = ({ asnInfo = [], dnsRecords, domai
   // Group ASN by Organization
   const orgStats = React.useMemo(() => {
     const map = new Map<string, number>();
-    asnInfo.forEach(a => {
-      let shortOrg = a.org.split(',')[0].replace(/Inc\.?|LLC|Corporation/gi, '').trim();
+    asnInfo.forEach((a) => {
+      let shortOrg = a.org
+        .split(',')[0]
+        .replace(/Inc\.?|LLC|Corporation/gi, '')
+        .trim();
       if (shortOrg.length > 18) shortOrg = shortOrg.substring(0, 16) + '...';
       map.set(shortOrg, (map.get(shortOrg) || 0) + 1);
     });
     return Array.from(map.entries()).map(([org, count]) => ({
       org,
-      count
+      count,
     }));
   }, [asnInfo]);
 
@@ -66,7 +74,8 @@ export const DnsHistoryMap: React.FC<Props> = ({ asnInfo = [], dnsRecords, domai
             IP Routing & Autonomous System (ASN) Map
           </h3>
           <p className="text-xs text-slate-400 font-mono">
-            BGP routing analysis, Autonomous System Numbers (ASN), ISP infrastructure, and authoritative DNS clusters.
+            BGP routing analysis, Autonomous System Numbers (ASN), ISP infrastructure, and
+            authoritative DNS clusters.
           </p>
         </div>
 
@@ -122,7 +131,10 @@ export const DnsHistoryMap: React.FC<Props> = ({ asnInfo = [], dnsRecords, domai
                       return (
                         <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl font-mono text-xs text-slate-200 shadow-xl">
                           <div className="text-blue-400 font-bold">{data.org}</div>
-                          <div className="text-slate-300">Allocated Endpoints: <span className="text-white font-bold">{data.count}</span></div>
+                          <div className="text-slate-300">
+                            Allocated Endpoints:{' '}
+                            <span className="text-white font-bold">{data.count}</span>
+                          </div>
                         </div>
                       );
                     }
@@ -131,7 +143,10 @@ export const DnsHistoryMap: React.FC<Props> = ({ asnInfo = [], dnsRecords, domai
                 />
                 <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]}>
                   {orgStats.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={['#3b82f6', '#06b6d4', '#10b981', '#a855f7'][index % 4]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={['#3b82f6', '#06b6d4', '#10b981', '#a855f7'][index % 4]}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -154,8 +169,12 @@ export const DnsHistoryMap: React.FC<Props> = ({ asnInfo = [], dnsRecords, domai
                     <Network className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-mono text-slate-400 uppercase block font-bold">Autonomous System</span>
-                    <span className="text-base font-extrabold text-blue-300 font-mono">{item.asn}</span>
+                    <span className="text-xs font-mono text-slate-400 uppercase block font-bold">
+                      Autonomous System
+                    </span>
+                    <span className="text-base font-extrabold text-blue-300 font-mono">
+                      {item.asn}
+                    </span>
                   </div>
                 </div>
 
@@ -167,12 +186,16 @@ export const DnsHistoryMap: React.FC<Props> = ({ asnInfo = [], dnsRecords, domai
 
               <div className="grid grid-cols-2 gap-3 text-xs font-mono">
                 <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800/80">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">BGP Route CIDR</span>
+                  <span className="text-[10px] text-slate-500 uppercase block font-bold">
+                    BGP Route CIDR
+                  </span>
                   <span className="text-slate-200">{item.cidr || `${item.ip}/24`}</span>
                 </div>
                 <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800/80 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-bold">Target IP</span>
+                    <span className="text-[10px] text-slate-500 uppercase block font-bold">
+                      Target IP
+                    </span>
                     <span className="text-cyan-300 font-bold truncate block">{item.ip}</span>
                   </div>
                   <button
@@ -180,15 +203,23 @@ export const DnsHistoryMap: React.FC<Props> = ({ asnInfo = [], dnsRecords, domai
                     className="p-1 text-slate-500 hover:text-slate-200 cursor-pointer"
                     title="Copy IP"
                   >
-                    {copiedText === item.ip ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    {copiedText === item.ip ? (
+                      <Check className="w-3 h-3 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
                   </button>
                 </div>
               </div>
 
               <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-800/80 space-y-1 text-xs font-mono">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Organization / Carrier:</span>
+                <span className="text-[10px] text-slate-500 uppercase font-bold block">
+                  Organization / Carrier:
+                </span>
                 <span className="text-slate-200 font-semibold block">{item.org}</span>
-                {item.isp && <span className="text-slate-400 text-[11px] block">ISP: {item.isp}</span>}
+                {item.isp && (
+                  <span className="text-slate-400 text-[11px] block">ISP: {item.isp}</span>
+                )}
               </div>
             </div>
 

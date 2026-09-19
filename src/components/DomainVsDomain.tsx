@@ -3,30 +3,30 @@
 import React from 'react';
 import { Investigation, DomainComparisonResult } from '@/types/osint';
 import { compareInvestigations } from '@/lib/osint/domainCompare';
-import { 
-  Swords, 
-  Search, 
-  Loader2, 
-  Sparkles, 
-  Layers, 
-  Shield, 
-  Calendar, 
-  Network, 
-  Cpu, 
+import {
+  Swords,
+  Search,
+  Loader2,
+  Sparkles,
+  Layers,
+  Shield,
+  Calendar,
+  Network,
+  Cpu,
   CheckCircle,
   FileCode,
   ArrowRight,
-  BarChart2
+  BarChart2,
 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Legend, 
-  CartesianGrid 
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
 } from 'recharts';
 
 interface Props {
@@ -48,7 +48,7 @@ export const DomainVsDomain: React.FC<Props> = ({ currentInvestigation }) => {
       const res = await fetch('/api/investigate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: targetB.trim() })
+        body: JSON.stringify({ domain: targetB.trim() }),
       });
 
       if (!res.ok) {
@@ -78,7 +78,8 @@ export const DomainVsDomain: React.FC<Props> = ({ currentInvestigation }) => {
             Target-vs-Target Multi-Domain Comparator
           </h3>
           <p className="text-xs text-slate-400 font-mono">
-            Compare two distinct web entities to contrast tech stack overlap, attack surfaces, and historical longevity.
+            Compare two distinct web entities to contrast tech stack overlap, attack surfaces, and
+            historical longevity.
           </p>
         </div>
 
@@ -113,7 +114,11 @@ export const DomainVsDomain: React.FC<Props> = ({ currentInvestigation }) => {
             disabled={loading}
             className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold text-xs font-mono rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Swords className="w-4 h-4" />}
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Swords className="w-4 h-4" />
+            )}
             <span>Execute Dual Scan</span>
           </button>
         </form>
@@ -149,28 +154,28 @@ export const DomainVsDomain: React.FC<Props> = ({ currentInvestigation }) => {
                     {
                       metric: 'Years Active',
                       [comparison.domainA]: comparison.yearsA,
-                      [comparison.domainB]: comparison.yearsB
+                      [comparison.domainB]: comparison.yearsB,
                     },
                     {
                       metric: 'Subdomains',
                       [comparison.domainA]: comparison.subdomainsCountA,
-                      [comparison.domainB]: comparison.subdomainsCountB
+                      [comparison.domainB]: comparison.subdomainsCountB,
                     },
                     {
                       metric: 'Tech Signatures',
                       [comparison.domainA]: currentInvestigation.technologies.length,
-                      [comparison.domainB]: competitorInv.technologies.length
+                      [comparison.domainB]: competitorInv.technologies.length,
                     },
                     {
                       metric: 'DNS Records',
                       [comparison.domainA]: currentInvestigation.dnsRecords.length,
-                      [comparison.domainB]: competitorInv.dnsRecords.length
+                      [comparison.domainB]: competitorInv.dnsRecords.length,
                     },
                     {
                       metric: 'Captures',
                       [comparison.domainA]: currentInvestigation.snapshots.length,
-                      [comparison.domainB]: competitorInv.snapshots.length
-                    }
+                      [comparison.domainB]: competitorInv.snapshots.length,
+                    },
                   ]}
                   margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                 >
@@ -191,9 +196,17 @@ export const DomainVsDomain: React.FC<Props> = ({ currentInvestigation }) => {
                       if (active && payload && payload.length) {
                         return (
                           <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl font-mono text-xs text-slate-200 shadow-xl space-y-1">
-                            <div className="text-slate-300 font-bold border-b border-slate-800 pb-1">{label}</div>
-                            <div className="text-amber-400">{comparison.domainA}: <span className="font-bold text-white">{payload[0]?.value}</span></div>
-                            <div className="text-emerald-400">{comparison.domainB}: <span className="font-bold text-white">{payload[1]?.value}</span></div>
+                            <div className="text-slate-300 font-bold border-b border-slate-800 pb-1">
+                              {label}
+                            </div>
+                            <div className="text-amber-400">
+                              {comparison.domainA}:{' '}
+                              <span className="font-bold text-white">{payload[0]?.value}</span>
+                            </div>
+                            <div className="text-emerald-400">
+                              {comparison.domainB}:{' '}
+                              <span className="font-bold text-white">{payload[1]?.value}</span>
+                            </div>
                           </div>
                         );
                       }
@@ -223,26 +236,52 @@ export const DomainVsDomain: React.FC<Props> = ({ currentInvestigation }) => {
             {/* Target A */}
             <div className="bg-slate-950/80 border border-amber-500/40 rounded-xl p-5 space-y-3">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <span className="text-base font-extrabold text-amber-400">{comparison.domainA}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">Primary Target</span>
+                <span className="text-base font-extrabold text-amber-400">
+                  {comparison.domainA}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                  Primary Target
+                </span>
               </div>
               <div className="space-y-1.5 text-slate-300">
-                <div className="flex justify-between"><span>Years Active:</span><strong className="text-white">{comparison.yearsA} yrs</strong></div>
-                <div className="flex justify-between"><span>Subdomains:</span><strong className="text-white">{comparison.subdomainsCountA}</strong></div>
-                <div className="flex justify-between"><span>Security Posture:</span><strong className="text-emerald-400">{comparison.securityRatingA}</strong></div>
+                <div className="flex justify-between">
+                  <span>Years Active:</span>
+                  <strong className="text-white">{comparison.yearsA} yrs</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Subdomains:</span>
+                  <strong className="text-white">{comparison.subdomainsCountA}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Security Posture:</span>
+                  <strong className="text-emerald-400">{comparison.securityRatingA}</strong>
+                </div>
               </div>
             </div>
 
             {/* Target B */}
             <div className="bg-slate-950/80 border border-emerald-500/40 rounded-xl p-5 space-y-3">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <span className="text-base font-extrabold text-emerald-400">{comparison.domainB}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">Comparison Target</span>
+                <span className="text-base font-extrabold text-emerald-400">
+                  {comparison.domainB}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                  Comparison Target
+                </span>
               </div>
               <div className="space-y-1.5 text-slate-300">
-                <div className="flex justify-between"><span>Years Active:</span><strong className="text-white">{comparison.yearsB} yrs</strong></div>
-                <div className="flex justify-between"><span>Subdomains:</span><strong className="text-white">{comparison.subdomainsCountB}</strong></div>
-                <div className="flex justify-between"><span>Security Posture:</span><strong className="text-emerald-400">{comparison.securityRatingB}</strong></div>
+                <div className="flex justify-between">
+                  <span>Years Active:</span>
+                  <strong className="text-white">{comparison.yearsB} yrs</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Subdomains:</span>
+                  <strong className="text-white">{comparison.subdomainsCountB}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Security Posture:</span>
+                  <strong className="text-emerald-400">{comparison.securityRatingB}</strong>
+                </div>
               </div>
             </div>
           </div>

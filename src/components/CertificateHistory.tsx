@@ -2,30 +2,30 @@
 
 import React from 'react';
 import { CertificateRecord } from '@/types/osint';
-import { 
-  ShieldCheck, 
-  Lock, 
-  Calendar, 
-  CheckCircle2, 
-  XCircle, 
-  Key, 
-  ExternalLink, 
-  Search, 
-  Fingerprint, 
+import {
+  ShieldCheck,
+  Lock,
+  Calendar,
+  CheckCircle2,
+  XCircle,
+  Key,
+  ExternalLink,
+  Search,
+  Fingerprint,
   Filter,
   Copy,
   Check,
-  BarChart2
+  BarChart2,
 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  CartesianGrid, 
-  Cell 
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Cell,
 } from 'recharts';
 
 interface Props {
@@ -34,18 +34,22 @@ interface Props {
   onTraceEvidence?: (evidenceIdOrEntity: string) => void;
 }
 
-export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain, onTraceEvidence }) => {
+export const CertificateHistory: React.FC<Props> = ({
+  certificates = [],
+  domain,
+  onTraceEvidence,
+}) => {
   const [filterStatus, setFilterStatus] = React.useState<'all' | 'active' | 'expired'>('all');
   const [searchTerm, setSearchTerm] = React.useState('');
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
-  const filteredCerts = certificates.filter(cert => {
+  const filteredCerts = certificates.filter((cert) => {
     const matchesStatus = filterStatus === 'all' || cert.status === filterStatus;
-    const matchesSearch = 
+    const matchesSearch =
       cert.issuer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cert.commonName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (cert.serialNumber && cert.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      cert.sans.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
+      cert.sans.some((s) => s.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesStatus && matchesSearch;
   });
 
@@ -57,19 +61,22 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain,
 
   const issuerStats = React.useMemo(() => {
     const map = new Map<string, number>();
-    certificates.forEach(c => {
+    certificates.forEach((c) => {
       let shortIssuer = c.issuer.split(',')[0].replace(/^CN=/i, '').trim();
       if (shortIssuer.length > 22) shortIssuer = shortIssuer.substring(0, 20) + '...';
       map.set(shortIssuer, (map.get(shortIssuer) || 0) + 1);
     });
-    return Array.from(map.entries()).map(([issuer, count]) => ({
-      issuer,
-      count
-    })).sort((a, b) => b.count - a.count).slice(0, 6);
+    return Array.from(map.entries())
+      .map(([issuer, count]) => ({
+        issuer,
+        count,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6);
   }, [certificates]);
 
-  const activeCount = certificates.filter(c => c.status === 'active').length;
-  const expiredCount = certificates.filter(c => c.status === 'expired').length;
+  const activeCount = certificates.filter((c) => c.status === 'active').length;
+  const expiredCount = certificates.filter((c) => c.status === 'expired').length;
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 backdrop-blur-xl">
@@ -81,7 +88,8 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain,
             SSL/TLS Certificate History & Transparency Ledger
           </h3>
           <p className="text-xs text-slate-400 font-mono">
-            Cryptographic trust provenance, Certificate Authority issuance history, and SAN registry logs.
+            Cryptographic trust provenance, Certificate Authority issuance history, and SAN registry
+            logs.
           </p>
         </div>
 
@@ -111,19 +119,30 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain,
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="space-y-3 font-mono text-xs flex flex-col justify-between">
           <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-1.5">
-            <span className="text-[10px] text-slate-500 uppercase font-bold">Total Issuances Observed</span>
-            <div className="text-2xl font-extrabold text-slate-100">{certificates.length} Certificates</div>
+            <span className="text-[10px] text-slate-500 uppercase font-bold">
+              Total Issuances Observed
+            </span>
+            <div className="text-2xl font-extrabold text-slate-100">
+              {certificates.length} Certificates
+            </div>
             <span className="text-[11px] text-cyan-400">Indexed via Public CT Logs</span>
           </div>
 
           <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-1.5">
-            <span className="text-[10px] text-slate-500 uppercase font-bold">Active Cryptographic Validity</span>
+            <span className="text-[10px] text-slate-500 uppercase font-bold">
+              Active Cryptographic Validity
+            </span>
             <div className="flex items-center justify-between">
               <span className="text-emerald-400 font-bold">{activeCount} Active</span>
               <span className="text-slate-500 font-bold">{expiredCount} Expired</span>
             </div>
             <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden flex">
-              <div className="bg-emerald-500 h-full" style={{ width: `${certificates.length ? (activeCount / certificates.length) * 100 : 50}%` }} />
+              <div
+                className="bg-emerald-500 h-full"
+                style={{
+                  width: `${certificates.length ? (activeCount / certificates.length) * 100 : 50}%`,
+                }}
+              />
               <div className="bg-slate-700 h-full flex-1" />
             </div>
           </div>
@@ -160,7 +179,9 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain,
                       return (
                         <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl font-mono text-xs text-slate-200 shadow-xl">
                           <div className="text-cyan-400 font-bold">{data.issuer}</div>
-                          <div className="text-slate-300">Total Certs: <span className="text-white font-bold">{data.count}</span></div>
+                          <div className="text-slate-300">
+                            Total Certs: <span className="text-white font-bold">{data.count}</span>
+                          </div>
                         </div>
                       );
                     }
@@ -193,7 +214,7 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain,
 
         <div className="flex items-center gap-1.5 text-xs font-mono">
           <span className="text-slate-500 text-[11px] uppercase font-bold mr-1">Status:</span>
-          {(['all', 'active', 'expired'] as const).map(status => (
+          {(['all', 'active', 'expired'] as const).map((status) => (
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
@@ -237,11 +258,13 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain,
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold flex items-center gap-1 border ${
-                    cert.status === 'active'
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                      : 'bg-slate-800 text-slate-400 border-slate-700'
-                  }`}>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold flex items-center gap-1 border ${
+                      cert.status === 'active'
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                        : 'bg-slate-800 text-slate-400 border-slate-700'
+                    }`}
+                  >
                     {cert.status === 'active' ? (
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     ) : (
@@ -265,17 +288,25 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain,
               {/* Validity Window */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs font-mono">
                 <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Valid From (Not Before)</span>
+                  <span className="text-[10px] text-slate-500 uppercase block font-bold">
+                    Valid From (Not Before)
+                  </span>
                   <span className="text-slate-200">{cert.notBefore.split('T')[0]}</span>
                 </div>
                 <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">Valid Until (Not After)</span>
+                  <span className="text-[10px] text-slate-500 uppercase block font-bold">
+                    Valid Until (Not After)
+                  </span>
                   <span className="text-slate-200">{cert.notAfter.split('T')[0]}</span>
                 </div>
                 <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-bold">Serial Number</span>
-                    <span className="text-slate-300 truncate block max-w-[140px]">{cert.serialNumber || 'Unavailable'}</span>
+                    <span className="text-[10px] text-slate-500 uppercase block font-bold">
+                      Serial Number
+                    </span>
+                    <span className="text-slate-300 truncate block max-w-[140px]">
+                      {cert.serialNumber || 'Unavailable'}
+                    </span>
                   </div>
                   {cert.serialNumber && (
                     <button
@@ -283,7 +314,11 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain,
                       className="p-1 text-slate-500 hover:text-cyan-400 cursor-pointer"
                       title="Copy serial number"
                     >
-                      {copiedId === `serial-${idx}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      {copiedId === `serial-${idx}` ? (
+                        <Check className="w-3 h-3 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-3 h-3" />
+                      )}
                     </button>
                   )}
                 </div>
@@ -297,7 +332,10 @@ export const CertificateHistory: React.FC<Props> = ({ certificates = [], domain,
                   </span>
                   <div className="flex flex-wrap gap-1.5 font-mono text-[11px]">
                     {cert.sans.slice(0, 10).map((san, sIdx) => (
-                      <span key={sIdx} className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 rounded">
+                      <span
+                        key={sIdx}
+                        className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 rounded"
+                      >
                         {san}
                       </span>
                     ))}

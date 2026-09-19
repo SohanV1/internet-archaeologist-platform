@@ -9,13 +9,15 @@ export function detectDnsDrift(
   const now = new Date().toISOString();
 
   // 1. Nameserver Drift
-  const nsRecords = dnsRecords.filter(r => r.type === 'NS');
+  const nsRecords = dnsRecords.filter((r) => r.type === 'NS');
   if (nsRecords.length > 0) {
     const primaryNs = nsRecords[0].value.toLowerCase();
     let nsProvider = 'Custom / Enterprise Nameservers';
     if (primaryNs.includes('cloudflare')) nsProvider = 'Cloudflare Authoritative DNS';
-    else if (primaryNs.includes('awsdns') || primaryNs.includes('route53')) nsProvider = 'AWS Route 53 DNS';
-    else if (primaryNs.includes('googledomains') || primaryNs.includes('cloud-dns')) nsProvider = 'Google Cloud DNS';
+    else if (primaryNs.includes('awsdns') || primaryNs.includes('route53'))
+      nsProvider = 'AWS Route 53 DNS';
+    else if (primaryNs.includes('googledomains') || primaryNs.includes('cloud-dns'))
+      nsProvider = 'Google Cloud DNS';
     else if (primaryNs.includes('azure-dns')) nsProvider = 'Microsoft Azure DNS';
     else if (primaryNs.includes('ns1.com')) nsProvider = 'NS1 Dynamic Anycast DNS';
     else if (primaryNs.includes('digitalocean')) nsProvider = 'DigitalOcean DNS';
@@ -25,29 +27,29 @@ export function detectDnsDrift(
       timestamp: now,
       category: 'Nameserver Shift',
       recordType: 'NS',
-      newValue: nsRecords.map(r => r.value).join(', '),
+      newValue: nsRecords.map((r) => r.value).join(', '),
       description: `Active DNS zone delegation observed on ${nsProvider} with ${nsRecords.length} authoritative nodes.`,
       evidenceId: `ev-dns-${domain}`,
-      severity: 'medium'
+      severity: 'medium',
     });
   }
 
   // 2. Mail Exchanger (MX) Routing Shifts
-  const mxRecords = dnsRecords.filter(r => r.type === 'MX');
+  const mxRecords = dnsRecords.filter((r) => r.type === 'MX');
   if (mxRecords.length > 0) {
-    const mxHosts = mxRecords.map(m => m.value.toLowerCase());
+    const mxHosts = mxRecords.map((m) => m.value.toLowerCase());
     let mailProvider = 'Self-Hosted / Private MTA';
-    if (mxHosts.some(m => m.includes('google') || m.includes('aspmx'))) {
+    if (mxHosts.some((m) => m.includes('google') || m.includes('aspmx'))) {
       mailProvider = 'Google Workspace (Gmail Enterprise)';
-    } else if (mxHosts.some(m => m.includes('outlook') || m.includes('protection.outlook.com'))) {
+    } else if (mxHosts.some((m) => m.includes('outlook') || m.includes('protection.outlook.com'))) {
       mailProvider = 'Microsoft 365 / Exchange Online';
-    } else if (mxHosts.some(m => m.includes('mimecast'))) {
+    } else if (mxHosts.some((m) => m.includes('mimecast'))) {
       mailProvider = 'Mimecast Secure Email Gateway';
-    } else if (mxHosts.some(m => m.includes('protonmail') || m.includes('proton.me'))) {
+    } else if (mxHosts.some((m) => m.includes('protonmail') || m.includes('proton.me'))) {
       mailProvider = 'ProtonMail Encrypted Gateway';
-    } else if (mxHosts.some(m => m.includes('mailgun'))) {
+    } else if (mxHosts.some((m) => m.includes('mailgun'))) {
       mailProvider = 'Mailgun Transactional Mail';
-    } else if (mxHosts.some(m => m.includes('sendgrid'))) {
+    } else if (mxHosts.some((m) => m.includes('sendgrid'))) {
       mailProvider = 'Twilio SendGrid Routing';
     }
 
@@ -56,16 +58,16 @@ export function detectDnsDrift(
       timestamp: now,
       category: 'Mail Routing Shift',
       recordType: 'MX',
-      newValue: mxRecords.map(r => r.value).join(', '),
+      newValue: mxRecords.map((r) => r.value).join(', '),
       description: `Domain mail routing configured via ${mailProvider} (${mxRecords.length} MX gateway endpoints active).`,
       evidenceId: `ev-dns-${domain}`,
-      severity: 'medium'
+      severity: 'medium',
     });
   }
 
   // 3. Security Policy (SPF / DMARC / DKIM) Adoption
-  const txtRecords = dnsRecords.filter(r => r.type === 'TXT');
-  const spfRecord = txtRecords.find(t => t.value.includes('v=spf1'));
+  const txtRecords = dnsRecords.filter((r) => r.type === 'TXT');
+  const spfRecord = txtRecords.find((t) => t.value.includes('v=spf1'));
   if (spfRecord) {
     events.push({
       id: `drift-spf-${domain}`,
@@ -75,7 +77,7 @@ export function detectDnsDrift(
       newValue: spfRecord.value,
       description: `Enforced Sender Policy Framework (SPF) email validation policy deployed: "${spfRecord.value}"`,
       evidenceId: `ev-dns-${domain}`,
-      severity: 'low'
+      severity: 'low',
     });
   }
 
@@ -90,7 +92,7 @@ export function detectDnsDrift(
       newValue: `${primaryAsn.asn} (${primaryAsn.org})`,
       description: `Target IP endpoints routed through ${primaryAsn.org} located in ${primaryAsn.country} (Anycast/BGP Prefix: ${primaryAsn.asn}).`,
       evidenceId: `ev-asn-routing-${domain}`,
-      severity: 'high'
+      severity: 'high',
     });
   }
 

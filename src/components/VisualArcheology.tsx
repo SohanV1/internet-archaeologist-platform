@@ -2,11 +2,7 @@
 
 import React from 'react';
 import { VisualReconstruction, WebSnapshot } from '@/types/osint';
-import { 
-  Eye, 
-  ExternalLink, 
-  Sliders
-} from 'lucide-react';
+import { Eye, ExternalLink, Sliders } from 'lucide-react';
 
 interface Props {
   reconstructions?: VisualReconstruction[];
@@ -15,7 +11,12 @@ interface Props {
   onTraceEvidence?: (evidenceIdOrEntity: string) => void;
 }
 
-export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapshots, domain, onTraceEvidence }) => {
+export const VisualArcheology: React.FC<Props> = ({
+  reconstructions = [],
+  snapshots,
+  domain,
+  onTraceEvidence,
+}) => {
   const [leftIndex, setLeftIndex] = React.useState<number>(0);
   const [rightIndex, setRightIndex] = React.useState<number>(
     reconstructions.length > 1 ? reconstructions.length - 1 : 0
@@ -30,7 +31,8 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
         <Eye className="w-10 h-10 text-slate-600 mx-auto" />
         <h3 className="text-lg font-bold text-slate-300">Visual Snapshots Not Available</h3>
         <p className="text-xs text-slate-500 max-w-md mx-auto">
-          Need Wayback Machine historical captures to reconstruct visual wireframes and UI transformations.
+          Need Wayback Machine historical captures to reconstruct visual wireframes and UI
+          transformations.
         </p>
       </div>
     );
@@ -61,28 +63,44 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
     const isFlat = item.layoutStyle === 'flat-responsive';
 
     return (
-      <div 
+      <div
         className={`w-full h-full p-4 sm:p-6 overflow-hidden flex flex-col justify-between select-none ${
-          isEarly 
-            ? 'bg-[#ffffff] text-[#000000] font-serif' 
-            : isWeb2 
-            ? 'bg-[#f4f6f9] text-[#2c3e50] font-sans' 
-            : isFlat 
-            ? 'bg-[#ffffff] text-[#1e293b] font-sans' 
-            : 'bg-[#090d16] text-[#f1f5f9] font-mono'
+          isEarly
+            ? 'bg-[#ffffff] text-[#000000] font-serif'
+            : isWeb2
+              ? 'bg-[#f4f6f9] text-[#2c3e50] font-sans'
+              : isFlat
+                ? 'bg-[#ffffff] text-[#1e293b] font-sans'
+                : 'bg-[#090d16] text-[#f1f5f9] font-mono'
         }`}
       >
         {/* Header bar */}
-        <div className={`pb-3 border-b ${
-          isEarly ? 'border-[#000000] space-y-1' : isWeb2 ? 'border-[#dcdde1] space-y-2' : isFlat ? 'border-slate-200 space-y-2' : 'border-slate-800 space-y-2'
-        }`}>
+        <div
+          className={`pb-3 border-b ${
+            isEarly
+              ? 'border-[#000000] space-y-1'
+              : isWeb2
+                ? 'border-[#dcdde1] space-y-2'
+                : isFlat
+                  ? 'border-slate-200 space-y-2'
+                  : 'border-slate-800 space-y-2'
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <h1 className={`font-bold truncate ${isEarly ? 'text-lg text-[#000080]' : isWeb2 ? 'text-xl text-[#2980b9]' : 'text-xl text-amber-400'}`}>
+            <h1
+              className={`font-bold truncate ${isEarly ? 'text-lg text-[#000080]' : isWeb2 ? 'text-xl text-[#2980b9]' : 'text-xl text-amber-400'}`}
+            >
               {domain}
             </h1>
-            <span className={`text-[10px] px-2 py-0.5 rounded ${
-              isEarly ? 'bg-[#c0c0c0] text-[#000000] border border-[#808080]' : isWeb2 ? 'bg-[#3498db] text-white' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-            }`}>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded ${
+                isEarly
+                  ? 'bg-[#c0c0c0] text-[#000000] border border-[#808080]'
+                  : isWeb2
+                    ? 'bg-[#3498db] text-white'
+                    : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+              }`}
+            >
               {item.year} Capture
             </span>
           </div>
@@ -92,16 +110,20 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
         {/* Layout wireframe body */}
         <div className="flex-1 py-4 grid grid-cols-3 gap-3">
           {/* Sidebar / Left Column */}
-          <div className={`p-2.5 rounded ${
-            isEarly 
-              ? 'bg-[#e0e0e0] border border-[#000000] space-y-1.5' 
-              : isWeb2 
-              ? 'bg-[#ffffff] border border-[#dcdde1] shadow-sm space-y-2' 
-              : isFlat 
-              ? 'bg-slate-50 border border-slate-200 space-y-2' 
-              : 'bg-slate-900/90 border border-slate-800 space-y-2'
-          }`}>
-            <span className="text-[10px] uppercase font-bold tracking-wider opacity-60 block">Navigation</span>
+          <div
+            className={`p-2.5 rounded ${
+              isEarly
+                ? 'bg-[#e0e0e0] border border-[#000000] space-y-1.5'
+                : isWeb2
+                  ? 'bg-[#ffffff] border border-[#dcdde1] shadow-sm space-y-2'
+                  : isFlat
+                    ? 'bg-slate-50 border border-slate-200 space-y-2'
+                    : 'bg-slate-900/90 border border-slate-800 space-y-2'
+            }`}
+          >
+            <span className="text-[10px] uppercase font-bold tracking-wider opacity-60 block">
+              Navigation
+            </span>
             <div className="space-y-1 text-[11px]">
               <div className="h-2 bg-current opacity-20 rounded w-3/4" />
               <div className="h-2 bg-current opacity-20 rounded w-1/2" />
@@ -110,15 +132,17 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
           </div>
 
           {/* Main content hero */}
-          <div className={`col-span-2 p-3 rounded flex flex-col justify-between ${
-            isEarly 
-              ? 'bg-[#ffffff] border border-dashed border-[#808080] space-y-2' 
-              : isWeb2 
-              ? 'bg-gradient-to-b from-white to-slate-100 border border-slate-300 shadow-md space-y-2' 
-              : isFlat 
-              ? 'bg-white border border-slate-200 shadow-sm space-y-2' 
-              : 'bg-slate-900/60 border border-slate-800 space-y-2'
-          }`}>
+          <div
+            className={`col-span-2 p-3 rounded flex flex-col justify-between ${
+              isEarly
+                ? 'bg-[#ffffff] border border-dashed border-[#808080] space-y-2'
+                : isWeb2
+                  ? 'bg-gradient-to-b from-white to-slate-100 border border-slate-300 shadow-md space-y-2'
+                  : isFlat
+                    ? 'bg-white border border-slate-200 shadow-sm space-y-2'
+                    : 'bg-slate-900/60 border border-slate-800 space-y-2'
+            }`}
+          >
             <div className="space-y-1.5">
               <div className="h-3.5 bg-current opacity-30 rounded w-4/5" />
               <div className="h-2 bg-current opacity-20 rounded w-full" />
@@ -128,13 +152,16 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
             {/* Simulated UI indicators */}
             <div className="flex flex-wrap gap-1.5 pt-2">
               {item.keyElements.slice(0, 3).map((elem, eIdx) => (
-                <span key={eIdx} className={`text-[9px] px-1.5 py-0.5 rounded border ${
-                  isEarly 
-                    ? 'bg-[#ffffcc] text-[#000000] border-[#cccc99]' 
-                    : isWeb2 
-                    ? 'bg-[#ebf5fb] text-[#2980b9] border-[#aed6f1]' 
-                    : 'bg-slate-800 text-slate-300 border-slate-700'
-                }`}>
+                <span
+                  key={eIdx}
+                  className={`text-[9px] px-1.5 py-0.5 rounded border ${
+                    isEarly
+                      ? 'bg-[#ffffcc] text-[#000000] border-[#cccc99]'
+                      : isWeb2
+                        ? 'bg-[#ebf5fb] text-[#2980b9] border-[#aed6f1]'
+                        : 'bg-slate-800 text-slate-300 border-slate-700'
+                  }`}
+                >
                   {elem}
                 </span>
               ))}
@@ -143,9 +170,11 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
         </div>
 
         {/* Footer info bar */}
-        <div className={`pt-2 border-t flex items-center justify-between text-[10px] ${
-          isEarly ? 'border-[#000000]' : isWeb2 ? 'border-[#dcdde1]' : 'border-slate-800'
-        }`}>
+        <div
+          className={`pt-2 border-t flex items-center justify-between text-[10px] ${
+            isEarly ? 'border-[#000000]' : isWeb2 ? 'border-[#dcdde1]' : 'border-slate-800'
+          }`}
+        >
           <span className="truncate opacity-75">
             Stack: {item.detectedTechNames.slice(0, 2).join(', ') || 'Static HTML'}
           </span>
@@ -210,7 +239,8 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
           </div>
 
           <span className="text-xs text-slate-300 font-mono bg-slate-950 px-3.5 py-1.5 rounded-full border border-slate-800">
-            Comparing <strong className="text-amber-300">{leftItem.year}</strong> vs <strong className="text-emerald-300">{rightItem.year}</strong>
+            Comparing <strong className="text-amber-300">{leftItem.year}</strong> vs{' '}
+            <strong className="text-emerald-300">{rightItem.year}</strong>
           </span>
         </div>
 
@@ -262,7 +292,7 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
         </div>
 
         {/* Split-Screen Slider Comparison Viewport */}
-        <div 
+        <div
           ref={containerRef}
           onMouseDown={() => setIsDragging(true)}
           onMouseUp={() => setIsDragging(false)}
@@ -272,12 +302,10 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
           className="relative w-full h-[400px] sm:h-[480px] rounded-2xl overflow-hidden border border-slate-800 shadow-2xl cursor-col-resize select-none bg-slate-950"
         >
           {/* Under layer (Right / Target Era) */}
-          <div className="absolute inset-0 w-full h-full">
-            {renderBrowserFrame(rightItem)}
-          </div>
+          <div className="absolute inset-0 w-full h-full">{renderBrowserFrame(rightItem)}</div>
 
           {/* Top clipped layer (Left / Base Era) */}
-          <div 
+          <div
             className="absolute inset-0 h-full overflow-hidden border-r-2 border-amber-400 shadow-2xl"
             style={{ width: `${sliderPosition}%` }}
           >
@@ -287,7 +315,7 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
           </div>
 
           {/* Slider Drag Handle Divider */}
-          <div 
+          <div
             className="absolute top-0 bottom-0 w-1 bg-amber-400 shadow-lg pointer-events-none"
             style={{ left: `${sliderPosition}%` }}
           >
@@ -307,7 +335,10 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
             <p className="text-slate-300 font-sans text-xs">{leftItem.title}</p>
             <div className="flex flex-wrap gap-1 pt-1">
               {leftItem.detectedTechNames.map((t, idx) => (
-                <span key={idx} className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 rounded text-[10px]">
+                <span
+                  key={idx}
+                  className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 rounded text-[10px]"
+                >
                   {t}
                 </span>
               ))}
@@ -322,7 +353,10 @@ export const VisualArcheology: React.FC<Props> = ({ reconstructions = [], snapsh
             <p className="text-slate-300 font-sans text-xs">{rightItem.title}</p>
             <div className="flex flex-wrap gap-1 pt-1">
               {rightItem.detectedTechNames.map((t, idx) => (
-                <span key={idx} className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 rounded text-[10px]">
+                <span
+                  key={idx}
+                  className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 rounded text-[10px]"
+                >
                   {t}
                 </span>
               ))}

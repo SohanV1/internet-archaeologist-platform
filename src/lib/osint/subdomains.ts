@@ -1,14 +1,18 @@
-﻿import { SubdomainRecord } from '@/types/osint';
+import { SubdomainRecord } from '@/types/osint';
+import { fetchWithRetry } from './fetchWithRetry';
 
 export async function discoverSubdomains(domain: string): Promise<SubdomainRecord[]> {
   const discoveredMap = new Map<string, SubdomainRecord>();
 
   // 1. Query crt.sh Certificate Transparency Logs (Passive, public SSL/TLS cert registry)
   try {
-    const crtRes = await fetch(`https://crt.sh/?q=%.${encodeURIComponent(domain)}&output=json`, {
-      signal: AbortSignal.timeout(4000),
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
-    });
+    const crtRes = await fetchWithRetry(
+      `https://crt.sh/?q=%.${encodeURIComponent(domain)}&output=json`,
+      {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; InternetArchaeologist/1.5)' },
+      },
+      { retries: 2, timeoutMs: 4500 }
+    );
 
     if (crtRes.ok) {
       const crtData = await crtRes.json();
@@ -26,8 +30,10 @@ export async function discoverSubdomains(domain: string): Promise<SubdomainRecor
                     subdomain: sub,
                     fullDomain: cleaned,
                     source: 'Certificate Transparency',
-                    firstSeen: item.entry_timestamp ? item.entry_timestamp.split('T')[0] : undefined,
-                    status: 'active'
+                    firstSeen: item.entry_timestamp
+                      ? item.entry_timestamp.split('T')[0]
+                      : undefined,
+                    status: 'active',
                   });
                 }
               }
@@ -42,9 +48,10 @@ export async function discoverSubdomains(domain: string): Promise<SubdomainRecor
 
   // 2. Query Wayback Machine CDX API for historical subdomains
   try {
-    const cdxRes = await fetch(
+    const cdxRes = await fetchWithRetry(
       `https://web.archive.org/cdx/search/cdx?url=*.${encodeURIComponent(domain)}/*&output=json&fl=original&collapse=urlkey&limit=30`,
-      { signal: AbortSignal.timeout(4000) }
+      {},
+      { retries: 2, timeoutMs: 4500 }
     );
 
     if (cdxRes.ok) {
@@ -61,7 +68,7 @@ export async function discoverSubdomains(domain: string): Promise<SubdomainRecor
                   subdomain: sub,
                   fullDomain: hostname,
                   source: 'Wayback Archive',
-                  status: 'archived'
+                  status: 'archived',
                 });
               }
             }
@@ -85,8 +92,8 @@ export async function discoverSubdomains(domain: string): Promise<SubdomainRecor
         subdomain: sub,
         fullDomain: full,
         source: 'Certificate Transparency',
-        firstSeen: `202${idx % 4 + 1}-0${(idx % 8) + 1}-15`,
-        status: idx % 2 === 0 ? 'active' : 'detected'
+        firstSeen: `202${(idx % 4) + 1}-0${(idx % 8) + 1}-15`,
+        status: idx % 2 === 0 ? 'active' : 'detected',
       });
     });
   }

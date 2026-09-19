@@ -1,30 +1,35 @@
 'use client';
 
 import React from 'react';
-import { TechEvolutionAnalysis, TechEvolutionEra, TechEvolutionItem, TechLifecycleStatus } from '@/types/osint';
-import { 
-  Cpu, 
-  Sparkles, 
-  Layers, 
-  ArrowRight, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Search, 
-  ShieldCheck, 
-  Server, 
+import {
+  TechEvolutionAnalysis,
+  TechEvolutionEra,
+  TechEvolutionItem,
+  TechLifecycleStatus,
+} from '@/types/osint';
+import {
+  Cpu,
+  Sparkles,
+  Layers,
+  ArrowRight,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Search,
+  ShieldCheck,
+  Server,
   Code,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Legend, 
-  CartesianGrid 
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
 } from 'recharts';
 
 interface Props {
@@ -33,9 +38,15 @@ interface Props {
   onTraceEvidence?: (evidenceIdOrEntity: string) => void;
 }
 
-export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, onTraceEvidence }) => {
+export const TechEvolutionMatrix: React.FC<Props> = ({
+  techEvolution,
+  domain,
+  onTraceEvidence,
+}) => {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedFilter, setSelectedFilter] = React.useState<'all' | 'introduced' | 'retained' | 'deprecated'>('all');
+  const [selectedFilter, setSelectedFilter] = React.useState<
+    'all' | 'introduced' | 'retained' | 'deprecated'
+  >('all');
 
   if (!techEvolution || techEvolution.eras.length === 0) {
     return (
@@ -43,17 +54,26 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
         <Cpu className="w-10 h-10 text-slate-600 mx-auto" />
         <h3 className="text-lg font-bold text-slate-300">Tech Evolution History Not Available</h3>
         <p className="text-xs text-slate-500 max-w-md mx-auto">
-          Historical snapshot captures are needed to synthesize the chronological stack migration trail.
+          Historical snapshot captures are needed to synthesize the chronological stack migration
+          trail.
         </p>
       </div>
     );
   }
 
-  const { eras, lifecycleItems, stackShiftNarrative, frontendEvolutionTrail, infrastructureEvolutionTrail, totalTechsDetectedHistorically } = techEvolution;
+  const {
+    eras,
+    lifecycleItems,
+    stackShiftNarrative,
+    frontendEvolutionTrail,
+    infrastructureEvolutionTrail,
+    totalTechsDetectedHistorically,
+  } = techEvolution;
 
-  const filteredItems = lifecycleItems.filter(item => {
-    const matchesSearch = item.technology.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.technology.category.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredItems = lifecycleItems.filter((item) => {
+    const matchesSearch =
+      item.technology.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.technology.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = selectedFilter === 'all' || item.lifecycle === selectedFilter;
     return matchesSearch && matchesFilter;
   });
@@ -95,7 +115,9 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
                 <Cpu className="w-3 h-3 text-purple-400" />
                 Stack Drift & Lifecycle Matrix
               </span>
-              <span className="text-xs text-slate-400 font-mono">Chronological Stack Archeology</span>
+              <span className="text-xs text-slate-400 font-mono">
+                Chronological Stack Archeology
+              </span>
             </div>
             <h2 className="text-2xl font-extrabold text-slate-100 font-mono tracking-tight pt-1">
               How <span className="text-purple-300">{domain}</span> Evolved Its Tech Stack Over Time
@@ -104,15 +126,14 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
 
           <span className="px-3.5 py-1.5 bg-slate-950 border border-slate-800 rounded-full text-xs font-mono text-slate-300 flex items-center gap-2">
             <Layers className="w-3.5 h-3.5 text-purple-400" />
-            <strong className="text-slate-100">{totalTechsDetectedHistorically}</strong> Historic Signatures Identified
+            <strong className="text-slate-100">{totalTechsDetectedHistorically}</strong> Historic
+            Signatures Identified
           </span>
         </div>
 
         {/* Narrative & Evolution Trails */}
         <div className="bg-slate-950/80 border border-slate-800/90 rounded-xl p-5 space-y-4 shadow-inner">
-          <p className="text-sm text-slate-300 font-sans leading-relaxed">
-            {stackShiftNarrative}
-          </p>
+          <p className="text-sm text-slate-300 font-sans leading-relaxed">{stackShiftNarrative}</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-800/80 font-mono text-xs">
             {/* Frontend Trail */}
@@ -167,7 +188,8 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
               Technology Turnover Dynamics by Era
             </h3>
             <p className="text-xs text-slate-400 font-mono">
-              Quantitative distribution of newly adopted, retained active, and sunsetted technologies.
+              Quantitative distribution of newly adopted, retained active, and sunsetted
+              technologies.
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs font-mono">
@@ -186,7 +208,7 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
         <div className="h-56 w-full pt-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={eras.map(era => ({
+              data={eras.map((era) => ({
                 name: era.yearRange,
                 adopted: era.introduced?.length || 0,
                 retained: era.activeStack?.length || 0,
@@ -211,10 +233,18 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
                   if (active && payload && payload.length) {
                     return (
                       <div className="bg-slate-900 border border-slate-700 p-3 rounded-xl shadow-2xl font-mono text-xs text-slate-200 space-y-1">
-                        <div className="text-purple-300 font-bold border-b border-slate-800 pb-1">{label} Era</div>
-                        <div className="text-emerald-400">Adopted: {payload.find(p => p.dataKey === 'adopted')?.value} tech</div>
-                        <div className="text-blue-400">Retained: {payload.find(p => p.dataKey === 'retained')?.value} tech</div>
-                        <div className="text-red-400">Sunsetted: {payload.find(p => p.dataKey === 'deprecated')?.value} tech</div>
+                        <div className="text-purple-300 font-bold border-b border-slate-800 pb-1">
+                          {label} Era
+                        </div>
+                        <div className="text-emerald-400">
+                          Adopted: {payload.find((p) => p.dataKey === 'adopted')?.value} tech
+                        </div>
+                        <div className="text-blue-400">
+                          Retained: {payload.find((p) => p.dataKey === 'retained')?.value} tech
+                        </div>
+                        <div className="text-red-400">
+                          Sunsetted: {payload.find((p) => p.dataKey === 'deprecated')?.value} tech
+                        </div>
                       </div>
                     );
                   }
@@ -265,12 +295,20 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
 
                 <div className="space-y-2 text-xs font-mono">
                   <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 space-y-1">
-                    <span className="text-[10px] text-slate-500 uppercase block font-bold">Primary Frontend</span>
-                    <span className="text-purple-300 font-bold block truncate">{era.dominantFrontend}</span>
+                    <span className="text-[10px] text-slate-500 uppercase block font-bold">
+                      Primary Frontend
+                    </span>
+                    <span className="text-purple-300 font-bold block truncate">
+                      {era.dominantFrontend}
+                    </span>
                   </div>
                   <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 space-y-1">
-                    <span className="text-[10px] text-slate-500 uppercase block font-bold">Hosting / CDN</span>
-                    <span className="text-blue-300 font-bold block truncate">{era.dominantInfrastructure}</span>
+                    <span className="text-[10px] text-slate-500 uppercase block font-bold">
+                      Hosting / CDN
+                    </span>
+                    <span className="text-blue-300 font-bold block truncate">
+                      {era.dominantInfrastructure}
+                    </span>
                   </div>
                 </div>
 
@@ -278,11 +316,15 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
                 {era.introduced.length > 0 && (
                   <div className="space-y-1 pt-1">
                     <span className="text-[10px] font-mono text-emerald-400 uppercase font-bold flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" /> Adopted in this Era ({era.introduced.length}):
+                      <Sparkles className="w-3 h-3" /> Adopted in this Era ({era.introduced.length}
+                      ):
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {era.introduced.map((t, tIdx) => (
-                        <span key={tIdx} className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[10px] rounded font-mono">
+                        <span
+                          key={tIdx}
+                          className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[10px] rounded font-mono"
+                        >
                           +{t.name}
                         </span>
                       ))}
@@ -298,7 +340,10 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {era.deprecated.map((t, tIdx) => (
-                        <span key={tIdx} className="px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-300 text-[10px] rounded font-mono line-through">
+                        <span
+                          key={tIdx}
+                          className="px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-300 text-[10px] rounded font-mono line-through"
+                        >
                           {t.name}
                         </span>
                       ))}
@@ -332,7 +377,7 @@ export const TechEvolutionMatrix: React.FC<Props> = ({ techEvolution, domain, on
 
           <div className="flex items-center gap-1.5 text-xs font-mono">
             <span className="text-slate-500 text-[11px] uppercase font-bold mr-1">Status:</span>
-            {(['all', 'introduced', 'retained', 'deprecated'] as const).map(filter => (
+            {(['all', 'introduced', 'retained', 'deprecated'] as const).map((filter) => (
               <button
                 key={filter}
                 onClick={() => setSelectedFilter(filter)}

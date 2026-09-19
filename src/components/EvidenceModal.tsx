@@ -2,18 +2,18 @@
 
 import React from 'react';
 import { EvidenceItem } from '@/types/osint';
-import { 
-  Shield, 
-  X, 
-  Copy, 
-  Check, 
-  ExternalLink, 
-  Fingerprint, 
-  Terminal, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle, 
-  FileText
+import {
+  Shield,
+  X,
+  Copy,
+  Check,
+  ExternalLink,
+  Fingerprint,
+  Terminal,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
 } from 'lucide-react';
 
 interface Props {
@@ -97,7 +97,7 @@ export const EvidenceModal: React.FC<Props> = ({ evidence, isOpen, onClose }) =>
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div 
+      <div
         className="bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
@@ -135,9 +135,7 @@ export const EvidenceModal: React.FC<Props> = ({ evidence, isOpen, onClose }) =>
               </span>
               {getNatureBadge(evidence.observationNature || 'OBSERVED')}
             </div>
-            <div>
-              {getConfidenceBadge(evidence.confidence, evidence.confidenceScore)}
-            </div>
+            <div>{getConfidenceBadge(evidence.confidence, evidence.confidenceScore)}</div>
           </div>
 
           {/* Finding / What was observed */}
@@ -147,7 +145,9 @@ export const EvidenceModal: React.FC<Props> = ({ evidence, isOpen, onClose }) =>
               Finding / Observed State
             </h4>
             <p className="text-sm font-semibold text-slate-100 font-sans leading-relaxed">
-              {evidence.relatedObservation || evidence.notes || 'No specific observation text recorded.'}
+              {evidence.relatedObservation ||
+                evidence.notes ||
+                'No specific observation text recorded.'}
             </p>
             {evidence.relatedEntity && (
               <div className="pt-2 flex items-center gap-2 text-xs">
@@ -178,7 +178,9 @@ export const EvidenceModal: React.FC<Props> = ({ evidence, isOpen, onClose }) =>
                   <span>Open Source</span>
                 </a>
               ) : (
-                <span className="text-[11px] text-slate-500 italic block">Source URL: Explicitly unavailable</span>
+                <span className="text-[11px] text-slate-500 italic block">
+                  Source URL: Explicitly unavailable
+                </span>
               )}
             </div>
 
@@ -214,7 +216,11 @@ export const EvidenceModal: React.FC<Props> = ({ evidence, isOpen, onClose }) =>
                     className="text-slate-400 hover:text-emerald-300 p-0.5 cursor-pointer"
                     title="Copy hash"
                   >
-                    {copiedKey === 'hash' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    {copiedKey === 'hash' ? (
+                      <Check className="w-3 h-3 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
                   </button>
                 )}
               </div>
@@ -227,7 +233,9 @@ export const EvidenceModal: React.FC<Props> = ({ evidence, isOpen, onClose }) =>
           {/* Notes if present */}
           {evidence.notes && (
             <div className="p-3.5 bg-slate-950/60 rounded-xl border border-slate-800/80 text-xs text-slate-300 italic">
-              <span className="font-bold text-slate-400 font-sans not-italic block mb-1">Analyst Notes:</span>
+              <span className="font-bold text-slate-400 font-sans not-italic block mb-1">
+                Analyst Notes:
+              </span>
               {evidence.notes}
             </div>
           )}
@@ -237,8 +245,12 @@ export const EvidenceModal: React.FC<Props> = ({ evidence, isOpen, onClose }) =>
             <div className="flex items-center justify-between bg-slate-950 px-4 py-2 rounded-t-xl border border-slate-800">
               <div className="flex items-center space-x-2">
                 <Terminal className="w-4 h-4 text-amber-400" />
-                <span className="font-bold text-slate-300 text-xs uppercase tracking-wider">Raw Evidence Payload</span>
-                <span className="text-[10px] text-slate-500">({evidence.rawData.length} bytes)</span>
+                <span className="font-bold text-slate-300 text-xs uppercase tracking-wider">
+                  Raw Evidence Payload
+                </span>
+                <span className="text-[10px] text-slate-500">
+                  ({evidence.rawData.length} bytes)
+                </span>
               </div>
               <div className="flex items-center space-x-2">
                 <button

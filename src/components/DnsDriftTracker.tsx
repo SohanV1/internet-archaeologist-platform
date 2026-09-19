@@ -2,27 +2,19 @@
 
 import React from 'react';
 import { DnsDriftEvent, DnsRecord } from '@/types/osint';
-import { 
-  Network, 
-  ShieldCheck, 
-  Server, 
-  Mail, 
-  ArrowRight, 
-  Search, 
-  Copy, 
-  Check, 
+import {
+  Network,
+  ShieldCheck,
+  Server,
+  Mail,
+  ArrowRight,
+  Search,
+  Copy,
+  Check,
   Globe,
-  BarChart2
+  BarChart2,
 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  CartesianGrid 
-} from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 interface Props {
   dnsDrifts?: DnsDriftEvent[];
@@ -31,18 +23,30 @@ interface Props {
   onTraceEvidence?: (evidenceIdOrEntity: string) => void;
 }
 
-export const DnsDriftTracker: React.FC<Props> = ({ dnsDrifts = [], dnsRecords, domain, onTraceEvidence }) => {
+export const DnsDriftTracker: React.FC<Props> = ({
+  dnsDrifts = [],
+  dnsRecords,
+  domain,
+  onTraceEvidence,
+}) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filterCategory, setFilterCategory] = React.useState<string>('all');
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
-  const categories = ['all', 'Nameserver Shift', 'Mail Routing Shift', 'Security Policy Adoption', 'IP Pool Migration'];
+  const categories = [
+    'all',
+    'Nameserver Shift',
+    'Mail Routing Shift',
+    'Security Policy Adoption',
+    'IP Pool Migration',
+  ];
 
-  const filteredDrifts = dnsDrifts.filter(item => {
+  const filteredDrifts = dnsDrifts.filter((item) => {
     const matchesCategory = filterCategory === 'all' || item.category === filterCategory;
-    const matchesSearch = item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.recordType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.newValue.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.recordType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.newValue.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -94,7 +98,8 @@ export const DnsDriftTracker: React.FC<Props> = ({ dnsDrifts = [], dnsRecords, d
               <span className="text-xs text-slate-400 font-mono">Infrastructure Tracking</span>
             </div>
             <h2 className="text-2xl font-extrabold text-slate-100 font-mono tracking-tight pt-1">
-              Historical DNS Infrastructure & Mail Shifts for <span className="text-cyan-300">{domain}</span>
+              Historical DNS Infrastructure & Mail Shifts for{' '}
+              <span className="text-cyan-300">{domain}</span>
             </h2>
           </div>
 
@@ -107,32 +112,40 @@ export const DnsDriftTracker: React.FC<Props> = ({ dnsDrifts = [], dnsRecords, d
         {/* Quick Infrastructure Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
           <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-1.5">
-            <span className="text-[10px] uppercase text-slate-500 font-bold block">Authoritative NS Nodes</span>
+            <span className="text-[10px] uppercase text-slate-500 font-bold block">
+              Authoritative NS Nodes
+            </span>
             <span className="text-base font-extrabold text-blue-300 block">
-              {dnsRecords.filter(r => r.type === 'NS').length} Active Nameservers
+              {dnsRecords.filter((r) => r.type === 'NS').length} Active Nameservers
             </span>
             <span className="text-[11px] text-slate-400 truncate block">
-              {dnsRecords.find(r => r.type === 'NS')?.value || 'Standard DNS'}
+              {dnsRecords.find((r) => r.type === 'NS')?.value || 'Standard DNS'}
             </span>
           </div>
 
           <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-1.5">
-            <span className="text-[10px] uppercase text-slate-500 font-bold block">Mail Exchangers (MX)</span>
+            <span className="text-[10px] uppercase text-slate-500 font-bold block">
+              Mail Exchangers (MX)
+            </span>
             <span className="text-base font-extrabold text-amber-300 block">
-              {dnsRecords.filter(r => r.type === 'MX').length} Gateway Hosts
+              {dnsRecords.filter((r) => r.type === 'MX').length} Gateway Hosts
             </span>
             <span className="text-[11px] text-slate-400 truncate block">
-              {dnsRecords.find(r => r.type === 'MX')?.value || 'No MX configured'}
+              {dnsRecords.find((r) => r.type === 'MX')?.value || 'No MX configured'}
             </span>
           </div>
 
           <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-1.5">
-            <span className="text-[10px] uppercase text-slate-500 font-bold block">Security TXT Directives</span>
+            <span className="text-[10px] uppercase text-slate-500 font-bold block">
+              Security TXT Directives
+            </span>
             <span className="text-base font-extrabold text-emerald-300 block">
-              {dnsRecords.filter(r => r.type === 'TXT').length} Policies Active
+              {dnsRecords.filter((r) => r.type === 'TXT').length} Policies Active
             </span>
             <span className="text-[11px] text-slate-400 truncate block">
-              {dnsRecords.some(r => r.type === 'TXT' && r.value.includes('spf1')) ? 'SPF Enforced ✓' : 'Standard TXT'}
+              {dnsRecords.some((r) => r.type === 'TXT' && r.value.includes('spf1'))
+                ? 'SPF Enforced ✓'
+                : 'Standard TXT'}
             </span>
           </div>
         </div>
@@ -152,11 +165,13 @@ export const DnsDriftTracker: React.FC<Props> = ({ dnsDrifts = [], dnsRecords, d
           <div className="h-44 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={['A', 'AAAA', 'NS', 'MX', 'TXT', 'CNAME', 'SOA'].map(type => ({
-                  type,
-                  count: dnsRecords.filter(r => r.type === type).length,
-                  shifts: dnsDrifts.filter(d => d.recordType === type).length
-                })).filter(d => d.count > 0 || d.shifts > 0)}
+                data={['A', 'AAAA', 'NS', 'MX', 'TXT', 'CNAME', 'SOA']
+                  .map((type) => ({
+                    type,
+                    count: dnsRecords.filter((r) => r.type === type).length,
+                    shifts: dnsDrifts.filter((d) => d.recordType === type).length,
+                  }))
+                  .filter((d) => d.count > 0 || d.shifts > 0)}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
@@ -177,8 +192,14 @@ export const DnsDriftTracker: React.FC<Props> = ({ dnsDrifts = [], dnsRecords, d
                       return (
                         <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl shadow-2xl font-mono text-xs text-slate-200 space-y-1">
                           <div className="text-cyan-400 font-bold">{label} Records</div>
-                          <div className="text-slate-300">Active Entries: <span className="font-bold text-white">{payload[0]?.value}</span></div>
-                          <div className="text-amber-400">Historical Shifts: <span className="font-bold">{payload[1]?.value || 0}</span></div>
+                          <div className="text-slate-300">
+                            Active Entries:{' '}
+                            <span className="font-bold text-white">{payload[0]?.value}</span>
+                          </div>
+                          <div className="text-amber-400">
+                            Historical Shifts:{' '}
+                            <span className="font-bold">{payload[1]?.value || 0}</span>
+                          </div>
                         </div>
                       );
                     }
@@ -208,7 +229,7 @@ export const DnsDriftTracker: React.FC<Props> = ({ dnsDrifts = [], dnsRecords, d
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono">
-            {categories.map(cat => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setFilterCategory(cat)}
@@ -257,7 +278,9 @@ export const DnsDriftTracker: React.FC<Props> = ({ dnsDrifts = [], dnsRecords, d
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className={`text-[10px] px-2 py-0.5 rounded uppercase font-mono font-bold border ${getSeverityBadge(event.severity)}`}>
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded uppercase font-mono font-bold border ${getSeverityBadge(event.severity)}`}
+                    >
                       {event.severity} Impact
                     </span>
                     {onTraceEvidence && (
@@ -280,15 +303,23 @@ export const DnsDriftTracker: React.FC<Props> = ({ dnsDrifts = [], dnsRecords, d
                 {/* Target Value Box */}
                 <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 flex items-center justify-between text-xs font-mono">
                   <div className="truncate mr-2">
-                    <span className="text-[10px] text-slate-500 uppercase block font-bold">Observed Configuration Value:</span>
-                    <span className="text-cyan-300 font-semibold truncate block">{event.newValue}</span>
+                    <span className="text-[10px] text-slate-500 uppercase block font-bold">
+                      Observed Configuration Value:
+                    </span>
+                    <span className="text-cyan-300 font-semibold truncate block">
+                      {event.newValue}
+                    </span>
                   </div>
                   <button
                     onClick={() => handleCopy(`drift-${idx}`, event.newValue)}
                     className="p-1.5 text-slate-500 hover:text-cyan-300 cursor-pointer shrink-0"
                     title="Copy configuration value"
                   >
-                    {copiedId === `drift-${idx}` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedId === `drift-${idx}` ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
                   </button>
                 </div>
               </div>

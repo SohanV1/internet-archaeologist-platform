@@ -7,13 +7,19 @@ function getConfidenceLevel(score: number): ConfidenceLevel {
   return 'UNKNOWN';
 }
 
-export function detectTechnologies(headers: Record<string, string>, htmlContent: string = ''): Technology[] {
+export function detectTechnologies(
+  headers: Record<string, string>,
+  htmlContent: string = ''
+): Technology[] {
   const techs: Technology[] = [];
 
-  const lowerHeaders = Object.entries(headers).reduce((acc, [k, v]) => {
-    acc[k.toLowerCase()] = v.toLowerCase();
-    return acc;
-  }, {} as Record<string, string>);
+  const lowerHeaders = Object.entries(headers).reduce(
+    (acc, [k, v]) => {
+      acc[k.toLowerCase()] = v.toLowerCase();
+      return acc;
+    },
+    {} as Record<string, string>
+  );
 
   const lowerHtml = htmlContent.toLowerCase();
 
@@ -29,7 +35,7 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         confidenceLevel: 'HIGH',
         observationNature: 'OBSERVED',
         evidence: `Server header: ${headers['server']}`,
-        evidenceId: 'ev-tech-nginx'
+        evidenceId: 'ev-tech-nginx',
       });
     } else if (serverVal.includes('apache')) {
       techs.push({
@@ -40,7 +46,7 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         confidenceLevel: 'HIGH',
         observationNature: 'OBSERVED',
         evidence: `Server header: ${headers['server']}`,
-        evidenceId: 'ev-tech-apache'
+        evidenceId: 'ev-tech-apache',
       });
     } else if (serverVal.includes('cloudflare')) {
       techs.push({
@@ -51,7 +57,7 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         confidenceLevel: 'HIGH',
         observationNature: 'OBSERVED',
         evidence: `Server header: ${headers['server']}`,
-        evidenceId: 'ev-tech-cloudflare-server'
+        evidenceId: 'ev-tech-cloudflare-server',
       });
     }
   }
@@ -68,7 +74,7 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         confidenceLevel: 'HIGH',
         observationNature: 'OBSERVED',
         evidence: `X-Powered-By: ${headers['x-powered-by']}`,
-        evidenceId: 'ev-tech-nextjs'
+        evidenceId: 'ev-tech-nextjs',
       });
     } else if (poweredBy.includes('express')) {
       techs.push({
@@ -79,7 +85,7 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         confidenceLevel: 'HIGH',
         observationNature: 'OBSERVED',
         evidence: `X-Powered-By: ${headers['x-powered-by']}`,
-        evidenceId: 'ev-tech-express'
+        evidenceId: 'ev-tech-express',
       });
     } else if (poweredBy.includes('php')) {
       techs.push({
@@ -90,7 +96,7 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         confidenceLevel: 'HIGH',
         observationNature: 'OBSERVED',
         evidence: `X-Powered-By: ${headers['x-powered-by']}`,
-        evidenceId: 'ev-tech-php'
+        evidenceId: 'ev-tech-php',
       });
     }
   }
@@ -105,12 +111,16 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
       confidenceLevel: 'HIGH',
       observationNature: 'INFERRED',
       evidence: 'HTML contains /wp-content/ or /wp-includes/ script paths',
-      evidenceId: 'ev-tech-wordpress'
+      evidenceId: 'ev-tech-wordpress',
     });
   }
 
-  if (lowerHtml.includes('react') || lowerHtml.includes('__next') || lowerHtml.includes('_next/static')) {
-    if (!techs.some(t => t.id === 'react')) {
+  if (
+    lowerHtml.includes('react') ||
+    lowerHtml.includes('__next') ||
+    lowerHtml.includes('_next/static')
+  ) {
+    if (!techs.some((t) => t.id === 'react')) {
       techs.push({
         id: 'react',
         name: 'React',
@@ -119,7 +129,7 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
         confidenceLevel: 'HIGH',
         observationNature: 'INFERRED',
         evidence: 'HTML contains React hydration markers and Next.js bundle chunk paths',
-        evidenceId: 'ev-tech-react'
+        evidenceId: 'ev-tech-react',
       });
     }
   }
@@ -133,11 +143,15 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
       confidenceLevel: 'MEDIUM',
       observationNature: 'INFERRED',
       evidence: 'CSS style class naming conventions indicate Tailwind utility framework',
-      evidenceId: 'ev-tech-tailwind'
+      evidenceId: 'ev-tech-tailwind',
     });
   }
 
-  if (lowerHtml.includes('google-analytics') || lowerHtml.includes('gtag') || lowerHtml.includes('ga.js')) {
+  if (
+    lowerHtml.includes('google-analytics') ||
+    lowerHtml.includes('gtag') ||
+    lowerHtml.includes('ga.js')
+  ) {
     techs.push({
       id: 'google-analytics',
       name: 'Google Analytics',
@@ -146,36 +160,35 @@ export function detectTechnologies(headers: Record<string, string>, htmlContent:
       confidenceLevel: 'HIGH',
       observationNature: 'INFERRED',
       evidence: 'Script tag referencing Google Analytics tracking snippet (gtag.js / ga.js)',
-      evidenceId: 'ev-tech-google-analytics'
+      evidenceId: 'ev-tech-google-analytics',
     });
   }
 
   // Add default baseline techs if minimal details available
   if (techs.length === 0) {
     techs.push(
-      { 
-        id: 'hsts', 
-        name: 'HTTP Strict Transport Security (HSTS)', 
-        category: 'Security', 
-        confidence: 100, 
+      {
+        id: 'hsts',
+        name: 'HTTP Strict Transport Security (HSTS)',
+        category: 'Security',
+        confidence: 100,
         confidenceLevel: 'HIGH',
         observationNature: 'OBSERVED',
         evidence: 'Security Header detected',
-        evidenceId: 'ev-tech-hsts'
+        evidenceId: 'ev-tech-hsts',
       },
-      { 
-        id: 'html5', 
-        name: 'HTML5', 
-        category: 'Other', 
-        confidence: 100, 
+      {
+        id: 'html5',
+        name: 'HTML5',
+        category: 'Other',
+        confidence: 100,
         confidenceLevel: 'HIGH',
         observationNature: 'OBSERVED',
         evidence: '<!DOCTYPE html> declared in document preamble',
-        evidenceId: 'ev-tech-html5'
+        evidenceId: 'ev-tech-html5',
       }
     );
   }
 
   return techs;
 }
-
