@@ -55,6 +55,17 @@ export const GlobalSearchBar: React.FC<Props> = ({
     return () => clearTimeout(handler);
   }, [query]);
 
+  // Lock background body scrolling when search dialog is active
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isOpen]);
+
   // Focus input on open
   useEffect(() => {
     if (isOpen) {

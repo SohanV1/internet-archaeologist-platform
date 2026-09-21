@@ -7,7 +7,7 @@
   --surface-secondary: #1a1a1e;
   --border: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.16);
-  --text-muted: #86868b;
+  --text-muted: #98989d;
   --accent: #2997ff;
 }
 
@@ -18,7 +18,7 @@
   --surface-secondary: #ebebed;
   --border: rgba(0, 0, 0, 0.08);
   --border-hover: rgba(0, 0, 0, 0.16);
-  --text-muted: #86868b;
+  --text-muted: #6e6e73;
   --accent: #0071e3;
 }
 
@@ -41,6 +41,15 @@ body {
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
+}
+
+/* Light Mode WCAG AA Contrast Calibrations */
+[data-theme='light'] .text-neutral-400 {
+  color: #6e6e73 !important; /* 4.6:1 contrast ratio against #ffffff */
+}
+
+[data-theme='light'] .text-neutral-500 {
+  color: #52525b !important; /* 5.9:1 contrast ratio against #ffffff */
 }
 
 /* Light Mode Card Overrides */
@@ -80,7 +89,7 @@ body {
 }
 
 [data-theme='light'] .text-slate-500 {
-  color: #86868b !important;
+  color: #52525b !important;
 }
 
 /* Apple-style minimal scrollbar */
@@ -107,3 +116,23 @@ body {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
 }
 
+/* Universal Accessible Focus Ring (WCAG 2.4.7) */
+.apple-focus {
+  outline: none;
+}
+.apple-focus:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--accent);
+}
+
+/* Vestibular & Motion Accessibility Guard */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

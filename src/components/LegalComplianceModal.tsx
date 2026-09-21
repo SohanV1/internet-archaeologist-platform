@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Scale, Lock, EyeOff, X, FileText, CheckCircle2 } from 'lucide-react';
 
 export type ComplianceSection = 'ethics' | 'privacy' | 'terms' | 'provenance';
@@ -18,7 +18,34 @@ export const LegalComplianceModal: React.FC<Props> = ({
 }) => {
   const [activeSection, setActiveSection] = useState<ComplianceSection>(defaultSection);
 
+  useEffect(() => {
+    setActiveSection(defaultSection);
+  }, [defaultSection]);
+
+  // Lock background body scrolling when modal is active
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isOpen]);
+
+  // Keyboard accessibility: Escape to dismiss
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
+
 
   return (
     <div
@@ -51,7 +78,7 @@ export const LegalComplianceModal: React.FC<Props> = ({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="p-1.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="p-1.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer apple-focus"
           >
             <X className="w-4 h-4" />
           </button>
@@ -62,7 +89,7 @@ export const LegalComplianceModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveSection('ethics')}
-            className={`py-3 px-3 text-xs font-medium border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 ${
+            className={`py-3 px-3 text-xs font-medium border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 apple-focus ${
               activeSection === 'ethics'
                 ? 'border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100'
                 : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
@@ -73,7 +100,7 @@ export const LegalComplianceModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveSection('privacy')}
-            className={`py-3 px-3 text-xs font-medium border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 ${
+            className={`py-3 px-3 text-xs font-medium border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 apple-focus ${
               activeSection === 'privacy'
                 ? 'border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100'
                 : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
@@ -84,7 +111,7 @@ export const LegalComplianceModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveSection('terms')}
-            className={`py-3 px-3 text-xs font-medium border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 ${
+            className={`py-3 px-3 text-xs font-medium border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 apple-focus ${
               activeSection === 'terms'
                 ? 'border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100'
                 : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
@@ -95,7 +122,7 @@ export const LegalComplianceModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveSection('provenance')}
-            className={`py-3 px-3 text-xs font-medium border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 ${
+            className={`py-3 px-3 text-xs font-medium border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 apple-focus ${
               activeSection === 'provenance'
                 ? 'border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100'
                 : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
@@ -215,7 +242,7 @@ export const LegalComplianceModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 bg-neutral-900 dark:bg-neutral-100 hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 rounded-lg text-xs font-medium transition-colors cursor-pointer"
+            className="px-4 py-1.5 bg-neutral-900 dark:bg-neutral-100 hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 rounded-lg text-xs font-medium transition-colors cursor-pointer apple-focus"
           >
             Acknowledge & Close
           </button>

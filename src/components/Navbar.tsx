@@ -105,7 +105,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 placeholder="Search domain (e.g. example.com, github.com)..."
-                className="w-full bg-neutral-100/90 dark:bg-neutral-900/90 border border-transparent focus:border-neutral-300 dark:focus:border-neutral-700 focus:bg-white dark:focus:bg-[#121214] rounded-xl pl-10 pr-16 py-2 text-xs md:text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none transition-all shadow-none"
+                className="w-full bg-neutral-100/90 dark:bg-neutral-900/90 border border-transparent focus:border-neutral-300 dark:focus:border-neutral-700 focus:bg-white dark:focus:bg-[#121214] rounded-xl pl-10 pr-16 py-2 text-xs md:text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 apple-focus transition-all shadow-none"
               />
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none">
                 <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-neutral-400 dark:text-neutral-500 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded shadow-2xs">
@@ -115,23 +115,24 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
             </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-neutral-950 font-medium text-xs md:text-sm rounded-xl transition-all shadow-sm whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-neutral-950 font-medium text-xs md:text-sm rounded-xl transition-all shadow-sm whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95 apple-focus"
             >
               <span>Scan Target</span>
             </button>
           </form>
 
           {/* Preset Domain Tags */}
-          <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 font-sans overflow-x-auto">
-            <span className="text-neutral-400 dark:text-neutral-500 text-[11px]">Presets:</span>
+          <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 font-sans overflow-x-auto py-0.5">
+            <span className="text-neutral-500 dark:text-neutral-400 text-[11px] font-medium shrink-0">Presets:</span>
             {PRESET_DOMAINS.map((domain) => (
               <button
                 key={domain}
+                type="button"
                 onClick={() => {
                   setInputVal(domain);
                   onSearch(domain);
                 }}
-                className="px-2 py-0.5 rounded-md bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.07] dark:hover:bg-white/[0.08] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="px-2.5 py-1 min-h-[28px] rounded-md bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.07] dark:hover:bg-white/[0.08] text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer touch-manipulation apple-focus"
               >
                 {domain}
               </button>
@@ -145,7 +146,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
           {onOpenGlobalSearch && (
             <button
               onClick={onOpenGlobalSearch}
-              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 min-h-[36px] text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer apple-focus"
               title="Global forensic search across all tabs (Ctrl+K)"
             >
               <Search className="w-3.5 h-3.5 text-neutral-400" />
@@ -159,7 +160,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
           {/* Theme Toggle (Dark / Light) */}
           <button
             onClick={toggleTheme}
-            className="p-2 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
+            className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer apple-focus"
             title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
             aria-label="Toggle dark/light theme"
           >
@@ -173,7 +174,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
           {/* Share Permalink Button */}
           <button
             onClick={handleSharePermalink}
-            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
+            className="flex items-center space-x-1.5 px-3 py-1.5 min-h-[36px] text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer apple-focus"
             title="Share domain investigation permalink"
           >
             {isCopiedPermalink ? (
@@ -192,7 +193,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
           {/* Saved Dossiers Modal Toggle */}
           <button
             onClick={onToggleSavedModal}
-            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
+            className="flex items-center space-x-1.5 px-3 py-1.5 min-h-[36px] text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer apple-focus"
             title="View saved research projects"
           >
             <Shield className="w-3.5 h-3.5 text-neutral-400" />
@@ -208,7 +209,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
           <div className="relative">
             <button
               onClick={() => setIsExportOpen(!isExportOpen)}
-              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 min-h-[36px] text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer apple-focus"
               title="Export Findings"
             >
               <Download className="w-3.5 h-3.5 text-neutral-400" />

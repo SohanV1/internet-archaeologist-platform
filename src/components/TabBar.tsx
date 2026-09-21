@@ -227,7 +227,7 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
                         setIsMobileOpen(false);
                       }}
                       className={`
-                        w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer group relative
+                        w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer group relative apple-focus
                         ${
                           isActive
                             ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-medium shadow-2xs'

@@ -221,27 +221,38 @@ export const DomainOverviewComponent: React.FC<Props> = ({
               <Server className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
               <span className="uppercase text-[11px] tracking-wider">RESOLVED IPS</span>
             </div>
-            <span className="font-semibold text-neutral-900 dark:text-neutral-100">{investigation.ipAddresses.length}</span>
+            <span className="font-semibold text-neutral-900 dark:text-neutral-100">
+              {investigation.ipAddresses.length}
+            </span>
+          </div>
+          <div className="flex items-baseline space-x-2">
+            <span className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+              {investigation.ipAddresses.length}
+            </span>
+            <span className="text-xs text-neutral-500 dark:text-neutral-400">endpoints</span>
           </div>
           {investigation.ipAddresses.length > 0 ? (
-            <div className="space-y-1 font-mono text-xs max-h-20 overflow-y-auto pr-1">
-              {investigation.ipAddresses.map((ip, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => copyToClipboard(ip)}
-                  className="text-neutral-700 dark:text-neutral-300 bg-white dark:bg-neutral-900 px-2.5 py-1 rounded-md border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between group hover:border-neutral-400/50 transition-all cursor-pointer text-[11px]"
-                >
-                  <span className="truncate">{ip}</span>
-                  {copiedIp === ip ? (
-                    <Check className="w-3 h-3 text-emerald-500 shrink-0 ml-1" />
-                  ) : (
-                    <Copy className="w-3 h-3 text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-200 transition-colors shrink-0 ml-1" />
-                  )}
-                </div>
-              ))}
+            <div className="flex items-center justify-between text-[11px] text-neutral-600 dark:text-neutral-400">
+              <span className="font-mono truncate mr-2" title={investigation.ipAddresses[0]}>
+                {investigation.ipAddresses[0]}
+                {investigation.ipAddresses.length > 1 ? ` (+${investigation.ipAddresses.length - 1} more)` : ''}
+              </span>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(investigation.ipAddresses[0])}
+                className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors apple-focus cursor-pointer shrink-0"
+                title="Copy primary IP"
+                aria-label="Copy primary IP address"
+              >
+                {copiedIp === investigation.ipAddresses[0] ? (
+                  <Check className="w-3 h-3 text-emerald-500" />
+                ) : (
+                  <Copy className="w-3 h-3 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200" />
+                )}
+              </button>
             </div>
           ) : (
-            <p className="text-xs text-neutral-400 italic">No IP records</p>
+            <p className="text-[11px] text-neutral-400 italic">No IP records</p>
           )}
         </div>
 
