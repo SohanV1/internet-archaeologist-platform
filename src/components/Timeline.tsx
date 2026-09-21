@@ -199,14 +199,14 @@ export const Timeline: React.FC<Props> = ({ snapshots, onNavigateToCompare, onTr
                 <button
                   key={`${snap.id}-${idx}`}
                   onClick={() => setSelectedSnapshot(snap)}
-                  className={`flex flex-col items-center p-3.5 rounded-xl border transition-all cursor-pointer font-mono ${
+                  className={`flex flex-col items-center p-3.5 rounded-xl border transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-amber-500/15 border-amber-500 text-amber-300 ring-2 ring-amber-500/30 shadow-lg glow-amber scale-105'
-                      : 'bg-slate-900 border-slate-800 hover:border-amber-500/40 text-slate-300 hover:bg-slate-800/60'
+                      ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-sm font-medium'
+                      : 'bg-black/[0.02] dark:bg-white/[0.04] border-black/[0.06] dark:border-white/[0.08] hover:border-black/[0.12] dark:hover:border-white/[0.16] text-neutral-600 dark:text-neutral-300'
                   }`}
                 >
-                  <span className="text-xs font-bold">{dateStr}</span>
-                  <span className="text-[11px] text-emerald-400 font-semibold mt-1 flex items-center gap-1">
+                  <span className="text-xs font-semibold">{dateStr}</span>
+                  <span className={`text-[11px] font-medium mt-1 flex items-center gap-1 ${isSelected ? 'text-emerald-300 dark:text-emerald-700' : 'text-emerald-500 dark:text-emerald-400'}`}>
                     <CheckCircle className="w-3 h-3" /> HTTP {snap.statusCode}
                   </span>
                   <span className="text-[10px] px-2 py-0.5 mt-2 bg-slate-950 rounded-md border border-slate-800 text-slate-400">

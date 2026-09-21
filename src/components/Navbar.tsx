@@ -58,88 +58,72 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
   }, []);
 
   return (
-    <header className="bg-slate-950/80 backdrop-blur-md text-slate-100 border-b border-slate-800/80 sticky top-0 z-50 px-4 py-3 shadow-xl">
+    <header className="bg-white/80 dark:bg-[#0a0a0c]/85 backdrop-blur-xl text-neutral-900 dark:text-neutral-100 border-b border-black/[0.06] dark:border-white/[0.08] sticky top-0 z-50 px-4 md:px-6 py-3 transition-colors">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Logo / Title */}
+        {/* Apple-style Logo & Monogram */}
         <div
-          className="flex items-center space-x-3 cursor-pointer group"
+          className="flex items-center space-x-3 cursor-pointer group select-none"
           onClick={() => onSearch('example.com')}
         >
-          <div className="p-2.5 bg-gradient-to-br from-amber-500/20 via-amber-600/10 to-transparent text-amber-400 rounded-xl border border-amber-500/30 group-hover:border-amber-400 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all">
+          <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 flex items-center justify-center shadow-sm transition-transform active:scale-95">
             <svg
-              className="w-6 h-6"
+              className="w-5 h-5"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.75"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeOpacity="0.4"
-                strokeDasharray="2 2"
-              />
-              <circle cx="12" cy="12" r="6" stroke="currentColor" strokeOpacity="0.7" />
-              <circle cx="12" cy="12" r="2" fill="currentColor" />
-              <path d="M12 2v20M2 12h20" stroke="currentColor" strokeOpacity="0.3" />
-              <path
-                d="M12 12l7 -7"
-                stroke="#fbbf24"
-                strokeWidth="2"
-                strokeLinecap="round"
-                className="animate-spin origin-center"
-                style={{ animationDuration: '4s' }}
-              />
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
             </svg>
           </div>
           <div>
-            <h1 className="font-extrabold text-lg leading-tight tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 flex items-center gap-2 font-mono">
-              INTERNET ARCHAEOLOGIST
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-mono font-semibold">
+            <div className="flex items-center gap-2">
+              <h1 className="font-semibold text-[15px] tracking-tight text-neutral-900 dark:text-neutral-100">
+                Internet Archaeologist
+              </h1>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-mono font-medium border border-black/[0.04] dark:border-white/[0.06]">
                 v1.5
               </span>
-            </h1>
-            <p className="text-xs text-slate-400 flex items-center gap-1.5 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               OSINT Reconnaissance & Temporal Forensics
             </p>
           </div>
         </div>
 
-        {/* Search Bar & Quick Presets */}
+        {/* Minimal Search Field & Clean Presets */}
         <div className="flex-1 max-w-xl w-full flex flex-col gap-1.5">
           <form onSubmit={handleSubmit} className="w-full flex items-center gap-2">
             <div className="relative w-full group">
-              <Terminal className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500/70 group-focus-within:text-amber-400 transition-colors" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 transition-colors group-focus-within:text-neutral-800 dark:group-focus-within:text-neutral-200" />
               <input
                 type="text"
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
-                placeholder="Target domain (e.g. example.com, github.com)..."
-                className="w-full bg-slate-900/95 border border-slate-700/80 rounded-xl pl-10 pr-16 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 font-mono transition-all shadow-inner"
+                placeholder="Search domain (e.g. example.com, github.com)..."
+                className="w-full bg-neutral-100/90 dark:bg-neutral-900/90 border border-transparent focus:border-neutral-300 dark:focus:border-neutral-700 focus:bg-white dark:focus:bg-[#121214] rounded-xl pl-10 pr-16 py-2 text-xs md:text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none transition-all shadow-none"
               />
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none">
-                <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-800/80 border border-slate-700 rounded shadow-sm">
-                  ↵ Enter
+                <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-neutral-400 dark:text-neutral-500 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded shadow-2xs">
+                  ↵
                 </kbd>
               </div>
             </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs md:text-sm rounded-xl transition-all shadow-lg hover:shadow-amber-500/20 whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-neutral-950 font-medium text-xs md:text-sm rounded-xl transition-all shadow-sm whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
-              <Search className="w-4 h-4" />
               <span>Scan Target</span>
             </button>
           </form>
 
           {/* Preset Domain Tags */}
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono overflow-x-auto">
-            <span className="text-slate-500 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-400" /> Presets:
-            </span>
+          <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 font-sans overflow-x-auto">
+            <span className="text-neutral-400 dark:text-neutral-500 text-[11px]">Presets:</span>
             {PRESET_DOMAINS.map((domain) => (
               <button
                 key={domain}
@@ -147,7 +131,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
                   setInputVal(domain);
                   onSearch(domain);
                 }}
-                className="px-2 py-0.5 rounded bg-slate-900 hover:bg-amber-500/10 hover:text-amber-300 border border-slate-800 hover:border-amber-500/40 transition-colors cursor-pointer"
+                className="px-2 py-0.5 rounded-md bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.07] dark:hover:bg-white/[0.08] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
               >
                 {domain}
               </button>
@@ -161,12 +145,12 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
           {onOpenGlobalSearch && (
             <button
               onClick={onOpenGlobalSearch}
-              className="flex items-center space-x-1 px-3 py-2 text-xs bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl border border-slate-800 hover:border-slate-700 transition-all font-mono shadow-sm cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
               title="Global forensic search across all tabs (Ctrl+K)"
             >
-              <Search className="w-3.5 h-3.5 text-amber-400" />
+              <Search className="w-3.5 h-3.5 text-neutral-400" />
               <span className="hidden sm:inline">Search</span>
-              <kbd className="hidden sm:inline text-[9px] px-1 py-0.2 bg-slate-800 rounded border border-slate-700 text-slate-400">
+              <kbd className="hidden sm:inline text-[9px] px-1 py-0.2 bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 text-neutral-400">
                 ⌘K
               </kbd>
             </button>
@@ -175,31 +159,31 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
           {/* Theme Toggle (Dark / Light) */}
           <button
             onClick={toggleTheme}
-            className="p-2 text-xs bg-slate-900 hover:bg-slate-800 text-amber-400 hover:text-amber-300 rounded-xl border border-slate-800 hover:border-slate-700 transition-all shadow-sm cursor-pointer"
+            className="p-2 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
             title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
             aria-label="Toggle dark/light theme"
           >
             {theme === 'dark' ? (
               <Sun className="w-4 h-4 text-amber-400" />
             ) : (
-              <Moon className="w-4 h-4 text-indigo-400" />
+              <Moon className="w-4 h-4 text-neutral-600" />
             )}
           </button>
 
           {/* Share Permalink Button */}
           <button
             onClick={handleSharePermalink}
-            className="flex items-center space-x-1.5 px-3 py-2 text-xs bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl border border-slate-800 hover:border-slate-700 transition-all font-medium shadow-sm cursor-pointer"
+            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
             title="Share domain investigation permalink"
           >
             {isCopiedPermalink ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-emerald-300 font-bold hidden sm:inline">Copied!</span>
+                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium hidden sm:inline">Copied</span>
               </>
             ) : (
               <>
-                <Share2 className="w-3.5 h-3.5 text-amber-400" />
+                <Share2 className="w-3.5 h-3.5 text-neutral-400" />
                 <span className="hidden sm:inline">Share</span>
               </>
             )}
@@ -208,13 +192,13 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
           {/* Saved Dossiers Modal Toggle */}
           <button
             onClick={onToggleSavedModal}
-            className="flex items-center space-x-1.5 px-3 py-2 text-xs bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl border border-slate-800 hover:border-slate-700 transition-all font-medium shadow-sm cursor-pointer"
+            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
             title="View saved research projects"
           >
-            <Shield className="w-3.5 h-3.5 text-emerald-400" />
+            <Shield className="w-3.5 h-3.5 text-neutral-400" />
             <span className="hidden sm:inline">Saved</span>
             {savedCount > 0 && (
-              <span className="px-1.5 py-0.2 text-[10px] bg-emerald-500/20 text-emerald-300 font-mono rounded-full border border-emerald-500/40 font-bold">
+              <span className="px-1.5 py-0.2 text-[10px] bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-mono rounded-full font-medium">
                 {savedCount}
               </span>
             )}
@@ -224,16 +208,16 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
           <div className="relative">
             <button
               onClick={() => setIsExportOpen(!isExportOpen)}
-              className="flex items-center space-x-1.5 px-3 py-2 text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/30 hover:border-amber-500/60 transition-all font-medium cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200/80 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 rounded-xl border border-black/[0.04] dark:border-white/[0.06] transition-colors cursor-pointer"
               title="Export Findings"
             >
-              <Download className="w-3.5 h-3.5 text-amber-400" />
+              <Download className="w-3.5 h-3.5 text-neutral-400" />
               <span>Export</span>
             </button>
 
             {isExportOpen && (
               <div
-                className="absolute right-0 mt-2 w-52 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono space-y-1 backdrop-blur-xl"
+                className="absolute right-0 mt-2 w-52 bg-white dark:bg-[#161618] border border-black/[0.08] dark:border-white/[0.1] rounded-2xl shadow-xl p-1.5 z-50 text-xs space-y-1 backdrop-blur-xl"
                 onMouseLeave={() => setIsExportOpen(false)}
               >
                 <button
@@ -241,7 +225,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
                     onExportReport('html');
                     setIsExportOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-amber-500/15 text-slate-200 hover:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer"
                 >
                   <span>Standalone HTML Report</span>
                 </button>
@@ -250,7 +234,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
                     onExportReport('json');
                     setIsExportOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors cursor-pointer"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer"
                 >
                   <span>Full JSON Payload</span>
                 </button>
@@ -259,7 +243,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
                     onExportReport('csv-dns');
                     setIsExportOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors cursor-pointer"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer"
                 >
                   <span>DNS Zones (CSV)</span>
                 </button>
@@ -268,7 +252,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
                     onExportReport('csv-subs');
                     setIsExportOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors cursor-pointer"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer"
                 >
                   <span>Subdomains (CSV)</span>
                 </button>

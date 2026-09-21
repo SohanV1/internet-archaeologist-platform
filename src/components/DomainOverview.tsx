@@ -11,13 +11,14 @@ import {
   Check,
   Network,
   Calendar,
-  Sparkles,
   Activity,
   Code2,
   Cpu,
   FileText,
   FileCode,
   Download,
+  ChevronDown,
+  Shield,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -87,6 +88,7 @@ export const DomainOverviewComponent: React.FC<Props> = ({
   const [copiedIp, setCopiedIp] = useState<string | null>(null);
   const [locCount, setLocCount] = useState<number>(0);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const [showTelemetry, setShowTelemetry] = useState<boolean>(false);
 
   // Animated counter for total LOC (381,400)
   useEffect(() => {
@@ -130,9 +132,9 @@ export const DomainOverviewComponent: React.FC<Props> = ({
       { dimension: 'Resolved IPs', count: investigation.ipAddresses.length, color: '#3b82f6' },
       { dimension: 'Subdomains', count: investigation.subdomains?.length || 0, color: '#10b981' },
       { dimension: 'DNS Zone', count: investigation.dnsRecords.length, color: '#06b6d4' },
-      { dimension: 'Active Tech', count: investigation.technologies.length, color: '#a855f7' },
+      { dimension: 'Active Tech', count: investigation.technologies.length, color: '#8b5cf6' },
       { dimension: 'Captures', count: investigation.snapshots.length, color: '#f59e0b' },
-      { dimension: 'Evidence Trail', count: investigation.evidence?.length || 0, color: '#f43f5e' },
+      { dimension: 'Evidence Trail', count: investigation.evidence?.length || 0, color: '#ef4444' },
     ],
     [
       investigation.ipAddresses.length,
@@ -145,108 +147,105 @@ export const DomainOverviewComponent: React.FC<Props> = ({
   );
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6 backdrop-blur-xl relative overflow-hidden">
-      {/* Decorative gradient glow top bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-emerald-500 to-purple-500" />
-
+    <div className="bg-white/80 dark:bg-[#141416]/90 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl p-5 md:p-6 apple-card space-y-6 backdrop-blur-xl relative transition-colors">
       {exportNotice && (
-        <div className="absolute top-3 right-6 z-10 px-3 py-1 bg-emerald-500/20 border border-emerald-500 text-emerald-300 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 animate-fade-in">
+        <div className="absolute top-3 right-6 z-10 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs font-medium flex items-center gap-1.5 animate-fade-in">
           <Check className="w-3.5 h-3.5" /> {exportNotice}
         </div>
       )}
 
       {/* Target Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-black/[0.06] dark:border-white/[0.06] pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[11px] font-mono text-amber-400/90 uppercase tracking-widest font-semibold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="text-[11px] uppercase tracking-wider text-neutral-500 dark:text-neutral-400 font-medium flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Target Dossier
             </span>
-            <span className="text-xs text-slate-500 font-mono">
+            <span className="text-xs text-neutral-400 dark:text-neutral-500 font-mono">
               (ID: {investigation.id.substring(0, 14)}...)
             </span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 flex items-center gap-3 font-mono">
-            <Globe className="w-7 h-7 text-amber-400" />
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 flex items-center gap-2.5">
+            <Globe className="w-6 h-6 text-neutral-700 dark:text-neutral-300" />
             {investigation.domain}
           </h2>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           {onTraceEvidence && (
             <button
               onClick={() => onTraceEvidence('ev-dns-' + investigation.domain)}
-              className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center gap-1.5 text-xs font-semibold font-mono shadow-sm transition-colors cursor-pointer"
+              className="px-3 py-1.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 border border-black/[0.04] dark:border-white/[0.06] rounded-full flex items-center gap-1.5 text-xs font-medium transition-colors cursor-pointer"
             >
-              <ShieldCheck className="w-3.5 h-3.5" /> Provenance Dossier
+              <ShieldCheck className="w-3.5 h-3.5 text-neutral-500" /> Provenance Dossier
             </button>
           )}
 
-          <span className="px-3 py-1.5 bg-purple-500/10 text-purple-300 border border-purple-500/30 rounded-full flex items-center gap-1.5 text-xs font-semibold font-mono">
-            <Sparkles className="w-3.5 h-3.5" /> {investigation.summary?.securityRating || 'High'}{' '}
+          <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 rounded-full flex items-center gap-1.5 text-xs font-medium">
+            <Shield className="w-3.5 h-3.5 text-emerald-500" /> {investigation.summary?.securityRating || 'High'}{' '}
             Security
           </span>
-          <span className="text-xs text-slate-400 font-mono bg-slate-950 px-3 py-1.5 rounded-full border border-slate-800 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+          <span className="text-xs text-neutral-500 dark:text-neutral-400 px-3 py-1.5 rounded-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] flex items-center gap-1.5 font-medium">
+            <Calendar className="w-3.5 h-3.5 text-neutral-400" />
             {investigation.summary?.totalYearsActive
-              ? `${investigation.summary.totalYearsActive} yrs of archives`
+              ? `${investigation.summary.totalYearsActive} yrs archived`
               : 'Analyzed'}
           </span>
         </div>
       </div>
 
-      {/* Metric Cards Grid */}
+      {/* 4 Apple Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* IPs */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 space-y-2.5 hover:border-slate-700 transition-all">
-          <div className="flex items-center justify-between text-xs font-mono font-bold text-slate-400">
+        <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] rounded-xl p-4 space-y-2 hover:border-black/[0.08] dark:hover:border-white/[0.1] transition-all">
+          <div className="flex items-center justify-between text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <div className="flex items-center space-x-1.5">
-              <Server className="w-4 h-4 text-blue-400" />
-              <span>RESOLVED IPS</span>
+              <Server className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+              <span className="uppercase text-[11px] tracking-wider">RESOLVED IPS</span>
             </div>
-            <span className="text-blue-400 font-bold">{investigation.ipAddresses.length}</span>
+            <span className="font-semibold text-neutral-900 dark:text-neutral-100">{investigation.ipAddresses.length}</span>
           </div>
           {investigation.ipAddresses.length > 0 ? (
-            <div className="space-y-1 font-mono text-xs max-h-24 overflow-y-auto pr-1">
+            <div className="space-y-1 font-mono text-xs max-h-20 overflow-y-auto pr-1">
               {investigation.ipAddresses.map((ip, idx) => (
                 <div
                   key={idx}
                   onClick={() => copyToClipboard(ip)}
-                  className="text-slate-200 bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 flex items-center justify-between group hover:border-amber-500/50 transition-all cursor-pointer text-[11px]"
+                  className="text-neutral-700 dark:text-neutral-300 bg-white dark:bg-neutral-900 px-2.5 py-1 rounded-md border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between group hover:border-neutral-400/50 transition-all cursor-pointer text-[11px]"
                 >
-                  <span className="text-blue-300 font-semibold truncate">{ip}</span>
+                  <span className="truncate">{ip}</span>
                   {copiedIp === ip ? (
-                    <Check className="w-3 h-3 text-emerald-400 shrink-0 ml-1" />
+                    <Check className="w-3 h-3 text-emerald-500 shrink-0 ml-1" />
                   ) : (
-                    <Copy className="w-3 h-3 text-slate-500 group-hover:text-amber-400 transition-colors shrink-0 ml-1" />
+                    <Copy className="w-3 h-3 text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-200 transition-colors shrink-0 ml-1" />
                   )}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-slate-500 font-mono italic">No IP records</p>
+            <p className="text-xs text-neutral-400 italic">No IP records</p>
           )}
         </div>
 
         {/* Subdomains */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 space-y-2 hover:border-slate-700 transition-all">
-          <div className="flex items-center justify-between text-xs font-mono font-bold text-slate-400">
+        <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] rounded-xl p-4 space-y-2 hover:border-black/[0.08] dark:hover:border-white/[0.1] transition-all">
+          <div className="flex items-center justify-between text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <div className="flex items-center space-x-1.5">
-              <Network className="w-4 h-4 text-emerald-400" />
-              <span>SUBDOMAINS</span>
+              <Network className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+              <span className="uppercase text-[11px] tracking-wider">SUBDOMAINS</span>
             </div>
-            <span className="text-emerald-400 font-bold">
+            <span className="font-semibold text-neutral-900 dark:text-neutral-100">
               {investigation.subdomains?.length || 0}
             </span>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-extrabold text-slate-100 font-mono">
+            <span className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
               {investigation.subdomains?.length || 0}
             </span>
-            <span className="text-xs text-slate-400 font-mono">discovered</span>
+            <span className="text-xs text-neutral-500">discovered</span>
           </div>
-          <p className="text-[11px] text-slate-500 font-mono truncate">
+          <p className="text-[11px] text-neutral-400 truncate">
             {investigation.subdomains
               ?.slice(0, 2)
               .map((s) => s.subdomain)
@@ -255,19 +254,19 @@ export const DomainOverviewComponent: React.FC<Props> = ({
         </div>
 
         {/* DNS Summary */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 space-y-2 hover:border-slate-700 transition-all">
-          <div className="flex items-center justify-between text-xs font-mono font-bold text-slate-400">
+        <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] rounded-xl p-4 space-y-2 hover:border-black/[0.08] dark:hover:border-white/[0.1] transition-all">
+          <div className="flex items-center justify-between text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <div className="flex items-center space-x-1.5">
-              <Database className="w-4 h-4 text-amber-400" />
-              <span>DNS RECORDS</span>
+              <Database className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+              <span className="uppercase text-[11px] tracking-wider">DNS RECORDS</span>
             </div>
-            <span className="text-amber-400 font-bold">{investigation.dnsRecords.length}</span>
+            <span className="font-semibold text-neutral-900 dark:text-neutral-100">{investigation.dnsRecords.length}</span>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-extrabold text-slate-100 font-mono">
+            <span className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
               {investigation.dnsRecords.length}
             </span>
-            <span className="text-xs text-slate-400 font-mono">zone entries</span>
+            <span className="text-xs text-neutral-500">entries</span>
           </div>
           <div className="flex flex-wrap gap-1 pt-0.5">
             {Array.from(new Set(investigation.dnsRecords.map((r) => r.type)))
@@ -275,7 +274,7 @@ export const DomainOverviewComponent: React.FC<Props> = ({
               .map((type, idx) => (
                 <span
                   key={idx}
-                  className="text-[10px] px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded font-mono font-semibold"
+                  className="text-[10px] px-2 py-0.5 bg-black/[0.04] dark:bg-white/[0.06] text-neutral-700 dark:text-neutral-300 rounded font-mono font-medium"
                 >
                   {type}
                 </span>
@@ -284,21 +283,21 @@ export const DomainOverviewComponent: React.FC<Props> = ({
         </div>
 
         {/* Tech Stack Summary */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 space-y-2 hover:border-slate-700 transition-all">
-          <div className="flex items-center justify-between text-xs font-mono font-bold text-slate-400">
+        <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] rounded-xl p-4 space-y-2 hover:border-black/[0.08] dark:hover:border-white/[0.1] transition-all">
+          <div className="flex items-center justify-between text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <div className="flex items-center space-x-1.5">
-              <Globe className="w-4 h-4 text-purple-400" />
-              <span>ACTIVE TECH</span>
+              <Globe className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+              <span className="uppercase text-[11px] tracking-wider">ACTIVE TECH</span>
             </div>
-            <span className="text-purple-400 font-bold">{investigation.technologies.length}</span>
+            <span className="font-semibold text-neutral-900 dark:text-neutral-100">{investigation.technologies.length}</span>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-extrabold text-slate-100 font-mono">
+            <span className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
               {investigation.technologies.length}
             </span>
-            <span className="text-xs text-slate-400 font-mono">signatures</span>
+            <span className="text-xs text-neutral-500">signatures</span>
           </div>
-          <p className="text-[11px] text-purple-300 font-mono truncate">
+          <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">
             {investigation.technologies
               .slice(0, 2)
               .map((t) => t.name)
@@ -307,209 +306,81 @@ export const DomainOverviewComponent: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Reconnaissance Surface & Asset Inventory Bar Chart */}
-      <div
-        id="overview-recon-chart"
-        className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 md:p-5 space-y-3"
-      >
-        <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-2.5">
-          <div className="text-xs font-mono text-slate-200 font-bold uppercase tracking-wider flex items-center gap-2">
-            <Activity className="w-4 h-4 text-amber-400" />
-            Reconnaissance Surface & Asset Inventory
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleExportChart('overview-recon-chart', 'png', 'recon-inventory')}
-              className="px-2 py-0.5 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-[10px] font-mono rounded border border-slate-800 flex items-center gap-1 transition-colors cursor-pointer"
-            >
-              <Download className="w-3 h-3" /> PNG
-            </button>
-            <span className="text-[11px] font-mono text-slate-500">
-              Relative discovery volume across target dimensions
-            </span>
-          </div>
-        </div>
+      {/* Clean Telemetry Disclosure Header */}
+      <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-black/[0.06] dark:border-white/[0.06]">
+        <button
+          type="button"
+          onClick={() => setShowTelemetry((prev) => !prev)}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 text-xs font-medium text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer"
+        >
+          <Activity className="w-3.5 h-3.5 text-neutral-500" />
+          <span>{showTelemetry ? 'Hide' : 'View'} Recon Surface & Codebase Intelligence ({locCount.toLocaleString()} LOC)</span>
+          <ChevronDown className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${showTelemetry ? 'rotate-180' : ''}`} />
+        </button>
 
-        <div className="h-36 w-full pt-1">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={reconChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-              <XAxis
-                dataKey="dimension"
-                stroke="#64748b"
-                tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }}
-                tickLine={false}
-              />
-              <YAxis
-                stroke="#64748b"
-                tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
-                tickLine={false}
-              />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload;
-                    return (
-                      <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl shadow-2xl font-mono text-xs text-slate-200">
-                        <div className="font-bold" style={{ color: data.color }}>
-                          {data.dimension}
-                        </div>
-                        <div className="text-slate-300">
-                          Total Discovered:{' '}
-                          <span className="font-bold text-white">{data.count}</span>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                {reconChartData.map((entry, index) => (
-                  <Cell key={`recon-cell-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {onNavigateToAnalytics && (
+          <button
+            onClick={onNavigateToAnalytics}
+            className="text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors flex items-center gap-1 cursor-pointer font-medium"
+          >
+            <span>Open Full Codebase Analytics</span>
+            <span>→</span>
+          </button>
+        )}
       </div>
 
-      {/* CODEBASE INTELLIGENCE SECTION (Part 2 Requirement 2) */}
-      <div
-        id="codebase-intelligence-section"
-        className="bg-slate-950/90 border border-slate-800 rounded-xl p-5 md:p-6 space-y-6"
-      >
-        <div className="flex flex-wrap items-center justify-between border-b border-slate-800 pb-4 gap-3">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 text-[10px] bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono font-bold rounded">
-                TELEMETRY
-              </span>
-              <span className="text-xs text-slate-400 font-mono">Portfolio Code Analysis</span>
-            </div>
-            <h3 className="text-lg md:text-xl font-bold font-mono text-slate-100 flex items-center gap-2.5">
-              <Code2 className="w-5 h-5 text-cyan-400" />
-              Codebase Intelligence & Static Structure
-            </h3>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {onNavigateToAnalytics && (
-              <button
-                onClick={onNavigateToAnalytics}
-                className="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>Full Analytics Tab →</span>
-              </button>
-            )}
-            <button
-              onClick={() =>
-                handleExportChart('codebase-intelligence-section', 'png', 'codebase-intel')
-              }
-              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-mono flex items-center gap-1 border border-slate-800 transition-colors cursor-pointer"
-              title="Export PNG"
-            >
-              <Download className="w-3.5 h-3.5 text-cyan-400" /> PNG
-            </button>
-          </div>
-        </div>
-
-        {/* Runtime Breakdown Badge / Header Banner */}
-        <div className="p-4 bg-slate-900/90 rounded-xl border border-slate-800 flex flex-wrap items-center justify-between gap-4 font-mono text-xs">
-          <div className="flex items-center gap-3">
-            <Cpu className="w-5 h-5 text-emerald-400 shrink-0" />
-            <div>
-              <span className="text-slate-400 block text-[11px]">
-                LANGUAGE RUNTIME CLASSIFICATION
-              </span>
-              <span className="font-bold text-slate-100 text-sm">
-                Executable: <span className="text-emerald-400">46%</span> | Documentation:{' '}
-                <span className="text-amber-400">41%</span> | Config:{' '}
-                <span className="text-purple-400">14%</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Animated Total LOC Counter */}
-          <div className="flex items-center gap-3 pl-4 border-l border-slate-800">
-            <FileCode className="w-5 h-5 text-cyan-400" />
-            <div>
-              <span className="text-slate-400 block text-[11px]">TOTAL CODEBASE VOLUME</span>
-              <span className="text-base font-extrabold text-cyan-300 font-mono tracking-tight">
-                {locCount.toLocaleString()}{' '}
-                <span className="text-xs font-normal text-slate-400">LOC</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* 2-Column: Animated Language Progress Bars + File Count Horizontal Bar Chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1">
-          {/* Column A: Language Percentage with Animated Progress Bars */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
-              <FileText className="w-4 h-4 text-cyan-400" />
-              Language Share (Animated Progress Bars)
-            </h4>
-
-            <div className="space-y-2.5">
-              {LANGUAGE_PROGRESS.map((item, idx) => (
-                <div key={idx} className="space-y-1">
-                  <div className="flex justify-between text-xs font-mono">
-                    <span className={`font-semibold ${item.textColor}`}>{item.name}</span>
-                    <span className="font-bold text-slate-200">{item.percent}%</span>
-                  </div>
-                  <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                    <div
-                      className={`${item.color} h-full rounded-full transition-all duration-1000 ease-out`}
-                      style={{ width: `${item.percent}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Column B: File Count by Extension Horizontal Bar Chart */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 font-bold flex items-center gap-1.5">
-              <Activity className="w-4 h-4 text-amber-400" />
-              File Count by Extension (Horizontal Distribution)
-            </h4>
-
-            <div className="h-64 w-full bg-slate-900/60 rounded-xl border border-slate-800/80 p-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={EXTENSION_BAR_DATA}
-                  layout="vertical"
-                  margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+      {/* Collapsible Telemetry / Analytics View */}
+      {showTelemetry && (
+        <div className="space-y-6 pt-2 animate-fade-in">
+          {/* Reconnaissance Surface & Asset Inventory Bar Chart */}
+          <div
+            id="overview-recon-chart"
+            className="bg-neutral-50/80 dark:bg-[#18181b]/70 border border-black/[0.04] dark:border-white/[0.06] rounded-xl p-4 md:p-5 space-y-3"
+          >
+            <div className="flex flex-wrap items-center justify-between border-b border-black/[0.04] dark:border-white/[0.06] pb-2.5">
+              <div className="text-xs text-neutral-700 dark:text-neutral-300 font-medium uppercase tracking-wider flex items-center gap-2">
+                <Activity className="w-4 h-4 text-neutral-500" />
+                Reconnaissance Surface & Asset Inventory
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleExportChart('overview-recon-chart', 'png', 'recon-inventory')}
+                  className="px-2 py-0.5 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 text-[10px] rounded border border-black/[0.06] dark:border-white/[0.08] flex items-center gap-1 transition-colors cursor-pointer"
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
+                  <Download className="w-3 h-3" /> PNG
+                </button>
+                <span className="text-[11px] text-neutral-400">
+                  Relative discovery volume across target dimensions
+                </span>
+              </div>
+            </div>
+
+            <div className="h-36 w-full pt-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={reconChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(120,120,128,0.15)" vertical={false} />
                   <XAxis
-                    type="number"
-                    stroke="#64748b"
-                    tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
+                    dataKey="dimension"
+                    stroke="#86868b"
+                    tick={{ fill: '#86868b', fontSize: 10 }}
                     tickLine={false}
                   />
                   <YAxis
-                    type="category"
-                    dataKey="ext"
-                    stroke="#64748b"
-                    tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }}
+                    stroke="#86868b"
+                    tick={{ fill: '#86868b', fontSize: 10 }}
                     tickLine={false}
-                    width={50}
                   />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
-                        const d = payload[0].payload;
+                        const data = payload[0].payload;
                         return (
-                          <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-xl shadow-2xl font-mono text-xs text-slate-200">
-                            <span className="font-bold" style={{ color: d.fill }}>
-                              {d.ext} Extension
-                            </span>
-                            <div className="text-slate-300 mt-1">
-                              Total Files: <span className="font-bold text-white">{d.count}</span>
+                          <div className="bg-white dark:bg-neutral-900 border border-black/[0.08] dark:border-white/[0.1] p-2.5 rounded-xl shadow-lg text-xs text-neutral-800 dark:text-neutral-200">
+                            <div className="font-semibold">
+                              {data.dimension}
+                            </div>
+                            <div className="text-neutral-500 mt-0.5">
+                              Total Discovered: <span className="font-semibold text-neutral-900 dark:text-white">{data.count}</span>
                             </div>
                           </div>
                         );
@@ -517,17 +388,160 @@ export const DomainOverviewComponent: React.FC<Props> = ({
                       return null;
                     }}
                   />
-                  <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                    {EXTENSION_BAR_DATA.map((entry, index) => (
-                      <Cell key={`ext-cell-${index}`} fill={entry.fill} />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {reconChartData.map((entry, index) => (
+                      <Cell key={`recon-cell-${index}`} fill={entry.color} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
+
+          {/* CODEBASE INTELLIGENCE SECTION */}
+          <div
+            id="codebase-intelligence-section"
+            className="bg-neutral-50/80 dark:bg-[#18181b]/70 border border-black/[0.04] dark:border-white/[0.06] rounded-xl p-5 md:p-6 space-y-6"
+          >
+            <div className="flex flex-wrap items-center justify-between border-b border-black/[0.04] dark:border-white/[0.06] pb-4 gap-3">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2 py-0.5 text-[10px] bg-neutral-200/70 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-medium rounded">
+                    TELEMETRY
+                  </span>
+                  <span className="text-xs text-neutral-500">Portfolio Code Analysis</span>
+                </div>
+                <h3 className="text-base md:text-lg font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+                  <Code2 className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />
+                  Codebase Intelligence & Static Structure
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() =>
+                    handleExportChart('codebase-intelligence-section', 'png', 'codebase-intel')
+                  }
+                  className="px-2.5 py-1.5 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl text-xs font-medium flex items-center gap-1 border border-black/[0.06] dark:border-white/[0.08] transition-colors cursor-pointer"
+                  title="Export PNG"
+                >
+                  <Download className="w-3.5 h-3.5 text-neutral-400" /> PNG
+                </button>
+              </div>
+            </div>
+
+            {/* Runtime Breakdown Badge */}
+            <div className="p-4 bg-white dark:bg-neutral-900 rounded-xl border border-black/[0.04] dark:border-white/[0.06] flex flex-wrap items-center justify-between gap-4 text-xs">
+              <div className="flex items-center gap-3">
+                <Cpu className="w-5 h-5 text-neutral-500 shrink-0" />
+                <div>
+                  <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">
+                    LANGUAGE RUNTIME CLASSIFICATION
+                  </span>
+                  <span className="font-medium text-neutral-800 dark:text-neutral-200 text-sm">
+                    Executable: 46% • Documentation: 41% • Config: 14%
+                  </span>
+                </div>
+              </div>
+
+              {/* Total LOC Counter */}
+              <div className="flex items-center gap-3 pl-4 border-l border-black/[0.06] dark:border-white/[0.06]">
+                <FileCode className="w-5 h-5 text-neutral-500" />
+                <div>
+                  <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">TOTAL CODEBASE VOLUME</span>
+                  <span className="text-base font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight">
+                    {locCount.toLocaleString()}{' '}
+                    <span className="text-xs font-normal text-neutral-500">LOC</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 2-Column: Language Progress Bars + File Count Bar Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1">
+              <div className="space-y-3">
+                <h4 className="text-xs uppercase tracking-wider text-neutral-500 font-medium flex items-center gap-1.5">
+                  <FileText className="w-4 h-4 text-neutral-400" />
+                  Language Share
+                </h4>
+
+                <div className="space-y-2.5">
+                  {LANGUAGE_PROGRESS.map((item, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="font-medium text-neutral-700 dark:text-neutral-300">{item.name}</span>
+                        <span className="font-medium text-neutral-500">{item.percent}%</span>
+                      </div>
+                      <div className="w-full bg-neutral-200/70 dark:bg-neutral-800 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className={`${item.color} h-full rounded-full transition-all duration-700 ease-out`}
+                          style={{ width: `${item.percent}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-xs uppercase tracking-wider text-neutral-500 font-medium flex items-center gap-1.5">
+                  <Activity className="w-4 h-4 text-neutral-400" />
+                  File Count by Extension
+                </h4>
+
+                <div className="h-64 w-full bg-white dark:bg-neutral-900 rounded-xl border border-black/[0.04] dark:border-white/[0.06] p-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={EXTENSION_BAR_DATA}
+                      layout="vertical"
+                      margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(120,120,128,0.15)" horizontal={false} />
+                      <XAxis
+                        type="number"
+                        stroke="#86868b"
+                        tick={{ fill: '#86868b', fontSize: 10 }}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="ext"
+                        stroke="#86868b"
+                        tick={{ fill: '#86868b', fontSize: 11 }}
+                        tickLine={false}
+                        width={50}
+                      />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const d = payload[0].payload;
+                            return (
+                              <div className="bg-white dark:bg-neutral-900 border border-black/[0.08] dark:border-white/[0.1] p-2.5 rounded-xl shadow-lg text-xs text-neutral-800 dark:text-neutral-200">
+                                <span className="font-semibold">
+                                  {d.ext} Extension
+                                </span>
+                                <div className="text-neutral-500 mt-1">
+                                  Total Files: <span className="font-semibold text-neutral-900 dark:text-white">{d.count}</span>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                        {EXTENSION_BAR_DATA.map((entry, index) => (
+                          <Cell key={`ext-cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

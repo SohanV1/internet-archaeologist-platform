@@ -143,39 +143,38 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
   return (
     <>
       {/* Mobile Toggle Button (Visible only on screens < lg) */}
-      <div className="lg:hidden flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl mb-4 shadow-md">
-        <div className="flex items-center gap-2">
+      <div className="lg:hidden flex items-center justify-between p-3 bg-white dark:bg-[#141416] border border-black/[0.06] dark:border-white/[0.08] rounded-2xl mb-4 shadow-sm">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsMobileOpen(!isMobileOpen)}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg transition-colors cursor-pointer"
+            className="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 text-neutral-700 dark:text-neutral-300 rounded-xl transition-colors cursor-pointer"
             aria-label="Toggle Navigation Sidebar"
           >
-            {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isMobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
-          <span className="font-mono text-xs text-slate-300 font-bold uppercase">
-            Active: <span className="text-amber-400">{activeTab}</span>
+          <span className="text-xs text-neutral-600 dark:text-neutral-400 font-medium">
+            Active: <span className="text-neutral-900 dark:text-neutral-100 font-semibold">{activeTab}</span>
           </span>
         </div>
 
-        <span className="text-[11px] font-mono text-slate-500">16 Modules</span>
+        <span className="text-[11px] text-neutral-400 font-medium">16 Modules</span>
       </div>
 
       {/* Sidebar Container */}
       <aside
         className={`
-          ${isMobileOpen ? 'fixed inset-y-0 left-0 z-50 w-72 bg-slate-950 p-4 shadow-2xl overflow-y-auto block' : 'hidden'}
-          lg:block shrink-0 transition-all duration-300 ease-in-out
-          ${isCollapsed ? 'lg:w-18' : 'lg:w-64'}
-          bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-2xl backdrop-blur-xl relative
+          ${isMobileOpen ? 'fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-[#141416] p-4 shadow-2xl overflow-y-auto block' : 'hidden'}
+          lg:block shrink-0 transition-all duration-200 ease-in-out
+          ${isCollapsed ? 'lg:w-16' : 'lg:w-60'}
+          bg-white/80 dark:bg-[#141416]/90 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl p-2.5 apple-card backdrop-blur-xl relative
         `}
       >
         {/* Top Controls: Collapse Toggle & Header */}
-        <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-2 mb-2 border-b border-black/[0.04] dark:border-white/[0.06]">
           {!isCollapsed && (
-            <div className="hidden lg:flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              <span className="font-mono text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Recon Modules
+            <div className="hidden lg:flex items-center gap-2 pl-2">
+              <span className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                Modules
               </span>
             </div>
           )}
@@ -184,33 +183,33 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
           {isMobileOpen && (
             <button
               onClick={() => setIsMobileOpen(false)}
-              className="lg:hidden p-1 text-slate-400 hover:text-white ml-auto"
+              className="lg:hidden p-1 text-neutral-400 hover:text-neutral-800 dark:hover:text-white ml-auto cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           )}
 
           {/* Desktop Collapsible Toggle */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex items-center justify-center p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-amber-400 transition-colors ml-auto cursor-pointer"
+            className="hidden lg:flex items-center justify-center p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors ml-auto cursor-pointer"
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             aria-label="Toggle Sidebar Collapse"
           >
             {isCollapsed ? (
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             ) : (
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
             )}
           </button>
         </div>
 
         {/* Navigation Categories & Tabs */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {categories.map((cat) => (
-            <div key={cat.id} className="space-y-1">
+            <div key={cat.id} className="space-y-0.5">
               {!isCollapsed && (
-                <div className="px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">
+                <div className="px-2.5 py-1 text-[10px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500 font-semibold select-none">
                   {cat.label}
                 </div>
               )}
@@ -228,34 +227,42 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
                         setIsMobileOpen(false);
                       }}
                       className={`
-                        w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-mono transition-all cursor-pointer group relative
+                        w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer group relative
                         ${
                           isActive
-                            ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow-sm font-bold'
-                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                            ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-medium shadow-2xs'
+                            : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                         }
-                        ${isCollapsed ? 'justify-center px-2' : 'justify-between'}
+                        ${isCollapsed ? 'justify-center px-1.5' : 'justify-between'}
                       `}
                       title={isCollapsed ? tab.label : undefined}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
                         <Icon
-                          className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-amber-400' : 'text-slate-400 group-hover:text-amber-300'}`}
+                          className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                            isActive
+                              ? 'text-white dark:text-neutral-950'
+                              : 'text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-300'
+                          }`}
                         />
                         {!isCollapsed && <span className="truncate">{tab.label}</span>}
                       </div>
 
                       {!isCollapsed && Boolean(tab.badge) && (
                         <span
-                          className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono shrink-0 ${isActive ? 'bg-amber-500/30 text-amber-200' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
+                          className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono shrink-0 ${
+                            isActive
+                              ? 'bg-white/20 text-white dark:bg-black/15 dark:text-neutral-950'
+                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'
+                          }`}
                         >
                           {tab.badge}
                         </span>
                       )}
 
-                      {/* Dot badge indicator when collapsed */}
+                      {/* Indicator when collapsed */}
                       {isCollapsed && Boolean(tab.badge) && (
-                        <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        <span className={`absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white dark:bg-neutral-950' : 'bg-neutral-400'}`} />
                       )}
                     </button>
                   );
@@ -270,7 +277,7 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
       {isMobileOpen && (
         <div
           onClick={() => setIsMobileOpen(false)}
-          className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs lg:hidden"
         />
       )}
     </>

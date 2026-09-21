@@ -94,34 +94,30 @@ export const WebsiteStory: React.FC<Props> = ({
   return (
     <div className="space-y-6">
       {/* Executive Story Narrative Hero Card */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-
+      <div className="bg-white/80 dark:bg-[#141416]/90 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl p-6 md:p-8 apple-card backdrop-blur-xl relative overflow-hidden transition-colors">
         <div className="relative space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-black/[0.06] dark:border-white/[0.06] pb-5">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-widest font-mono font-extrabold bg-amber-500/15 text-amber-300 px-2.5 py-1 rounded-md border border-amber-500/30 flex items-center gap-1.5">
-                  <Sparkles className="w-3 h-3 text-amber-400" />
+                <span className="text-[10px] uppercase tracking-wider text-neutral-500 font-medium bg-black/[0.04] dark:bg-white/[0.06] px-2.5 py-0.5 rounded-full border border-black/[0.04] dark:border-white/[0.06] flex items-center gap-1.5">
+                  <Compass className="w-3 h-3 text-neutral-500" />
                   Website Evolution Intelligence
                 </span>
-                <span className="text-xs text-slate-400 font-mono">Forensic Timeline Analysis</span>
+                <span className="text-xs text-neutral-400">Forensic Timeline Analysis</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 font-mono tracking-tight pt-1">
-                What Happened to{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500">
+              <h2 className="text-2xl md:text-3xl font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight pt-1">
+                Evolutionary History of{' '}
+                <span className="text-neutral-900 dark:text-white font-bold">
                   {domain}
                 </span>
-                ?
               </h2>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono px-3.5 py-1.5 rounded-full bg-slate-950 border border-slate-800 text-slate-300 flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-xs px-3.5 py-1.5 rounded-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] text-neutral-600 dark:text-neutral-300 flex items-center gap-2 font-medium">
+                <Calendar className="w-3.5 h-3.5 text-neutral-400" />
                 Active Since:{' '}
-                <strong className="text-slate-100">
+                <strong className="text-neutral-900 dark:text-neutral-100 font-semibold">
                   {summary.firstRecordedDate.split('-')[0]}
                 </strong>{' '}
                 ({summary.totalYearsActive} yrs)
@@ -130,43 +126,43 @@ export const WebsiteStory: React.FC<Props> = ({
           </div>
 
           {/* Headline & Narrative Summary */}
-          <div className="bg-slate-950/80 border border-slate-800/90 rounded-xl p-5 space-y-3 shadow-inner">
+          <div className="bg-neutral-50/70 dark:bg-neutral-900/60 border border-black/[0.04] dark:border-white/[0.06] rounded-2xl p-5 md:p-6 space-y-3">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20 shrink-0 mt-0.5">
-                <TrendingUp className="w-5 h-5" />
+              <div className="p-2 bg-neutral-200/60 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl shrink-0 mt-0.5">
+                <TrendingUp className="w-4 h-4" />
               </div>
               <div className="space-y-1.5">
-                <h3 className="text-base md:text-lg font-bold text-amber-300 font-mono">
+                <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
                   {summary.headline}
                 </h3>
-                <p className="text-sm text-slate-300 font-sans leading-relaxed">
+                <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed font-sans">
                   {summary.narrative}
                 </p>
               </div>
             </div>
 
             {/* Framework Evolution Pathway */}
-            <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+            <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <span className="text-slate-500 font-semibold uppercase tracking-wider">
+                <span className="text-neutral-400 font-medium uppercase tracking-wider text-[11px]">
                   Framework Evolution:
                 </span>
-                <span className="px-3 py-1 rounded-md bg-purple-500/10 border border-purple-500/30 text-purple-300 font-bold">
+                <span className="px-2.5 py-1 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-neutral-800 dark:text-neutral-200 font-medium">
                   {summary.primaryFrameworkEvolution}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-slate-500 font-semibold uppercase tracking-wider">
+                <span className="text-neutral-400 font-medium uppercase tracking-wider text-[11px]">
                   Security Posture:
                 </span>
                 <span
-                  className={`px-2.5 py-0.5 rounded font-bold ${
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                     summary.securityRating === 'High'
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
+                      : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20'
                   }`}
                 >
-                  {summary.securityRating}
+                  {summary.securityRating} Security
                 </span>
               </div>
             </div>
@@ -176,105 +172,108 @@ export const WebsiteStory: React.FC<Props> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
             <div
               onClick={() => onNavigateToTab?.('tech')}
-              className="bg-slate-950/60 border border-slate-800/80 hover:border-purple-500/50 p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
+              className="bg-neutral-50/70 dark:bg-neutral-900/60 border border-black/[0.04] dark:border-white/[0.06] hover:border-black/[0.1] dark:hover:border-white/[0.12] p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
             >
-              <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-                <span className="flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-purple-400" /> Active Stack
+              <div className="flex items-center justify-between text-neutral-500 text-xs">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Cpu className="w-3.5 h-3.5 text-neutral-400" /> Active Stack
                 </span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-purple-400 transition-colors" />
+                <ChevronRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-800 dark:group-hover:text-white transition-colors" />
               </div>
-              <p className="text-xl font-extrabold text-purple-300 font-mono">
+              <p className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
                 {technologies.length} Techs
               </p>
-              <p className="text-[11px] text-slate-500 font-mono truncate">
+              <p className="text-[11px] text-neutral-400 truncate">
                 {technologies[0]?.name || 'Modern Stack'}
               </p>
             </div>
 
             <div
               onClick={() => onNavigateToTab?.('timeline')}
-              className="bg-slate-950/60 border border-slate-800/80 hover:border-amber-500/50 p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
+              className="bg-neutral-50/70 dark:bg-neutral-900/60 border border-black/[0.04] dark:border-white/[0.06] hover:border-black/[0.1] dark:hover:border-white/[0.12] p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
             >
-              <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-                <span className="flex items-center gap-1.5">
-                  <Palette className="w-3.5 h-3.5 text-amber-400" /> UI/UX Shifts
+              <div className="flex items-center justify-between text-neutral-500 text-xs">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Palette className="w-3.5 h-3.5 text-neutral-400" /> UI/UX Shifts
                 </span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-amber-400 transition-colors" />
+                <ChevronRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-800 dark:group-hover:text-white transition-colors" />
               </div>
-              <p className="text-xl font-extrabold text-amber-300 font-mono">
+              <p className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
                 {summary.majorRedesignsCount} Redesigns
               </p>
-              <p className="text-[11px] text-slate-500 font-mono">Structural Overhauls</p>
+              <p className="text-[11px] text-neutral-400">Structural Overhauls</p>
             </div>
 
             <div
               onClick={() => onNavigateToTab?.('subdomains')}
-              className="bg-slate-950/60 border border-slate-800/80 hover:border-emerald-500/50 p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
+              className="bg-neutral-50/70 dark:bg-neutral-900/60 border border-black/[0.04] dark:border-white/[0.06] hover:border-black/[0.1] dark:hover:border-white/[0.12] p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
             >
-              <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-                <span className="flex items-center gap-1.5">
-                  <Network className="w-3.5 h-3.5 text-emerald-400" /> Subdomains
+              <div className="flex items-center justify-between text-neutral-500 text-xs">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Network className="w-3.5 h-3.5 text-neutral-400" /> Subdomains
                 </span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-emerald-400 transition-colors" />
+                <ChevronRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-800 dark:group-hover:text-white transition-colors" />
               </div>
-              <p className="text-xl font-extrabold text-emerald-300 font-mono">
+              <p className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
                 {subdomains.length} Detected
               </p>
-              <p className="text-[11px] text-slate-500 font-mono">Ecosystem Sprawl</p>
+              <p className="text-[11px] text-neutral-400">Ecosystem Sprawl</p>
             </div>
 
             <div
               onClick={() => onNavigateToTab?.('changes')}
-              className="bg-slate-950/60 border border-slate-800/80 hover:border-cyan-500/50 p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
+              className="bg-neutral-50/70 dark:bg-neutral-900/60 border border-black/[0.04] dark:border-white/[0.06] hover:border-black/[0.1] dark:hover:border-white/[0.12] p-4 rounded-xl space-y-1 transition-all cursor-pointer group"
             >
-              <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-cyan-400" /> History Span
+              <div className="flex items-center justify-between text-neutral-500 text-xs">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Clock className="w-3.5 h-3.5 text-neutral-400" /> History Span
                 </span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-cyan-400 transition-colors" />
+                <ChevronRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-800 dark:group-hover:text-white transition-colors" />
               </div>
-              <p className="text-xl font-extrabold text-cyan-300 font-mono">
+              <p className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
                 {summary.totalYearsActive} Years
               </p>
-              <p className="text-[11px] text-slate-500 font-mono">{milestones.length} Milestones</p>
+              <p className="text-[11px] text-neutral-400">{milestones.length} Milestones</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Chronological Milestones Feed */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl backdrop-blur-xl space-y-6">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-          <div className="space-y-1">
-            <h3 className="text-xl font-extrabold text-slate-100 font-mono flex items-center gap-2.5">
-              <Compass className="w-5 h-5 text-amber-400" />
+      <div className="bg-white/80 dark:bg-[#141416]/90 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl p-6 md:p-8 apple-card backdrop-blur-xl space-y-6 transition-colors">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-black/[0.06] dark:border-white/[0.06] pb-4">
+          <div className="space-y-0.5">
+            <h3 className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+              <Compass className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
               Key Evolutionary Milestones & Findings
             </h3>
-            <p className="text-xs text-slate-400 font-mono">
-              Chronological log of major architectural rewrites, interface overhauls, and
-              infrastructure events.
+            <p className="text-xs text-neutral-500">
+              Chronological log of major architectural rewrites, interface overhauls, and infrastructure events.
             </p>
           </div>
 
           {/* Search Input and Category Filters */}
           <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full lg:w-auto">
-            <div className="relative w-full sm:w-56">
+            <div className="relative w-full sm:w-52">
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search milestones..."
-                className="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full bg-neutral-100/90 dark:bg-neutral-900/90 border border-transparent focus:border-neutral-300 dark:focus:border-neutral-700 rounded-xl px-3 py-1.5 text-xs text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 outline-none transition-colors"
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+            <div className="flex flex-wrap items-center gap-1 bg-neutral-100 dark:bg-neutral-900 p-1 rounded-xl text-xs">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setFilterCategory(cat)}
-                  className={`px-2.5 py-1 rounded-lg transition-all capitalize cursor-pointer text-[11px] ${filterCategory === cat ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900 border-transparent'}`}
+                  className={`px-2.5 py-1 rounded-lg transition-all capitalize cursor-pointer text-[11px] font-medium ${
+                    filterCategory === cat
+                      ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-2xs'
+                      : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+                  }`}
                 >
                   {cat === 'all' ? 'All' : cat.split(' ')[0]}
                 </button>
@@ -284,47 +283,45 @@ export const WebsiteStory: React.FC<Props> = ({
         </div>
 
         {/* Timeline Feed */}
-        <div className="space-y-4 relative before:absolute before:inset-0 before:left-5 before:w-0.5 before:bg-slate-800 before:hidden md:before:block">
+        <div className="space-y-4">
           {filteredMilestones.length === 0 ? (
-            <div className="text-center py-12 text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-xl">
+            <div className="text-center py-12 text-neutral-400 text-xs border border-dashed border-black/[0.08] dark:border-white/[0.08] rounded-2xl">
               No milestones found matching your search or filter.
             </div>
           ) : (
             filteredMilestones.map((m, mIdx) => (
               <div
                 key={`${m.id}-${mIdx}`}
-                className="relative flex flex-col md:flex-row gap-4 p-5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition-all shadow-lg group"
+                className="flex flex-col md:flex-row gap-4 p-5 rounded-2xl bg-neutral-50/70 dark:bg-neutral-900/60 border border-black/[0.04] dark:border-white/[0.06] hover:border-black/[0.08] dark:hover:border-white/[0.1] transition-all group"
               >
                 {/* Year / Era Pill Badge */}
-                <div className="flex md:flex-col items-center justify-between md:justify-start gap-2 md:w-28 shrink-0">
-                  <div className="flex items-center gap-2 md:flex-col">
-                    <span className="text-sm font-mono font-extrabold text-amber-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-lg shadow-sm">
-                      {m.era}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      {m.timestamp.split('T')[0]}
-                    </span>
-                  </div>
+                <div className="flex md:flex-col items-center justify-between md:justify-start gap-1.5 md:w-28 shrink-0">
+                  <span className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 bg-white dark:bg-neutral-800 border border-black/[0.06] dark:border-white/[0.08] px-2.5 py-1 rounded-lg">
+                    {m.era}
+                  </span>
+                  <span className="text-[10px] text-neutral-400 font-mono">
+                    {m.timestamp.split('T')[0]}
+                  </span>
                 </div>
 
                 {/* Milestone Content */}
-                <div className="flex-1 space-y-2.5">
+                <div className="flex-1 space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-xs px-2.5 py-0.5 rounded-full border font-mono font-semibold flex items-center gap-1.5 ${getCategoryBadgeStyle(m.category)}`}
+                        className={`text-xs px-2.5 py-0.5 rounded-full border font-medium flex items-center gap-1.5 ${getCategoryBadgeStyle(m.category)}`}
                       >
                         {getCategoryIcon(m.category)}
                         {m.category}
                       </span>
                       {m.impact === 'critical' && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-red-500/10 border border-red-500/30 text-red-400 font-mono font-bold uppercase">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-medium uppercase tracking-wider">
                           Critical Shift
                         </span>
                       )}
                       {m.impact === 'major' && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono font-bold uppercase">
-                          Major Milestone
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 font-medium uppercase tracking-wider">
+                          Major
                         </span>
                       )}
                     </div>
@@ -333,21 +330,21 @@ export const WebsiteStory: React.FC<Props> = ({
                     {onTraceEvidence && (
                       <button
                         onClick={() => onTraceEvidence(m.evidenceId || m.title)}
-                        className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 font-mono transition-colors cursor-pointer bg-emerald-500/5 hover:bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20"
+                        className="inline-flex items-center gap-1 text-[11px] text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer bg-black/[0.02] dark:bg-white/[0.04] hover:bg-black/[0.05] px-2 py-0.5 rounded-lg border border-black/[0.04] dark:border-white/[0.06]"
                         title="Trace underlying evidence record"
                       >
-                        <ShieldCheck className="w-3 h-3" />
+                        <ShieldCheck className="w-3 h-3 text-neutral-400" />
                         <span>Trace Evidence</span>
                         <ArrowRight className="w-3 h-3" />
                       </button>
                     )}
                   </div>
 
-                  <h4 className="text-base font-bold text-slate-100 font-mono group-hover:text-amber-300 transition-colors">
+                  <h4 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 font-sans">
                     {m.title}
                   </h4>
 
-                  <p className="text-sm text-slate-300 font-sans leading-relaxed">
+                  <p className="text-xs md:text-sm text-neutral-600 dark:text-neutral-400 font-sans leading-relaxed">
                     {m.description}
                   </p>
 

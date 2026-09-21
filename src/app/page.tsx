@@ -332,7 +332,7 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950">
+    <div className="min-h-screen flex flex-col bg-[#f5f5f7] dark:bg-[#09090b] text-neutral-900 dark:text-neutral-100 font-sans transition-colors duration-200">
       <Navbar
         currentDomain={investigation?.domain || 'example.com'}
         onSearch={(d) => handleInvestigate(d)}
@@ -345,30 +345,28 @@ export default function Home() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-6">
         {/* Loading Progress State */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20 px-6 space-y-6 bg-slate-900/70 border border-slate-800 rounded-3xl backdrop-blur-xl shadow-2xl">
+          <div className="flex flex-col items-center justify-center py-20 px-6 space-y-5 bg-white/80 dark:bg-[#141416]/90 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl apple-card backdrop-blur-xl">
             <div className="relative">
-              <Loader2 className="w-14 h-14 text-amber-400 animate-spin" />
-              <div className="absolute inset-0 rounded-full border-2 border-amber-400/20 animate-ping" />
+              <Loader2 className="w-10 h-10 text-neutral-800 dark:text-neutral-200 animate-spin" />
             </div>
 
             <div className="w-full max-w-md space-y-3 text-center">
-              <div className="flex items-center justify-between text-xs font-mono text-slate-400">
-                <span className="flex items-center gap-1.5 text-amber-300 font-bold">
-                  <Terminal className="w-3.5 h-3.5" /> Stage {loadingStage + 1} of{' '}
-                  {LOADING_STAGES.length}
+              <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
+                <span className="font-medium">
+                  Step {loadingStage + 1} of {LOADING_STAGES.length}
                 </span>
-                <span className="font-bold text-slate-200">{currentStage.progress}%</span>
+                <span className="font-mono font-medium text-neutral-700 dark:text-neutral-300">{currentStage.progress}%</span>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+              <div className="w-full bg-neutral-200/70 dark:bg-neutral-800 h-1.5 rounded-full overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-amber-500 via-purple-500 to-emerald-400 h-full rounded-full transition-all duration-500 ease-out shadow-md"
+                  className="bg-neutral-900 dark:bg-white h-full rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${currentStage.progress}%` }}
                 />
               </div>
 
-              <p className="text-slate-300 font-mono text-xs tracking-wide animate-pulse pt-1">
+              <p className="text-neutral-600 dark:text-neutral-400 text-xs font-medium pt-1">
                 {currentStage.label}
               </p>
             </div>
@@ -377,25 +375,25 @@ export default function Home() {
 
         {/* Error Notification Card */}
         {error && !loading && (
-          <div className="p-6 bg-red-950/40 border border-red-800/80 text-red-200 rounded-2xl text-xs md:text-sm font-mono flex items-start gap-3.5 shadow-2xl">
-            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <span className="font-bold text-red-300 uppercase tracking-wider block">
-                Investigation Scan Error:
+          <div className="p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-neutral-900 dark:text-neutral-100 rounded-2xl text-xs md:text-sm flex items-start gap-3.5 shadow-sm">
+            <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+            <div className="space-y-1.5">
+              <span className="font-semibold text-red-600 dark:text-red-400 text-xs uppercase tracking-wider block">
+                Investigation Notice
               </span>
-              <p className="text-slate-300 font-sans text-xs">{error}</p>
+              <p className="text-neutral-700 dark:text-neutral-300 text-xs">{error}</p>
               <div className="pt-2 flex items-center gap-2">
                 <button
                   onClick={() => handleInvestigate('example.com')}
-                  className="px-3 py-1 bg-red-900/40 hover:bg-red-800/60 border border-red-700/50 rounded-lg text-xs font-mono text-red-200 transition-colors cursor-pointer"
+                  className="px-3 py-1 bg-white dark:bg-neutral-800 hover:bg-neutral-100 text-neutral-700 dark:text-neutral-300 border border-black/[0.08] dark:border-white/[0.1] rounded-lg text-xs font-medium transition-colors cursor-pointer"
                 >
-                  Try scanning example.com
+                  Scan example.com
                 </button>
                 <button
                   onClick={() => handleInvestigate('github.com')}
-                  className="px-3 py-1 bg-red-900/40 hover:bg-red-800/60 border border-red-700/50 rounded-lg text-xs font-mono text-red-200 transition-colors cursor-pointer"
+                  className="px-3 py-1 bg-white dark:bg-neutral-800 hover:bg-neutral-100 text-neutral-700 dark:text-neutral-300 border border-black/[0.08] dark:border-white/[0.1] rounded-lg text-xs font-medium transition-colors cursor-pointer"
                 >
-                  Try scanning github.com
+                  Scan github.com
                 </button>
               </div>
             </div>
@@ -511,54 +509,54 @@ export default function Home() {
                   {activeTab === 'vs' && <DomainVsDomain currentInvestigation={investigation} />}
 
                   {activeTab === 'overview' && (
-                    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl space-y-4 backdrop-blur-xl">
-                      <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-4 gap-2">
-                        <h3 className="text-xl font-extrabold text-slate-100 font-mono flex items-center gap-2">
-                          <Globe className="w-5 h-5 text-amber-400" />
+                    <div className="bg-white/80 dark:bg-[#141416]/90 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl p-6 md:p-8 apple-card space-y-4 backdrop-blur-xl">
+                      <div className="flex flex-wrap items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] pb-4 gap-2">
+                        <h3 className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />
                           Authoritative DNS Zone Records
                         </h3>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleTraceEvidence('ev-dns-' + investigation.domain)}
-                            className="text-xs text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 rounded-full font-mono font-bold transition-colors cursor-pointer"
+                            className="text-xs text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200/80 px-3 py-1 rounded-full font-medium transition-colors cursor-pointer"
                           >
                             Trace DNS Evidence
                           </button>
-                          <span className="text-xs text-slate-400 font-mono">
+                          <span className="text-xs text-neutral-500">
                             {investigation.dnsRecords.length} entries resolved via DoH
                           </span>
                         </div>
                       </div>
-                      <div className="overflow-x-auto rounded-xl border border-slate-800">
+                      <div className="overflow-x-auto rounded-xl border border-black/[0.06] dark:border-white/[0.08]">
                         <table className="w-full text-left text-xs border-collapse">
                           <thead>
-                            <tr className="border-b border-slate-800 bg-slate-950 text-slate-400 uppercase font-mono tracking-wider">
+                            <tr className="border-b border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.02] text-neutral-500 uppercase font-medium tracking-wider">
                               <th className="p-3.5">Type</th>
                               <th className="p-3.5">Value / Target Record</th>
                               <th className="p-3.5">TTL</th>
                               <th className="p-3.5 text-right">Action</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-800/60 font-mono">
+                          <tbody className="divide-y divide-black/[0.04] dark:divide-white/[0.04] font-mono">
                             {investigation.dnsRecords.map((r, i) => (
-                              <tr key={i} className="hover:bg-slate-950/60 transition-colors group">
-                                <td className="p-3.5 font-bold text-amber-400">
-                                  <span className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 rounded-md">
+                              <tr key={i} className="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group">
+                                <td className="p-3.5 font-medium text-neutral-900 dark:text-neutral-100">
+                                  <span className="px-2.5 py-1 bg-black/[0.04] dark:bg-white/[0.06] rounded-md text-[11px]">
                                     {r.type}
                                   </span>
                                 </td>
-                                <td className="p-3.5 text-slate-200 font-semibold">{r.value}</td>
-                                <td className="p-3.5 text-slate-400">{r.ttl || 3600}s</td>
+                                <td className="p-3.5 text-neutral-800 dark:text-neutral-200 font-medium">{r.value}</td>
+                                <td className="p-3.5 text-neutral-500">{r.ttl || 3600}s</td>
                                 <td className="p-3.5 text-right">
                                   <button
                                     onClick={() => copyText(r.value)}
-                                    className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md text-xs transition-colors cursor-pointer inline-flex items-center gap-1"
+                                    className="p-1.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 text-neutral-600 dark:text-neutral-300 rounded-md text-xs transition-colors cursor-pointer inline-flex items-center gap-1"
                                     title="Copy record value"
                                   >
                                     {copiedValue === r.value ? (
-                                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                      <Check className="w-3.5 h-3.5 text-emerald-500" />
                                     ) : (
-                                      <Copy className="w-3.5 h-3.5 text-slate-400" />
+                                      <Copy className="w-3.5 h-3.5 text-neutral-400" />
                                     )}
                                   </button>
                                 </td>
@@ -606,6 +604,18 @@ export default function Home() {
           </>
         )}
       </main>
+
+      {/* Minimal Apple Footer */}
+      <footer className="w-full max-w-7xl mx-auto px-4 md:px-6 py-6 border-t border-black/[0.06] dark:border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 gap-3">
+        <div className="flex items-center gap-2">
+          <span>Internet Archaeologist © 2026</span>
+          <span>•</span>
+          <span>Passive Public Records Forensics</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-neutral-400 dark:text-neutral-500">Cookieless Analysis • Public Intelligence</span>
+        </div>
+      </footer>
 
       {/* Global Search Bar (⌘K) Modal */}
       <GlobalSearchBar

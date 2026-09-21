@@ -22,25 +22,25 @@ export const SavedInvestigations: React.FC<Props> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl space-y-4 p-6 glow-amber">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-[#161618] border border-black/[0.08] dark:border-white/[0.1] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl space-y-4 p-6 apple-card">
+        <div className="flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] pb-4">
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/30">
+            <div className="p-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl">
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-100 font-mono">
+              <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
                 Saved Target Investigations
               </h3>
-              <p className="text-xs text-slate-400 font-mono">
+              <p className="text-xs text-neutral-500">
                 Locally stored intelligence dossiers
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl transition-colors cursor-pointer"
+            className="p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-800 dark:hover:text-white rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
