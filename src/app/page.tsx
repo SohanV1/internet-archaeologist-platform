@@ -16,7 +16,10 @@ import {
   deleteInvestigation,
 } from '@/lib/osint/storage';
 import { generateHtmlReport, exportDnsToCsv, exportSubdomainsToCsv } from '@/lib/osint/export';
+import { validateAndSanitizeDomain } from '@/lib/osint/validator';
+import { LegalComplianceModal, ComplianceSection } from '@/components/LegalComplianceModal';
 import { Globe, Loader2, Copy, Check, AlertTriangle, Terminal } from 'lucide-react';
+
 
 // Lazy loading of heavy tab components for optimized perceived performance
 const WebsiteStory = dynamic(
@@ -115,6 +118,13 @@ export default function Home() {
   const [isSavedModalOpen, setIsSavedModalOpen] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState<boolean>(false);
+  const [legalSection, setLegalSection] = useState<ComplianceSection>('ethics');
+
+  const handleOpenLegal = useCallback((section: ComplianceSection) => {
+    setLegalSection(section);
+    setIsLegalModalOpen(true);
+  }, []);
 
   // Update browser tab title dynamically with active domain
   useEffect(() => {
@@ -147,28 +157,17 @@ export default function Home() {
   );
 
   const validateDomain = (input: string): { valid: boolean; cleaned: string; error?: string } => {
-    const cleaned = input
-      .trim()
-      .replace(/^https?:\/\//i, '')
-      .replace(/^ftp:\/\//i, '')
-      .replace(/\/.*$/, '')
-      .toLowerCase();
-
-    if (!cleaned) {
-      return { valid: false, cleaned: '', error: 'Domain name cannot be empty.' };
-    }
-
-    const domainRegex = /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
-    if (!domainRegex.test(cleaned)) {
+    const res = validateAndSanitizeDomain(input);
+    if (!res.isValid || !res.sanitizedDomain) {
       return {
         valid: false,
-        cleaned,
-        error: `"${input}" is not a valid domain name. Example format: github.com or cloudflare.com`,
+        cleaned: input,
+        error: res.error || `"${input}" is not a valid domain name. Example format: github.com or cloudflare.com`,
       };
     }
-
-    return { valid: true, cleaned };
+    return { valid: true, cleaned: res.sanitizedDomain };
   };
+
 
   const handleInvestigate = useCallback(
     async (targetDomainInput: string, initialTab?: NavigationTab) => {
@@ -605,15 +604,45 @@ export default function Home() {
         )}
       </main>
 
-      {/* Minimal Apple Footer */}
-      <footer className="w-full max-w-7xl mx-auto px-4 md:px-6 py-6 border-t border-black/[0.06] dark:border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 gap-3">
+      {/* Minimal Apple Footer with Legal & Compliance Transparency */}
+      <footer className="w-full max-w-7xl mx-auto px-4 md:px-6 py-6 border-t border-black/[0.06] dark:border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 gap-4">
         <div className="flex items-center gap-2">
           <span>Internet Archaeologist © 2026</span>
           <span>•</span>
-          <span>Passive Public Records Forensics</span>
+          <span className="font-mono text-[11px] text-neutral-400 dark:text-neutral-500">RFC 8484 / RFC 6962 Passive Forensics</span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-neutral-400 dark:text-neutral-500">Cookieless Analysis • Public Intelligence</span>
+        <div className="flex flex-wrap items-center justify-center gap-3 text-xs">
+          <button
+            type="button"
+            onClick={() => handleOpenLegal('ethics')}
+            className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+          >
+            Ethical OSINT Charter
+          </button>
+          <span>•</span>
+          <button
+            type="button"
+            onClick={() => handleOpenLegal('privacy')}
+            className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+          >
+            Privacy & GDPR
+          </button>
+          <span>•</span>
+          <button
+            type="button"
+            onClick={() => handleOpenLegal('terms')}
+            className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+          >
+            Terms of Use
+          </button>
+          <span>•</span>
+          <button
+            type="button"
+            onClick={() => handleOpenLegal('provenance')}
+            className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+          >
+            Cryptographic Integrity
+          </button>
         </div>
       </footer>
 
@@ -640,6 +669,13 @@ export default function Home() {
           handleTabChange('story');
         }}
         onDelete={handleDeleteSaved}
+      />
+
+      {/* Legal & Compliance Modal */}
+      <LegalComplianceModal
+        isOpen={isLegalModalOpen}
+        onClose={() => setIsLegalModalOpen(false)}
+        defaultSection={legalSection}
       />
     </div>
   );

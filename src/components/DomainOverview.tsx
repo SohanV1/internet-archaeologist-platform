@@ -19,7 +19,12 @@ import {
   Download,
   ChevronDown,
   Shield,
+  AlertTriangle,
+  ShieldAlert,
+  CheckCircle2,
 } from 'lucide-react';
+import { evaluateRiskPosture } from '@/lib/osint/riskAssessment';
+
 import {
   ResponsiveContainer,
   BarChart,
@@ -89,6 +94,18 @@ export const DomainOverviewComponent: React.FC<Props> = ({
   const [locCount, setLocCount] = useState<number>(0);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
   const [showTelemetry, setShowTelemetry] = useState<boolean>(false);
+  const [showRiskDetails, setShowRiskDetails] = useState<boolean>(false);
+
+  const risk = useMemo(() => {
+    if (investigation.riskAssessment) return investigation.riskAssessment;
+    return evaluateRiskPosture({
+      domain: investigation.domain,
+      dnsRecords: investigation.dnsRecords || [],
+      certificates: investigation.certificates || [],
+      subdomains: investigation.subdomains || [],
+      technologies: investigation.technologies || [],
+    });
+  }, [investigation]);
 
   // Animated counter for total LOC (381,400)
   useEffect(() => {
@@ -304,6 +321,119 @@ export const DomainOverviewComponent: React.FC<Props> = ({
               .join(', ') || 'Analyzed'}
           </p>
         </div>
+      </div>
+
+      {/* Apple-Style Risk Assessment & Defensive Posture Section */}
+      <div className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] rounded-xl p-4 md:p-5 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.04] dark:border-white/[0.06] pb-3">
+          <div className="flex items-center gap-2.5">
+            <div
+              className={`p-2 rounded-lg ${
+                risk.grade === 'A+' || risk.grade === 'A'
+                  ? 'bg-emerald-500/10 text-emerald-500'
+                  : risk.grade === 'B' || risk.grade === 'C'
+                    ? 'bg-amber-500/10 text-amber-500'
+                    : 'bg-rose-500/10 text-rose-500'
+              }`}
+            >
+              <ShieldAlert className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+                <span>Security & Passive Hygiene Posture</span>
+                <span
+                  className={`px-2 py-0.5 rounded text-[10px] font-medium border ${
+                    risk.grade === 'A+' || risk.grade === 'A'
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                      : risk.grade === 'B' || risk.grade === 'C'
+                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                        : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                  }`}
+                >
+                  Grade {risk.grade} ({risk.riskLevel} RISK)
+                </span>
+              </div>
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                {risk.passedChecksCount} of {risk.totalChecksCount} baseline security controls verified
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <div className="text-xs font-mono font-semibold text-neutral-800 dark:text-neutral-200">
+                {risk.overallScore} / 100
+              </div>
+              <div className="text-[10px] text-neutral-400">Risk Score</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Narrative Posture Summary */}
+        <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">
+          {risk.postureSummary}
+        </p>
+
+        {/* Findings Toggle & Expansion */}
+        {risk.findings.length > 0 && (
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => setShowRiskDetails((prev) => !prev)}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+              <span>
+                {showRiskDetails ? 'Hide' : 'Review'} {risk.findings.length} Defensive Vulnerabilities & Recommendations
+              </span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
+                  showRiskDetails ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {showRiskDetails && (
+              <div className="mt-3 space-y-2.5 pt-2 border-t border-black/[0.04] dark:border-white/[0.06] animate-fade-in">
+                {risk.findings.map((f) => (
+                  <div
+                    key={f.id}
+                    className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-black/[0.04] dark:border-white/[0.06] space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                            f.severity === 'HIGH'
+                              ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                              : f.severity === 'MEDIUM'
+                                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                                : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'
+                          }`}
+                        >
+                          {f.severity}
+                        </span>
+                        <span className="text-xs font-medium text-neutral-900 dark:text-neutral-100">
+                          {f.title}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-neutral-400 font-mono">
+                        +{f.impactScore} risk penalty
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                      {f.description}
+                    </p>
+                    <div className="text-[11px] text-emerald-700 dark:text-emerald-400/90 bg-emerald-500/5 dark:bg-emerald-500/10 p-2 rounded border border-emerald-500/15 flex items-start gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-500" />
+                      <span>{f.recommendation}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Clean Telemetry Disclosure Header */}

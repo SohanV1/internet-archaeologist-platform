@@ -154,7 +154,7 @@ export function getDynamicCodebaseAnalytics(): CodebaseAnalyticsData {
     ];
 
     for (const dir of candidateDirs) {
-      if (fs.existsSync(dir)) {
+      if (fs.existsSync(/*turbopackIgnore: true*/ dir)) {
         scannedProjectsCount++;
         scanDirectory(dir, countsByExt, 3);
       }

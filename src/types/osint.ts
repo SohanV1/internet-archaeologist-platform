@@ -255,6 +255,29 @@ export interface VisualReconstruction {
   statusCode: number;
 }
 
+export type RiskSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
+export interface RiskFinding {
+  id: string;
+  category: 'SSL/TLS' | 'DNS & Email' | 'Transport Security' | 'Subdomain Surface' | 'Information Disclosure';
+  severity: RiskSeverity;
+  title: string;
+  description: string;
+  recommendation: string;
+  impactScore: number;
+}
+
+export interface RiskAssessment {
+  overallScore: number;
+  grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
+  riskLevel: RiskSeverity;
+  findings: RiskFinding[];
+  passedChecksCount: number;
+  totalChecksCount: number;
+  postureSummary: string;
+  generatedAt: string;
+}
+
 export interface Investigation {
   id: string;
   domain: string;
@@ -277,4 +300,6 @@ export interface Investigation {
   techEvolution?: TechEvolutionAnalysis;
   dnsDrifts?: DnsDriftEvent[];
   visualReconstructions?: VisualReconstruction[];
+  riskAssessment?: RiskAssessment;
 }
+

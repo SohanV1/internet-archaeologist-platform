@@ -21,15 +21,28 @@ import { detectDnsDrift } from './dnsDrift';
 import { reconstructVisualSnapshots } from './visualReconstructor';
 import { calculateSha256 } from './cryptoHash';
 import { fetchWithRetry } from './fetchWithRetry';
+import { validateAndSanitizeDomain } from './validator';
+import { logger } from './logger';
+import { evaluateRiskPosture } from './riskAssessment';
 
 export async function createInvestigation(domainInput: string): Promise<Investigation> {
-  const domain = domainInput
-    .replace(/^https?:\/\//, '')
-    .replace(/\/.*$/, '')
-    .trim()
-    .toLowerCase();
+  const validation = validateAndSanitizeDomain(domainInput);
+  if (!validation.isValid || !validation.sanitizedDomain) {
+    logger.warn('investigationEngine', `Rejected invalid domain target: ${domainInput}`, {
+      error: validation.error,
+      riskFlags: validation.riskFlags,
+    });
+    throw new Error(validation.error || 'Invalid target domain format');
+  }
+
+  const domain = validation.sanitizedDomain;
   const targetUrl = `https://${domain}`;
   const now = new Date().toISOString();
+
+  logger.info('investigationEngine', `Initiating passive investigation for domain: ${domain}`, {
+    targetUrl,
+  });
+
 
   // Run DNS lookup, subdomain discovery, historical snapshots, and certificate logs concurrently
   const [dnsResult, subdomains, snapshots, certificates] = await Promise.all([
@@ -68,10 +81,14 @@ export async function createInvestigation(domainInput: string): Promise<Investig
       rawResponseHeaders = Object.entries(headersObj)
         .map(([k, v]) => `${k}: ${v}`)
         .join('\n');
-      htmlSample = await res.text();
+      const fullHtml = await res.text();
+      htmlSample = fullHtml.length > 500000 ? fullHtml.slice(0, 500000) : fullHtml;
       detectedTech = detectTechnologies(headersObj, htmlSample);
     }
-  } catch {
+  } catch (probeErr) {
+    logger.warn('investigationEngine', `Live HTTP probe unreachable for ${targetUrl}`, {
+      error: probeErr instanceof Error ? probeErr.message : String(probeErr),
+    });
     // If live fetch fails, run fallback signature detection on baseline
     detectedTech = detectTechnologies({ server: 'nginx', 'x-powered-by': 'Next.js' }, htmlSample);
   }
@@ -334,6 +351,16 @@ export async function createInvestigation(domainInput: string): Promise<Investig
     }
   });
 
+  // Compute Passive Security Posture & Hygiene Risk Assessment
+  const riskAssessment = evaluateRiskPosture({
+    domain,
+    dnsRecords: linkedDnsRecords,
+    certificates: linkedCertificates,
+    subdomains: linkedSubdomains,
+    technologies: detectedTech,
+    rawHeaders: rawResponseHeaders,
+  });
+
   const investigation: Investigation = {
     id: `inv-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
     domain,
@@ -356,7 +383,16 @@ export async function createInvestigation(domainInput: string): Promise<Investig
     techEvolution,
     dnsDrifts,
     visualReconstructions,
+    riskAssessment,
   };
+
+  logger.info('investigationEngine', `Successfully completed passive investigation for ${domain}`, {
+    domain,
+    riskGrade: riskAssessment.grade,
+    riskScore: riskAssessment.overallScore,
+    subdomainsCount: linkedSubdomains.length,
+    dnsRecordsCount: linkedDnsRecords.length,
+  });
 
   return investigation;
 }
