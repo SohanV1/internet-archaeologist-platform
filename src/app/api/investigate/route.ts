@@ -2,11 +2,32 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createInvestigation } from '@/lib/osint/investigationEngine';
 import { validateAndSanitizeDomain } from '@/lib/osint/validator';
 import { logger } from '@/lib/osint/logger';
+import { globalInvestigateRateLimiter, getClientIp } from '@/lib/security/rateLimiter';
 import { InvestigateRequestBody, InvestigateApiResponse } from '@/types/api';
 
 export async function POST(req: NextRequest): Promise<NextResponse<InvestigateApiResponse>> {
   const startTime = performance.now();
   const requestId = `req-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+
+  // Rate Limiting Enforcement (30 requests / 60s per client IP)
+  const clientIp = getClientIp(req.headers);
+  const rateLimit = globalInvestigateRateLimiter.check(clientIp);
+  if (!rateLimit.allowed) {
+    logger.warn('api:investigate', `Rate limit exceeded for client: ${clientIp}`, undefined, requestId);
+    return NextResponse.json(
+      { error: `Too many investigation requests. Please wait ${rateLimit.retryAfter} seconds before trying again.` },
+      {
+        status: 429,
+        headers: {
+          'X-Request-Id': requestId,
+          'Retry-After': String(rateLimit.retryAfter),
+          'X-RateLimit-Limit': String(rateLimit.limit),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(rateLimit.resetTime),
+        },
+      }
+    );
+  }
 
   try {
     let body: Partial<InvestigateRequestBody>;
@@ -74,6 +95,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<InvestigateAp
       headers: {
         'X-Request-Id': requestId,
         'Server-Timing': `investigation;dur=${durationMs}`,
+        'X-RateLimit-Limit': String(rateLimit.limit),
+        'X-RateLimit-Remaining': String(rateLimit.remaining),
+        'X-RateLimit-Reset': String(rateLimit.resetTime),
       },
     });
   } catch (err: unknown) {
@@ -82,13 +106,21 @@ export async function POST(req: NextRequest): Promise<NextResponse<InvestigateAp
 
     logger.error('api:investigate', `Unhandled API error: ${errorMessage}`, err, { durationMs }, requestId);
 
+    const safeErrorMessage =
+      process.env.NODE_ENV === 'production' && !errorMessage.includes('Invalid') && !errorMessage.includes('Access denied') && !errorMessage.includes('Domain')
+        ? 'An unexpected error occurred during investigation. Please verify the target domain and try again.'
+        : errorMessage;
+
     return NextResponse.json(
-      { error: errorMessage },
+      { error: safeErrorMessage },
       {
         status: 500,
         headers: {
           'X-Request-Id': requestId,
           'Server-Timing': `error;dur=${durationMs}`,
+          'X-RateLimit-Limit': String(rateLimit.limit),
+          'X-RateLimit-Remaining': String(rateLimit.remaining),
+          'X-RateLimit-Reset': String(rateLimit.resetTime),
         },
       }
     );

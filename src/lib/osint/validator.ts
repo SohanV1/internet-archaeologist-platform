@@ -158,3 +158,42 @@ export function validateAndSanitizeDomain(rawInput: unknown): ValidationResult {
     sanitizedDomain: domain,
   };
 }
+
+/**
+ * Validates outbound request URLs against SSRF, internal IP access,
+ * non-HTTP protocols, and cloud metadata endpoints.
+ */
+export function isSafeUrlForFetch(rawUrl: unknown): { safe: boolean; reason?: string } {
+  if (!rawUrl || typeof rawUrl !== 'string') {
+    return { safe: false, reason: 'URL must be a non-empty string.' };
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return { safe: false, reason: `Malformed URL: ${rawUrl}` };
+  }
+
+  // 1. Strict protocol enforcement: only http and https
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return {
+      safe: false,
+      reason: `Blocked protocol '${parsed.protocol}'. Only HTTP and HTTPS are permitted for OSINT queries.`,
+    };
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  // 2. Validate hostname against SSRF, private IPs, loopback, and cloud metadata
+  const validation = validateAndSanitizeDomain(hostname);
+  if (!validation.isValid) {
+    return {
+      safe: false,
+      reason: validation.error || `Restricted target hostname '${hostname}' for outbound request.`,
+    };
+  }
+
+  return { safe: true };
+}
+

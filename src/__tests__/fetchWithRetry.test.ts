@@ -56,4 +56,23 @@ describe('fetchWithRetry utility', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
+
+  it('immediately blocks SSRF attempts to private or metadata addresses before making fetch call', async () => {
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock;
+
+    await expect(
+      fetchWithRetry('http://169.254.169.254/latest/meta-data/')
+    ).rejects.toThrow(/SSRF Prevention Block/i);
+
+    await expect(
+      fetchWithRetry('http://127.0.0.1:8080/admin')
+    ).rejects.toThrow(/SSRF Prevention Block/i);
+
+    await expect(
+      fetchWithRetry('file:///etc/passwd')
+    ).rejects.toThrow(/SSRF Prevention Block/i);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });

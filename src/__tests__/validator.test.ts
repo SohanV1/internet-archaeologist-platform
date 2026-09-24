@@ -1,4 +1,4 @@
-import { validateAndSanitizeDomain } from '@/lib/osint/validator';
+import { validateAndSanitizeDomain, isSafeUrlForFetch } from '@/lib/osint/validator';
 
 describe('Security & Domain Validator (validateAndSanitizeDomain)', () => {
   describe('Valid Domain Scenarios', () => {
@@ -80,6 +80,41 @@ describe('Security & Domain Validator (validateAndSanitizeDomain)', () => {
       expect(validateAndSanitizeDomain(null).isValid).toBe(false);
       expect(validateAndSanitizeDomain(undefined).isValid).toBe(false);
       expect(validateAndSanitizeDomain(12345).isValid).toBe(false);
+    });
+  });
+
+  describe('isSafeUrlForFetch (Outbound SSRF Guard)', () => {
+    it('allows valid public HTTPS URLs', () => {
+      expect(isSafeUrlForFetch('https://cloudflare-dns.com/dns-query').safe).toBe(true);
+      expect(isSafeUrlForFetch('https://crt.sh/?q=example.com').safe).toBe(true);
+      expect(isSafeUrlForFetch('https://web.archive.org/cdx/search/cdx').safe).toBe(true);
+    });
+
+    it('blocks loopback and localhost URLs', () => {
+      expect(isSafeUrlForFetch('http://127.0.0.1:8080/admin').safe).toBe(false);
+      expect(isSafeUrlForFetch('http://localhost:3000').safe).toBe(false);
+    });
+
+    it('blocks cloud metadata endpoint URLs', () => {
+      expect(isSafeUrlForFetch('http://169.254.169.254/latest/meta-data/').safe).toBe(false);
+    });
+
+    it('blocks private IPv4 addresses in URLs', () => {
+      expect(isSafeUrlForFetch('http://10.0.0.1/status').safe).toBe(false);
+      expect(isSafeUrlForFetch('http://192.168.1.254/login').safe).toBe(false);
+      expect(isSafeUrlForFetch('http://172.16.0.5/api').safe).toBe(false);
+    });
+
+    it('blocks non-HTTP protocols (file, gopher, ftp)', () => {
+      expect(isSafeUrlForFetch('file:///etc/passwd').safe).toBe(false);
+      expect(isSafeUrlForFetch('gopher://evil.com/').safe).toBe(false);
+      expect(isSafeUrlForFetch('ftp://example.com/').safe).toBe(false);
+    });
+
+    it('handles malformed URL strings', () => {
+      expect(isSafeUrlForFetch('not-a-valid-url').safe).toBe(false);
+      expect(isSafeUrlForFetch('').safe).toBe(false);
+      expect(isSafeUrlForFetch(null).safe).toBe(false);
     });
   });
 });

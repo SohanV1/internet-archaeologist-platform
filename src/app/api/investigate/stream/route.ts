@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { CentralOrchestrator } from '@/lib/agents/centralOrchestrator';
 import { validateAndSanitizeDomain } from '@/lib/osint/validator';
 import { logger } from '@/lib/osint/logger';
+import { globalInvestigateRateLimiter, getClientIp } from '@/lib/security/rateLimiter';
 import { AuthorizationGateRecord } from '@/types/agent';
 
 export const runtime = 'nodejs';
@@ -9,6 +10,28 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   const requestId = `stream-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+  // Rate Limiting Enforcement (30 requests / 60s per client IP)
+  const clientIp = getClientIp(req.headers);
+  const rateLimit = globalInvestigateRateLimiter.check(clientIp);
+  if (!rateLimit.allowed) {
+    logger.warn('api:investigate:stream', `Rate limit exceeded for client: ${clientIp}`, undefined, requestId);
+    return new Response(
+      JSON.stringify({
+        error: `Too many streaming requests. Please wait ${rateLimit.retryAfter} seconds before trying again.`,
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateLimit.retryAfter),
+          'X-RateLimit-Limit': String(rateLimit.limit),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(rateLimit.resetTime),
+        },
+      }
+    );
+  }
 
   try {
     const body = await req.json();
@@ -18,7 +41,11 @@ export async function POST(req: NextRequest) {
     if (!rawDomain || typeof rawDomain !== 'string') {
       return new Response(JSON.stringify({ error: 'Domain parameter is required' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': String(rateLimit.limit),
+          'X-RateLimit-Remaining': String(rateLimit.remaining),
+        },
       });
     }
 
@@ -26,7 +53,11 @@ export async function POST(req: NextRequest) {
     if (!validation.isValid || !validation.sanitizedDomain) {
       return new Response(JSON.stringify({ error: validation.error || 'Invalid domain syntax' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': String(rateLimit.limit),
+          'X-RateLimit-Remaining': String(rateLimit.remaining),
+        },
       });
     }
 
@@ -81,6 +112,9 @@ export async function POST(req: NextRequest) {
         'Connection': 'keep-alive',
         'X-Accel-Buffering': 'no',
         'X-Request-Id': requestId,
+        'X-RateLimit-Limit': String(rateLimit.limit),
+        'X-RateLimit-Remaining': String(rateLimit.remaining),
+        'X-RateLimit-Reset': String(rateLimit.resetTime),
       },
     });
   } catch (err: unknown) {

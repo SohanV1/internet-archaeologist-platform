@@ -13,11 +13,18 @@ export interface FetchRetryOptions {
 
 const DEFAULT_RETRY_STATUSES = [408, 429, 500, 502, 503, 504];
 
+import { isSafeUrlForFetch } from './validator';
+
 export async function fetchWithRetry(
   url: string,
   init?: RequestInit,
   options?: FetchRetryOptions
 ): Promise<Response> {
+  const safetyCheck = isSafeUrlForFetch(url);
+  if (!safetyCheck.safe) {
+    throw new Error(`SSRF Prevention Block: ${safetyCheck.reason || 'Restricted outbound target'}`);
+  }
+
   const maxRetries = options?.retries ?? 2;
   const initialBackoff = options?.backoffMs ?? 600;
   const timeoutMs = options?.timeoutMs ?? 6000;
