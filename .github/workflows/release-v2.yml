@@ -96,28 +96,23 @@ jobs:
           if [ -z "$RELEASE_TAG" ] || [ "$RELEASE_TAG" = "main" ]; then
             RELEASE_TAG="v2.0.0"
           fi
-          echo "Packaging artifacts for release tag: $RELEASE_TAG"
-          tar -czvf "internet-archaeologist-${RELEASE_TAG}.tar.gz" \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='.next' \
-            --exclude='coverage' \
-            .
-          zip -r "internet-archaeologist-${RELEASE_TAG}.zip" . \
-            -x '*.git*' \
-            -x '*node_modules*' \
-            -x '*.next*' \
-            -x '*coverage*'
+          echo "Packaging clean repository tree for release tag: $RELEASE_TAG"
+          git archive --format=tar.gz --prefix="internet-archaeologist-${RELEASE_TAG}/" -o "internet-archaeologist-${RELEASE_TAG}.tar.gz" HEAD
+          git archive --format=zip --prefix="internet-archaeologist-${RELEASE_TAG}/" -o "internet-archaeologist-${RELEASE_TAG}.zip" HEAD
+          ls -lh internet-archaeologist-${RELEASE_TAG}.*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v2.0.0' }}
+          name: Internet Archaeologist Platform ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v2.0.0' }}
           body_path: RELEASE_NOTES.md
           files: |
             internet-archaeologist-*.tar.gz
             internet-archaeologist-*.zip
           draft: false
           prerelease: false
-          name: Internet Archaeologist Platform ${{ github.ref_name }}
+          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
