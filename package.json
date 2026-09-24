@@ -1,7 +1,7 @@
 {
   "name": "osint_tool",
-  "version": "1.5.0",
-  "description": "Internet Archaeologist Platform v1.5 - Passive OSINT Reconnaissance Engine",
+  "version": "2.0.0",
+  "description": "Internet Archaeologist Platform v2.0 - Multi-Agent Defensive OSINT & Website Security Suite",
   "main": "index.js",
   "scripts": {
     "dev": "next dev -p 5006",

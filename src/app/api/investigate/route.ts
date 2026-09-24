@@ -59,7 +59,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<InvestigateAp
       requestId
     );
 
-    const investigation = await createInvestigation(validation.sanitizedDomain);
+    const investigation = await createInvestigation(validation.sanitizedDomain, body.authorization);
     const durationMs = Math.round(performance.now() - startTime);
 
     logger.info(

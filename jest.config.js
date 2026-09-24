@@ -1,5 +1,9 @@
+const path = require('path');
+
 /** @type {import('jest').Config} */
 module.exports = {
+  rootDir: __dirname,
+  moduleDirectories: ['node_modules', path.resolve(__dirname, 'node_modules')],
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
@@ -25,6 +29,7 @@ module.exports = {
     ],
   },
   testMatch: ['**/__tests__/**/*.test.[jt]s?(x)'],
+  testPathIgnorePatterns: ['/node_modules/', '/node_modules_corrupt/'],
   collectCoverageFrom: [
     'src/lib/osint/history.ts',
     'src/lib/osint/cryptoHash.ts',

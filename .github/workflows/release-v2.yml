@@ -1,0 +1,123 @@
+name: Release v2.0 Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-and-test:
+    name: Validate, Lint & Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Run TypeScript Typecheck
+        run: npm run typecheck
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Jest Unit Tests with Coverage Enforcement
+        run: npm run test:coverage
+
+      - name: Upload Test Coverage Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report-v2
+          path: coverage/
+          retention-days: 14
+
+  create-release:
+    name: Package & Publish GitHub Release
+    needs: validate-and-test
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Build Next.js Production Bundle
+        run: npm run build
+
+      - name: Extract Release Notes from CHANGELOG.md
+        id: release_notes
+        run: |
+          node -e '
+            const fs = require("fs");
+            const tag = process.env.GITHUB_REF_NAME || "";
+            const version = tag.replace(/^v/, "") || "2.0.0";
+            const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
+            const header = "## [" + version + "]";
+            const start = changelog.indexOf(header);
+            let notes = "";
+            if (start !== -1) {
+              const after = changelog.slice(start);
+              const next = after.indexOf("\n## [", header.length);
+              notes = next !== -1 ? after.slice(0, next).trim() : after.trim();
+            } else {
+              notes = "### Release " + (tag || "v2.0.0") + "\n\nRefer to CHANGELOG.md for details.";
+            }
+            fs.writeFileSync("RELEASE_NOTES.md", notes);
+          '
+
+      - name: Package Release Archives (Tarball & Zip)
+        run: |
+          RELEASE_TAG="${{ github.ref_name }}"
+          if [ -z "$RELEASE_TAG" ] || [ "$RELEASE_TAG" = "main" ]; then
+            RELEASE_TAG="v2.0.0"
+          fi
+          echo "Packaging artifacts for release tag: $RELEASE_TAG"
+          tar -czvf "internet-archaeologist-${RELEASE_TAG}.tar.gz" \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='coverage' \
+            .
+          zip -r "internet-archaeologist-${RELEASE_TAG}.zip" . \
+            -x '*.git*' \
+            -x '*node_modules*' \
+            -x '*.next*' \
+            -x '*coverage*'
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
+          files: |
+            internet-archaeologist-*.tar.gz
+            internet-archaeologist-*.zip
+          draft: false
+          prerelease: false
+          name: Internet Archaeologist Platform ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

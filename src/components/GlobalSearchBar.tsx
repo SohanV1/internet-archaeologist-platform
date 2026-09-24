@@ -16,6 +16,9 @@ import {
   Sparkles,
   ArrowRight,
   Database,
+  Mail,
+  HeartPulse,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface SearchResultItem {
@@ -23,7 +26,16 @@ interface SearchResultItem {
   tab: NavigationTab;
   tabLabel: string;
   category:
-    'DNS' | 'Subdomain' | 'Technology' | 'Archive' | 'Certificate' | 'Milestone' | 'Evidence';
+    | 'DNS'
+    | 'Subdomain'
+    | 'Technology'
+    | 'Archive'
+    | 'Certificate'
+    | 'Milestone'
+    | 'Evidence'
+    | 'Vulnerability'
+    | 'Contact'
+    | 'Health';
   title: string;
   subtitle: string;
   badge?: string;
@@ -191,6 +203,49 @@ export const GlobalSearchBar: React.FC<Props> = ({
         subtitle: `Source: ${ev.source} • Method: ${ev.collectionMethod}`,
         badge: `${ev.confidenceScore}%`,
         icon: Shield,
+      });
+    });
+
+    // 8. Discovered Public Contacts -> 'domain-intel'
+    investigation.exposedContacts?.forEach((contact, idx) => {
+      items.push({
+        id: `contact-${idx}`,
+        tab: 'domain-intel',
+        tabLabel: 'Domain Intelligence',
+        category: 'Contact',
+        title: `${contact.role}: ${contact.maskedValue || contact.value}`,
+        subtitle: `Source: ${contact.source} • RFC/Public Data`,
+        badge: contact.role.split(' ')[0],
+        icon: Mail,
+      });
+    });
+
+    // 9. Vulnerabilities -> 'vulnerabilities'
+    investigation.vulnerabilities?.forEach((vuln) => {
+      items.push({
+        id: vuln.id,
+        tab: 'vulnerabilities',
+        tabLabel: 'Vulnerability Posture',
+        category: 'Vulnerability',
+        title: `[${vuln.severity}] ${vuln.title}`,
+        subtitle: `CVSS ${vuln.cvssScore} • Category: ${vuln.category} • Status: ${vuln.status}`,
+        badge: vuln.severity,
+        icon: ShieldAlert,
+      });
+    });
+
+    // 10. Website Health Issues -> 'website-health'
+    const brokenLinks = investigation.websiteHealth?.brokenLinks || investigation.healthReport?.brokenLinks;
+    brokenLinks?.forEach((bl, idx) => {
+      items.push({
+        id: `health-bl-${idx}`,
+        tab: 'website-health',
+        tabLabel: 'Website Health & Hygiene',
+        category: 'Health',
+        title: `Broken Link (${bl.statusCode}): ${bl.url}`,
+        subtitle: `Status: HTTP ${bl.statusCode} • Page: ${bl.sourcePage}`,
+        badge: `${bl.statusCode}`,
+        icon: HeartPulse,
       });
     });
 

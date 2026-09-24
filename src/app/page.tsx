@@ -18,7 +18,10 @@ import {
 import { generateHtmlReport, exportDnsToCsv, exportSubdomainsToCsv } from '@/lib/osint/export';
 import { validateAndSanitizeDomain } from '@/lib/osint/validator';
 import { LegalComplianceModal, ComplianceSection } from '@/components/LegalComplianceModal';
-import { Globe, Loader2, Copy, Check, AlertTriangle, Terminal } from 'lucide-react';
+import { TargetAuthorizationModal } from '@/components/TargetAuthorizationModal';
+import { AgentProgressTracker } from '@/components/AgentProgressTracker';
+import { AgentId, AgentTelemetry, AuthorizationGateRecord } from '@/types/agent';
+import { Globe, Loader2, Copy, Check, AlertTriangle, Terminal, ShieldAlert } from 'lucide-react';
 
 
 // Lazy loading of heavy tab components for optimized perceived performance
@@ -80,6 +83,22 @@ const AnalyticsDashboard = dynamic(
   () => import('@/components/AnalyticsDashboard').then((m) => m.AnalyticsDashboard),
   { loading: () => <SkeletonLoader type="card" /> }
 );
+const DomainIntelligenceView = dynamic(
+  () => import('@/components/DomainIntelligenceView').then((m) => m.DomainIntelligenceView),
+  { loading: () => <SkeletonLoader type="card" /> }
+);
+const WebsiteHealthCard = dynamic(
+  () => import('@/components/WebsiteHealthCard').then((m) => m.WebsiteHealthCard),
+  { loading: () => <SkeletonLoader type="card" /> }
+);
+const VulnerabilityReport = dynamic(
+  () => import('@/components/VulnerabilityReport').then((m) => m.VulnerabilityReport),
+  { loading: () => <SkeletonLoader type="table" /> }
+);
+const SnapshotHistoryDiff = dynamic(
+  () => import('@/components/SnapshotHistoryDiff').then((m) => m.SnapshotHistoryDiff),
+  { loading: () => <SkeletonLoader type="card" /> }
+);
 
 const LOADING_STAGES = [
   { label: 'Resolving Cloudflare DoH & Authoritative DNS Zones...', progress: 20 },
@@ -105,12 +124,27 @@ export type NavigationTab =
   | 'changes'
   | 'graph'
   | 'evidence'
-  | 'analytics';
+  | 'analytics'
+  | 'domain-intel'
+  | 'website-health'
+  | 'vulnerabilities'
+  | 'scan-diff';
+
+const INITIAL_TELEMETRIES: Record<AgentId, AgentTelemetry> = {
+  orchestrator: { id: 'orchestrator', name: 'Central Orchestrator', role: 'Workflow Coordinator & Audit', status: 'idle', progress: 0, currentAction: 'Initialized', findingsCount: 0 },
+  'passive-recon': { id: 'passive-recon', name: 'Passive Recon', role: 'DNS, CT Logs & RDAP', status: 'idle', progress: 0, currentAction: 'Pending launch', findingsCount: 0 },
+  'tech-hosting': { id: 'tech-hosting', name: 'Tech & Hosting', role: 'Infrastructure & Mail Detection', status: 'idle', progress: 0, currentAction: 'Pending launch', findingsCount: 0 },
+  'snapshot-history': { id: 'snapshot-history', name: 'Snapshot & History', role: 'Temporal Forensics & Version Diffing', status: 'idle', progress: 0, currentAction: 'Pending launch', findingsCount: 0 },
+  'contact-discovery': { id: 'contact-discovery', name: 'Contact Discovery', role: 'Public Contact & security.txt Parser', status: 'idle', progress: 0, currentAction: 'Pending launch', findingsCount: 0 },
+  'website-health': { id: 'website-health', name: 'Website Health', role: 'HTTP Performance & Login Hygiene', status: 'idle', progress: 0, currentAction: 'Pending launch', findingsCount: 0 },
+  'safe-vulnerability': { id: 'safe-vulnerability', name: 'Safe Vulnerability', role: 'Defensive Posture & CVSS Scoring', status: 'idle', progress: 0, currentAction: 'Pending launch', findingsCount: 0 },
+  'source-enrichment': { id: 'source-enrichment', name: 'Source Enrichment', role: 'Authoritative Citations & RFC Specs', status: 'idle', progress: 0, currentAction: 'Pending launch', findingsCount: 0 },
+  reporting: { id: 'reporting', name: 'Reporting Agent', role: 'Executive Summary & Posture Ledger', status: 'idle', progress: 0, currentAction: 'Pending launch', findingsCount: 0 },
+};
 
 export default function Home() {
   const [investigation, setInvestigation] = useState<Investigation | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [loadingStage, setLoadingStage] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<NavigationTab>('story');
   const [highlightEvidenceId, setHighlightEvidenceId] = useState<string | null>(null);
@@ -121,6 +155,13 @@ export default function Home() {
   const [isLegalModalOpen, setIsLegalModalOpen] = useState<boolean>(false);
   const [legalSection, setLegalSection] = useState<ComplianceSection>('ethics');
 
+  // v2.0 Parallel Telemetry & Authorization State
+  const [telemetries, setTelemetries] = useState<Record<AgentId, AgentTelemetry>>(INITIAL_TELEMETRIES);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [pendingTargetDomain, setPendingTargetDomain] = useState<string>('');
+  const [pendingInitialTab, setPendingInitialTab] = useState<NavigationTab | undefined>(undefined);
+  const [activeDomain, setActiveDomain] = useState<string>('');
+
   const handleOpenLegal = useCallback((section: ComplianceSection) => {
     setLegalSection(section);
     setIsLegalModalOpen(true);
@@ -130,8 +171,8 @@ export default function Home() {
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.title = investigation?.domain
-        ? `${investigation.domain} — Internet Archaeologist Platform v1.5`
-        : 'Internet Archaeologist Platform v1.5';
+        ? `${investigation.domain} — Internet Archaeologist Platform v2.0`
+        : 'Internet Archaeologist Platform v2.0';
     }
   }, [investigation]);
 
@@ -168,6 +209,119 @@ export default function Home() {
     return { valid: true, cleaned: res.sanitizedDomain };
   };
 
+  const startInvestigationStream = useCallback(
+    async (targetDomain: string, authRecord?: AuthorizationGateRecord, initialTab?: NavigationTab) => {
+      setLoading(true);
+      setError(null);
+      setActiveDomain(targetDomain);
+      setTelemetries({
+        orchestrator: { id: 'orchestrator', name: 'Central Orchestrator', role: 'Workflow Coordinator & Audit', status: 'running', progress: 10, currentAction: 'Coordinating agent pipeline', findingsCount: 0 },
+        'passive-recon': { id: 'passive-recon', name: 'Passive Recon', role: 'DNS, CT Logs & RDAP', status: 'running', progress: 15, currentAction: 'Resolving DNS and crt.sh logs', findingsCount: 0 },
+        'tech-hosting': { id: 'tech-hosting', name: 'Tech & Hosting', role: 'Infrastructure & Mail Detection', status: 'running', progress: 15, currentAction: 'Fingerprinting MX and hosting', findingsCount: 0 },
+        'snapshot-history': { id: 'snapshot-history', name: 'Snapshot & History', role: 'Temporal Forensics & Version Diffing', status: 'running', progress: 15, currentAction: 'Indexing Wayback snapshots', findingsCount: 0 },
+        'contact-discovery': { id: 'contact-discovery', name: 'Contact Discovery', role: 'Public Contact & security.txt Parser', status: 'idle', progress: 0, currentAction: 'Queued', findingsCount: 0 },
+        'website-health': { id: 'website-health', name: 'Website Health', role: 'HTTP Performance & Login Hygiene', status: 'idle', progress: 0, currentAction: 'Queued', findingsCount: 0 },
+        'safe-vulnerability': { id: 'safe-vulnerability', name: 'Safe Vulnerability', role: 'Defensive Posture & CVSS Scoring', status: 'idle', progress: 0, currentAction: 'Queued', findingsCount: 0 },
+        'source-enrichment': { id: 'source-enrichment', name: 'Source Enrichment', role: 'Authoritative Citations & RFC Specs', status: 'idle', progress: 0, currentAction: 'Queued', findingsCount: 0 },
+        reporting: { id: 'reporting', name: 'Reporting Agent', role: 'Executive Summary & Posture Ledger', status: 'idle', progress: 0, currentAction: 'Queued', findingsCount: 0 },
+      });
+
+      updateUrlParams(targetDomain, initialTab);
+
+      try {
+        const streamRes = await fetch('/api/investigate/stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain: targetDomain, authorization: authRecord }),
+        });
+
+        if (!streamRes.ok || !streamRes.body) {
+          // Fallback to standard investigate endpoint
+          const fallbackRes = await fetch('/api/investigate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain: targetDomain, authorization: authRecord }),
+          });
+
+          if (!fallbackRes.ok) {
+            throw new Error(`Failed to fetch investigation for "${targetDomain}". Upstream service responded with HTTP ${fallbackRes.status}.`);
+          }
+
+          const fallbackData: Investigation = await fallbackRes.json();
+          setInvestigation(fallbackData);
+          saveInvestigation(fallbackData);
+          setSavedList(getSavedInvestigations());
+          if (initialTab) setActiveTab(initialTab);
+          return;
+        }
+
+        const reader = streamRes.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let finalInvestigation: Investigation | null = null;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const messages = buffer.split('\n\n');
+          buffer = messages.pop() || '';
+
+          for (const msg of messages) {
+            const trimmed = msg.trim();
+            if (!trimmed) continue;
+
+            const eventMatch = trimmed.match(/^event:\s*(\w+)/m);
+            const dataMatch = trimmed.match(/^data:\s*(.*)$/ms);
+
+            const eventType = eventMatch ? eventMatch[1] : 'message';
+            const dataStr = dataMatch ? dataMatch[1] : '';
+
+            if (dataStr) {
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (eventType === 'telemetry') {
+                  const tel = parsed.telemetry || parsed;
+                  if (tel && tel.id) {
+                    setTelemetries((prev) => ({
+                      ...prev,
+                      [tel.id]: {
+                        ...prev[tel.id as AgentId],
+                        ...tel,
+                      },
+                    }));
+                  }
+                } else if (eventType === 'complete') {
+                  finalInvestigation = (parsed.payload?.partialResult || parsed.payload || parsed) as Investigation;
+                } else if (eventType === 'error') {
+                  throw new Error(parsed.error || 'Agent swarm encountered an error');
+                }
+              } catch {
+                // Ignore parse errors on partial chunks
+              }
+            }
+          }
+        }
+
+        if (finalInvestigation) {
+          setInvestigation(finalInvestigation);
+          saveInvestigation(finalInvestigation);
+          setSavedList(getSavedInvestigations());
+          if (initialTab) {
+            setActiveTab(initialTab);
+          }
+        }
+      } catch (err: unknown) {
+        const msg =
+          err instanceof Error ? err.message : 'An error occurred during domain research.';
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [updateUrlParams]
+  );
 
   const handleInvestigate = useCallback(
     async (targetDomainInput: string, initialTab?: NavigationTab) => {
@@ -178,46 +332,19 @@ export default function Home() {
       }
 
       const targetDomain = validation.cleaned;
-      setLoading(true);
-      setError(null);
-      setLoadingStage(0);
-
-      updateUrlParams(targetDomain, initialTab);
-
-      const stageInterval = setInterval(() => {
-        setLoadingStage((prev) => (prev < LOADING_STAGES.length - 1 ? prev + 1 : prev));
-      }, 700);
-
-      try {
-        const res = await fetch('/api/investigate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain: targetDomain }),
-        });
-
-        if (!res.ok) {
-          throw new Error(
-            `Failed to fetch investigation for "${targetDomain}". Upstream service responded with HTTP ${res.status}.`
-          );
-        }
-
-        const data: Investigation = await res.json();
-        setInvestigation(data);
-        saveInvestigation(data);
-        setSavedList(getSavedInvestigations());
-        if (initialTab) {
-          setActiveTab(initialTab);
-        }
-      } catch (err: unknown) {
-        const msg =
-          err instanceof Error ? err.message : 'An error occurred during domain research.';
-        setError(msg);
-      } finally {
-        clearInterval(stageInterval);
-        setLoading(false);
-      }
+      setPendingTargetDomain(targetDomain);
+      setPendingInitialTab(initialTab);
+      setIsAuthModalOpen(true);
     },
-    [updateUrlParams]
+    []
+  );
+
+  const handleAuthorizeAndScan = useCallback(
+    (record: AuthorizationGateRecord) => {
+      setIsAuthModalOpen(false);
+      startInvestigationStream(record.targetDomain, record, pendingInitialTab);
+    },
+    [pendingInitialTab, startInvestigationStream]
   );
 
   // Initial startup load
@@ -235,13 +362,16 @@ export default function Home() {
       }
 
       if (queryDomain) {
-        handleInvestigate(queryDomain, queryTab || undefined);
+        startInvestigationStream(queryDomain, undefined, queryTab || undefined);
+        return;
+      } else if (list.length > 0) {
+        setInvestigation(list[0]);
         return;
       }
     }
 
-    handleInvestigate('example.com');
-  }, [handleInvestigate]);
+    startInvestigationStream('example.com', undefined, 'story');
+  }, [startInvestigationStream]);
 
   const handleTraceEvidence = useCallback(
     (evidenceIdOrEntity: string) => {
@@ -325,11 +455,6 @@ export default function Home() {
     setTimeout(() => setCopiedValue(null), 2000);
   }, []);
 
-  const currentStage = useMemo(
-    () => LOADING_STAGES[loadingStage] || LOADING_STAGES[0],
-    [loadingStage]
-  );
-
   return (
     <div className="min-h-screen flex flex-col bg-[#f5f5f7] dark:bg-[#09090b] text-neutral-900 dark:text-neutral-100 font-sans transition-colors duration-200">
       <Navbar
@@ -342,33 +467,13 @@ export default function Home() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-6">
-        {/* Loading Progress State */}
+        {/* Loading Progress State - v2.0 Real-Time Parallel Telemetry */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20 px-6 space-y-5 bg-white/80 dark:bg-[#141416]/90 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl apple-card backdrop-blur-xl">
-            <div className="relative">
-              <Loader2 className="w-10 h-10 text-neutral-800 dark:text-neutral-200 animate-spin" />
-            </div>
-
-            <div className="w-full max-w-md space-y-3 text-center">
-              <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                <span className="font-medium">
-                  Step {loadingStage + 1} of {LOADING_STAGES.length}
-                </span>
-                <span className="font-mono font-medium text-neutral-700 dark:text-neutral-300">{currentStage.progress}%</span>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="w-full bg-neutral-200/70 dark:bg-neutral-800 h-1.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-neutral-900 dark:bg-white h-full rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${currentStage.progress}%` }}
-                />
-              </div>
-
-              <p className="text-neutral-600 dark:text-neutral-400 text-xs font-medium pt-1">
-                {currentStage.label}
-              </p>
-            </div>
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <AgentProgressTracker
+              telemetries={telemetries}
+              activeDomain={activeDomain || pendingTargetDomain || 'target domain'}
+            />
           </div>
         )}
 
@@ -421,6 +526,9 @@ export default function Home() {
                   graphNodes: investigation.relationships?.nodes.length,
                   dnsRecords: investigation.dnsRecords?.length,
                   snapshots: investigation.snapshots?.length,
+                  contacts: investigation.exposedContacts?.length,
+                  healthIssues: (investigation.websiteHealth || investigation.healthReport)?.brokenLinks?.length,
+                  vulns: investigation.vulnerabilities?.length,
                 }}
               />
 
@@ -597,6 +705,31 @@ export default function Home() {
                       highlightId={highlightEvidenceId}
                     />
                   )}
+
+                  {activeTab === 'domain-intel' && (
+                    <DomainIntelligenceView investigation={investigation} />
+                  )}
+
+                  {activeTab === 'website-health' && (
+                    <WebsiteHealthCard
+                      healthReport={investigation.websiteHealth || investigation.healthReport}
+                      targetDomain={investigation.domain}
+                    />
+                  )}
+
+                  {activeTab === 'vulnerabilities' && (
+                    <VulnerabilityReport
+                      findings={investigation.vulnerabilities}
+                      targetDomain={investigation.domain}
+                    />
+                  )}
+
+                  {activeTab === 'scan-diff' && (
+                    <SnapshotHistoryDiff
+                      currentInvestigation={investigation}
+                      savedInvestigations={savedList}
+                    />
+                  )}
                 </ErrorBoundary>
               </div>
             </div>
@@ -676,6 +809,14 @@ export default function Home() {
         isOpen={isLegalModalOpen}
         onClose={() => setIsLegalModalOpen(false)}
         defaultSection={legalSection}
+      />
+
+      {/* Target Authorization Gate Modal */}
+      <TargetAuthorizationModal
+        isOpen={isAuthModalOpen}
+        targetDomain={pendingTargetDomain}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthorize={handleAuthorizeAndScan}
       />
     </div>
   );

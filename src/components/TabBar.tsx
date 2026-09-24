@@ -19,8 +19,11 @@ import {
   BarChart2,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Menu,
   X,
+  HeartPulse,
+  ShieldAlert,
 } from 'lucide-react';
 import { NavigationTab } from '@/app/page';
 
@@ -47,12 +50,21 @@ interface TabBarProps {
     graphNodes?: number;
     dnsRecords?: number;
     snapshots?: number;
+    contacts?: number;
+    healthIssues?: number;
+    vulns?: number;
   };
 }
 
 export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange, counts = {} }) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+
+  const toggleCategoryCollapse = (catId: string) => {
+    setCollapsedCategories((prev) => ({ ...prev, [catId]: !prev[catId] }));
+  };
 
   const categories: TabCategory[] = useMemo(
     () => [
@@ -136,9 +148,51 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
           },
         ],
       },
+      {
+        id: 'defensive-v2',
+        label: 'v2.0 Defensive Suite',
+        tabs: [
+          {
+            id: 'domain-intel',
+            label: 'Domain Intelligence',
+            shortLabel: 'Domain Intel',
+            icon: Globe,
+            badge: counts.contacts,
+          },
+          {
+            id: 'website-health',
+            label: 'Website Health & Hygiene',
+            shortLabel: 'Site Health',
+            icon: HeartPulse,
+            badge: counts.healthIssues,
+          },
+          {
+            id: 'vulnerabilities',
+            label: 'Vulnerability Posture',
+            shortLabel: 'Vuln Audit',
+            icon: ShieldAlert,
+            badge: counts.vulns,
+          },
+          {
+            id: 'scan-diff',
+            label: 'Historical Scan Diff',
+            shortLabel: 'Scan Diff',
+            icon: GitCompare,
+          },
+        ],
+      },
     ],
     [counts]
   );
+
+  const activeCategory = useMemo(() => {
+    return categories.find((cat) => cat.tabs.some((t) => t.id === activeTab))?.id || 'core';
+  }, [categories, activeTab]);
+
+  const visibleCategories = useMemo(() => {
+    if (selectedCategory === 'all') return categories;
+    return categories.filter((cat) => cat.id === selectedCategory);
+  }, [categories, selectedCategory]);
 
   return (
     <>
@@ -157,7 +211,7 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
           </span>
         </div>
 
-        <span className="text-[11px] text-neutral-400 font-medium">16 Modules</span>
+        <span className="text-[11px] text-neutral-400 font-medium">20 Modules</span>
       </div>
 
       {/* Sidebar Container */}
@@ -204,72 +258,120 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
           </button>
         </div>
 
+        {/* Category Filter Pills (Uncluttered fast switching) */}
+        {!isCollapsed && (
+          <div className="flex items-center gap-1 p-1 bg-black/[0.03] dark:bg-white/[0.04] rounded-xl mb-3 overflow-x-auto no-scrollbar">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`px-2 py-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer shrink-0 ${
+                selectedCategory === 'all'
+                  ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-2xs font-semibold'
+                  : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'
+              }`}
+            >
+              All
+            </button>
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedCategory(c.id)}
+                className={`px-2 py-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer shrink-0 flex items-center gap-1 ${
+                  selectedCategory === c.id
+                    ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-2xs font-semibold'
+                    : activeCategory === c.id
+                    ? 'text-amber-600 dark:text-amber-400 font-medium'
+                    : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'
+                }`}
+              >
+                <span>{c.label.split(' ')[0]}</span>
+                {activeCategory === c.id && selectedCategory !== c.id && (
+                  <span className="w-1 h-1 rounded-full bg-amber-500 shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Navigation Categories & Tabs */}
         <div className="space-y-3">
-          {categories.map((cat) => (
-            <div key={cat.id} className="space-y-0.5">
-              {!isCollapsed && (
-                <div className="px-2.5 py-1 text-[10px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500 font-semibold select-none">
-                  {cat.label}
-                </div>
-              )}
+          {visibleCategories.map((cat) => {
+            const isCatCollapsed = Boolean(collapsedCategories[cat.id]);
 
-              <div className="space-y-0.5">
-                {cat.tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
+            return (
+              <div key={cat.id} className="space-y-0.5">
+                {!isCollapsed && (
+                  <button
+                    onClick={() => toggleCategoryCollapse(cat.id)}
+                    className="w-full flex items-center justify-between px-2.5 py-1 text-[10px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500 font-semibold select-none hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors cursor-pointer group"
+                  >
+                    <span>{cat.label}</span>
+                    <ChevronDown
+                      className={`w-3 h-3 text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-transform duration-200 ${
+                        isCatCollapsed ? '-rotate-90' : 'rotate-0'
+                      }`}
+                    />
+                  </button>
+                )}
 
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => {
-                        onTabChange(tab.id);
-                        setIsMobileOpen(false);
-                      }}
-                      className={`
-                        w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer group relative apple-focus
-                        ${
-                          isActive
-                            ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-medium shadow-2xs'
-                            : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
-                        }
-                        ${isCollapsed ? 'justify-center px-1.5' : 'justify-between'}
-                      `}
-                      title={isCollapsed ? tab.label : undefined}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Icon
-                          className={`w-3.5 h-3.5 shrink-0 transition-colors ${
-                            isActive
-                              ? 'text-white dark:text-neutral-950'
-                              : 'text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-300'
-                          }`}
-                        />
-                        {!isCollapsed && <span className="truncate">{tab.label}</span>}
-                      </div>
+                {!isCatCollapsed && (
+                  <div className="space-y-0.5">
+                    {cat.tabs.map((tab) => {
+                      const Icon = tab.icon;
+                      const isActive = activeTab === tab.id;
 
-                      {!isCollapsed && Boolean(tab.badge) && (
-                        <span
-                          className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono shrink-0 ${
-                            isActive
-                              ? 'bg-white/20 text-white dark:bg-black/15 dark:text-neutral-950'
-                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'
-                          }`}
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => {
+                            onTabChange(tab.id);
+                            setIsMobileOpen(false);
+                          }}
+                          className={`
+                            w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer group relative apple-focus
+                            ${
+                              isActive
+                                ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-medium shadow-2xs'
+                                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                            }
+                            ${isCollapsed ? 'justify-center px-1.5' : 'justify-between'}
+                          `}
+                          title={isCollapsed ? tab.label : undefined}
                         >
-                          {tab.badge}
-                        </span>
-                      )}
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Icon
+                              className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                                isActive
+                                  ? 'text-white dark:text-neutral-950'
+                                  : 'text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-300'
+                              }`}
+                            />
+                            {!isCollapsed && <span className="truncate">{tab.label}</span>}
+                          </div>
 
-                      {/* Indicator when collapsed */}
-                      {isCollapsed && Boolean(tab.badge) && (
-                        <span className={`absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white dark:bg-neutral-950' : 'bg-neutral-400'}`} />
-                      )}
-                    </button>
-                  );
-                })}
+                          {!isCollapsed && Boolean(tab.badge) && (
+                            <span
+                              className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono shrink-0 ${
+                                isActive
+                                  ? 'bg-white/20 text-white dark:bg-black/15 dark:text-neutral-950'
+                                  : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'
+                              }`}
+                            >
+                              {tab.badge}
+                            </span>
+                          )}
+
+                          {/* Indicator when collapsed */}
+                          {isCollapsed && Boolean(tab.badge) && (
+                            <span className={`absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white dark:bg-neutral-950' : 'bg-neutral-400'}`} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </aside>
 

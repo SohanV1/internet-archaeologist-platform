@@ -255,7 +255,7 @@ export interface VisualReconstruction {
   statusCode: number;
 }
 
-export type RiskSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type RiskSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'INFO';
 
 export interface RiskFinding {
   id: string;
@@ -276,6 +276,152 @@ export interface RiskAssessment {
   totalChecksCount: number;
   postureSummary: string;
   generatedAt: string;
+}
+
+// ----------------- Version 2.0 Intelligence Interfaces -----------------
+
+export interface WhoisRdapRecord {
+  domain: string;
+  registrar?: string;
+  registryExpiry?: string;
+  createdDate?: string;
+  updatedDate?: string;
+  organization?: string;
+  country?: string;
+  abuseContactEmail?: string;
+  abuseContactPhone?: string;
+  privacyProtected: boolean;
+  rawRdapUrl?: string;
+  evidenceId?: string;
+}
+
+export type BusinessMailProvider =
+  | 'Google Workspace'
+  | 'Microsoft 365'
+  | 'Zoho Mail'
+  | 'ProtonMail'
+  | 'iCloud Mail'
+  | 'Fastmail'
+  | 'Custom / Self-Hosted MTA'
+  | 'Unknown';
+
+export interface MailProviderInfo {
+  provider: BusinessMailProvider;
+  mxHosts: string[];
+  spfRecord?: string;
+  spfStatus: 'Strict (-all)' | 'SoftFail (~all)' | 'Neutral (?all)' | 'Permissive (+all)' | 'Missing';
+  dmarcRecord?: string;
+  dmarcPolicy: 'reject' | 'quarantine' | 'none' | 'missing';
+  dkimSelectorHints: string[];
+  securityScore: number; // 0 to 100
+  evidenceId?: string;
+}
+
+export type ContactRole =
+  | 'Security / CERT'
+  | 'Abuse / Legal'
+  | 'Technical / Webmaster'
+  | 'Support / Sales'
+  | 'General';
+
+export interface ExposedContact {
+  id: string;
+  type: 'email' | 'phone';
+  value: string; // privacy-masked e.g. "sec***@example.com"
+  maskedValue?: string;
+  role: ContactRole;
+  source: 'security.txt (RFC 9116)' | 'RDAP Registration' | 'Public Site Contact Page' | 'HTML Meta';
+  confidence: number; // 0-100
+  evidenceId?: string;
+}
+
+export interface HostingFingerprint {
+  hostingType: 'Cloud Provider' | 'CDN / Edge Proxy' | 'Self-Hosted / Bare Metal' | 'Container / PaaS';
+  primaryProvider: string;
+  cdn?: string;
+  cloudProvider?: string;
+  containerIndicators: string[];
+  asn: string;
+  asnOrg: string;
+  serverRegion: {
+    country: string;
+    regionName?: string;
+    city?: string;
+    timezone?: string;
+  };
+  evidenceId?: string;
+}
+
+export interface BrokenLinkItem {
+  url: string;
+  statusCode: number;
+  anchorText?: string;
+  sourcePage: string;
+}
+
+export interface RedirectHop {
+  from: string;
+  to: string;
+  statusCode: number;
+  isHttps: boolean;
+}
+
+export interface LoginFormHygiene {
+  formAction: string;
+  isHttps: boolean;
+  hasCsrfToken: boolean;
+  hasPasswordInput: boolean;
+  autocompleteConfigured: boolean;
+  cleartextRisk: boolean;
+  notes: string;
+}
+
+export interface WebsiteHealthReport {
+  overallHealthScore: number; // 0 to 100
+  targetAccessible: boolean;
+  httpStatus: number;
+  responseTimeMs: number;
+  brokenLinks: BrokenLinkItem[];
+  redirectChain: RedirectHop[];
+  mixedContentIssues: { resourceUrl: string; resourceType: string }[];
+  exposedErrorMessages: { snippet: string; type: string; url: string }[];
+  loginFormHygiene: LoginFormHygiene[];
+  generatedAt: string;
+  evidenceId?: string;
+}
+
+export interface VulnerabilityReference {
+  title: string;
+  url: string;
+  standard: 'OWASP' | 'CISA' | 'NIST' | 'RFC' | 'CIS';
+}
+
+export interface SafeVulnerabilityFinding {
+  id: string;
+  title: string;
+  severity: RiskSeverity;
+  cvssScore: number; // 0.0 to 10.0
+  category: 'Access Control' | 'Cryptographic Hygiene' | 'Injection Defense' | 'Security Misconfiguration' | 'Transport Security' | 'Email Authentication';
+  status: 'CONFIRMED' | 'INFORMATIONAL' | 'FALSE_POSITIVE_CLEARED';
+  affectedAsset: string;
+  evidence: string;
+  likelyImpact: string;
+  remediationSteps: string[];
+  references: VulnerabilityReference[];
+  evidenceId?: string;
+}
+
+export interface HistoricalScanDiff {
+  priorScanId: string;
+  priorTimestamp: string;
+  currentTimestamp: string;
+  domain: string;
+  newSubdomains: string[];
+  removedSubdomains: string[];
+  resolvedVulnerabilities: string[];
+  newVulnerabilities: string[];
+  netScoreDelta: number; // positive = improved, negative = regressed
+  summaryNarrative: string;
 }
 
 export interface Investigation {
@@ -301,5 +447,23 @@ export interface Investigation {
   dnsDrifts?: DnsDriftEvent[];
   visualReconstructions?: VisualReconstruction[];
   riskAssessment?: RiskAssessment;
+
+  // Version 2.0 Extended Intelligence Fields
+  version?: '2.0.0';
+  whoisRdap?: WhoisRdapRecord;
+  mailProvider?: MailProviderInfo;
+  exposedContacts?: ExposedContact[];
+  hostingFingerprint?: HostingFingerprint;
+  healthReport?: WebsiteHealthReport;
+  websiteHealth?: WebsiteHealthReport;
+  vulnerabilities?: SafeVulnerabilityFinding[];
+  historicalDiff?: HistoricalScanDiff;
+  authorizationRecord?: {
+    scope: 'passive_only' | 'authorized_defensive';
+    authorizedBy: string;
+    organization?: string;
+    timestamp: string;
+    auditSignatureHash: string;
+  };
 }
 

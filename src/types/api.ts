@@ -3,6 +3,7 @@
  */
 
 import { Investigation } from './osint';
+import { AuthorizationGateRecord } from './agent';
 
 // Standard API Response envelope
 export interface ApiResponse<T> {
@@ -16,6 +17,7 @@ export interface ApiResponse<T> {
 // Investigate Endpoint Types (/api/investigate)
 export interface InvestigateRequestBody {
   domain: string;
+  authorization?: AuthorizationGateRecord;
   options?: {
     includeVisuals?: boolean;
     includeSubdomains?: boolean;
