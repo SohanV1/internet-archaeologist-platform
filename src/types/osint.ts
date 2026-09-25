@@ -286,11 +286,14 @@ export interface WhoisRdapRecord {
   registryExpiry?: string;
   createdDate?: string;
   updatedDate?: string;
-  organization?: string;
-  country?: string;
+  registrantName?: string; // v2.1 Formatted Name (fn) or handle fallback
+  organization?: string;   // v2.1 Organization name
+  country?: string;        // v2.1 2-letter ISO code or full country name
   abuseContactEmail?: string;
   abuseContactPhone?: string;
   privacyProtected: boolean;
+  privacyNotice?: string;  // v2.1 Redaction notice (e.g., "Redacted for Privacy by Gandi")
+  standards?: string[];    // v2.1 RFC 9083, RFC 7095, RFC 6350 citations
   rawRdapUrl?: string;
   evidenceId?: string;
 }
@@ -317,12 +320,23 @@ export interface MailProviderInfo {
   evidenceId?: string;
 }
 
-export type ContactRole =
+export type CanonicalContactRole =
+  | 'security'
+  | 'admin'
+  | 'sales'
+  | 'support'
+  | 'legal'
+  | 'executive'
+  | 'general';
+
+export type LegacyContactRole =
   | 'Security / CERT'
   | 'Abuse / Legal'
   | 'Technical / Webmaster'
   | 'Support / Sales'
   | 'General';
+
+export type ContactRole = CanonicalContactRole | LegacyContactRole;
 
 export interface ExposedContact {
   id: string;
@@ -330,7 +344,7 @@ export interface ExposedContact {
   value: string; // privacy-masked e.g. "sec***@example.com"
   maskedValue?: string;
   role: ContactRole;
-  source: 'security.txt (RFC 9116)' | 'RDAP Registration' | 'Public Site Contact Page' | 'HTML Meta';
+  source: string; // e.g. 'security.txt (RFC 9116)', '/contact', '/about', '/team', '/privacy', '/imprint', 'Footer'
   confidence: number; // 0-100
   evidenceId?: string;
 }
@@ -376,6 +390,34 @@ export interface LoginFormHygiene {
   notes: string;
 }
 
+export type LoginErrorPattern =
+  | 'generic_error'
+  | 'username_enumeration_risk'
+  | 'rate_limited'
+  | 'redirected'
+  | 'indeterminate';
+
+export interface LoginProbeResult {
+  formAction: string;
+  httpMethod: string;
+  dummyCredentialUsed: string; // e.g. "test@invalid.tld"
+  httpStatus: number;
+  responseTimeMs: number;
+  extractedErrorText?: string;
+  errorPattern: LoginErrorPattern;
+  enumerationRiskDetected: boolean;
+  notes: string;
+}
+
+export interface FormEndpoint {
+  actionUrl: string;
+  httpMethod: string;
+  isHttps: boolean;
+  isPubliclyAccessible: boolean;
+  sourcePage: string;
+  statusCode?: number;
+}
+
 export interface WebsiteHealthReport {
   overallHealthScore: number; // 0 to 100
   targetAccessible: boolean;
@@ -386,6 +428,9 @@ export interface WebsiteHealthReport {
   mixedContentIssues: { resourceUrl: string; resourceType: string }[];
   exposedErrorMessages: { snippet: string; type: string; url: string }[];
   loginFormHygiene: LoginFormHygiene[];
+  loginProbeResults?: LoginProbeResult[];
+  crawledPagesCount?: number;
+  formEndpoints?: FormEndpoint[];
   generatedAt: string;
   evidenceId?: string;
 }

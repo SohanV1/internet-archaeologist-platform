@@ -26,6 +26,15 @@ interface DomainIntelligenceViewProps {
 }
 
 const ROLE_BADGES: Record<ContactRole, { bg: string; text: string; border: string }> = {
+  // Canonical 7 roles (v2.1)
+  security: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30' },
+  admin: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30' },
+  sales: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30' },
+  support: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/30' },
+  legal: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
+  executive: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' },
+  general: { bg: 'bg-zinc-800', text: 'text-zinc-300', border: 'border-zinc-700' },
+  // Legacy roles (v2.0 backward compatibility)
   'Security / CERT': { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30' },
   'Abuse / Legal': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
   'Technical / Webmaster': { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30' },
@@ -75,17 +84,29 @@ export function DomainIntelligenceView({ investigation }: DomainIntelligenceView
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-5">
             <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
-              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block">Registrar</span>
-              <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">
-                {whois?.registrar || 'IANA Authorized Registrar'}
+              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block">Registrant Name</span>
+              <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate" title={whois?.registrantName}>
+                {whois?.registrantName || (whois?.privacyProtected ? 'Redacted for Privacy' : 'Not Disclosed')}
               </span>
             </div>
             <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
-              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block">Registrant Org</span>
-              <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate">
+              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block">Organization</span>
+              <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate" title={whois?.organization}>
                 {whois?.organization || 'Private Registrant'}
+              </span>
+            </div>
+            <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block">Country</span>
+              <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate" title={whois?.country}>
+                {whois?.country || 'Unknown'}
+              </span>
+            </div>
+            <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block">Registrar</span>
+              <span className="text-xs font-semibold text-zinc-200 mt-0.5 block truncate" title={whois?.registrar}>
+                {whois?.registrar || 'IANA Authorized Registrar'}
               </span>
             </div>
             <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
@@ -101,6 +122,15 @@ export function DomainIntelligenceView({ investigation }: DomainIntelligenceView
               </span>
             </div>
           </div>
+
+          {whois?.privacyNotice && (
+            <div className="mt-4 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-2">
+              <Shield className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="text-xs text-amber-300 font-medium truncate" title={whois.privacyNotice}>
+                {whois.privacyNotice}
+              </span>
+            </div>
+          )}
 
           {whois?.abuseContactEmail && (
             <div className="mt-4 p-3 rounded-xl bg-zinc-900/40 border border-zinc-800 flex items-center justify-between">
@@ -283,7 +313,11 @@ export function DomainIntelligenceView({ investigation }: DomainIntelligenceView
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
             {contacts.map((contact) => {
-              const badgeStyle = ROLE_BADGES[contact.role] || ROLE_BADGES.General;
+              const badgeStyle =
+                ROLE_BADGES[contact.role] ||
+                ROLE_BADGES[(contact.role || '').toLowerCase() as ContactRole] ||
+                ROLE_BADGES.general ||
+                ROLE_BADGES.General;
 
               return (
                 <div

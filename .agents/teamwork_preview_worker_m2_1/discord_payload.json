@@ -1,0 +1,14 @@
+{
+  "project": "internet-archaeologist-platform",
+  "category": "feature",
+  "title": "M2: Deep Email Discovery & 7-Role Categorization (R2)",
+  "intent": "Implement deep public email scraping across subpages, footers, mailto links, asset noise filtering, 7-role categorization, and UI role badges per Requirement R2.",
+  "summary": "Enhanced contactDiscoveryAgent with concurrent multi-path scraping (/contact, /about, /team, /privacy, /imprint via Promise.allSettled), mailto link query stripping, ReDoS-safe document truncation (100k chars), false-positive noise filtering (.png, .jpg, .css, .js, placeholder domains), and 7-role categorization (security, admin, sales, support, legal, executive, general). Updated ContactRole in osint.ts and added badge styles in DomainIntelligenceView. Added 20 unit tests with 100% pass (219/219 total).",
+  "files": [
+    "src/types/osint.ts",
+    "src/lib/agents/contactDiscoveryAgent.ts",
+    "src/components/DomainIntelligenceView.tsx",
+    "src/__tests__/contact_discovery.test.ts"
+  ],
+  "status": "Verified / Tests Passed (219/219)"
+}

@@ -1,0 +1,15 @@
+{
+  "project": "internet-archaeologist-platform",
+  "category": "feature",
+  "title": "M1: Domain Owner Identity Resolution (R1)",
+  "intent": "Extract domain owner name, org, and country from RDAP/WHOIS records, handle thin-to-thick registry traversal, and display owner card in UI",
+  "summary": "Implemented vCard 4.0 (RFC 7095 / RFC 6350) parsing in passiveReconAgent to extract fn, org, and country. Added rel: related link traversal for thin registries (Verisign/PIR) with SSRF validation, handle fallback, and privacy redaction classification. Updated sourceEnrichmentAgent with RFC citations and ISO-3166 country normalization. Enhanced DomainIntelligenceView RDAP card.",
+  "files": [
+    "src/types/osint.ts",
+    "src/lib/agents/passiveReconAgent.ts",
+    "src/lib/agents/sourceEnrichmentAgent.ts",
+    "src/components/DomainIntelligenceView.tsx",
+    "src/__tests__/rdap_identity.test.ts"
+  ],
+  "status": "Verified / All Tests Passed (76/76)"
+}

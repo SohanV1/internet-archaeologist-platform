@@ -20,6 +20,7 @@ import {
 import { fetchWithRetry } from '../osint/fetchWithRetry';
 import { calculateSha256 } from '../osint/cryptoHash';
 import { logger } from '../osint/logger';
+import { isSafeUrlForFetch } from '../osint/validator';
 
 export interface PassiveReconResult {
   dnsRecords: DnsRecord[];
@@ -28,6 +29,217 @@ export interface PassiveReconResult {
   certificates: CertificateRecord[];
   whoisRdap: WhoisRdapRecord;
   evidence: EvidenceItem[];
+}
+
+export const PRIVACY_TOKENS_REGEX =
+  /(redacted|privacy|withheld|proxy|domains by proxy|whoisguard|contact privacy|privacy protect|anonym|data protect|identity protect|private registrant|gdpr)/i;
+
+export function isPrivacyToken(str?: string | null): boolean {
+  if (!str || typeof str !== 'string') return false;
+  return PRIVACY_TOKENS_REGEX.test(str);
+}
+
+export function collectAllEntities(entities?: any[]): any[] {
+  const result: any[] = [];
+  function recurse(list?: any[]) {
+    if (!Array.isArray(list)) return;
+    for (const ent of list) {
+      if (ent && typeof ent === 'object') {
+        result.push(ent);
+        if (Array.isArray(ent.entities)) {
+          recurse(ent.entities);
+        }
+      }
+    }
+  }
+  recurse(entities);
+  return result;
+}
+
+export function parseRdapPayload(rdapData: any, whoisRdap: WhoisRdapRecord): void {
+  if (!rdapData || typeof rdapData !== 'object') return;
+
+  // 1. Events (registration, expiration, last change)
+  if (Array.isArray(rdapData.events)) {
+    for (const ev of rdapData.events) {
+      if (!ev || typeof ev !== 'object') continue;
+      if (ev.eventAction === 'registration' && !whoisRdap.createdDate) {
+        whoisRdap.createdDate = ev.eventDate;
+      }
+      if (ev.eventAction === 'expiration' && !whoisRdap.registryExpiry) {
+        whoisRdap.registryExpiry = ev.eventDate;
+      }
+      if ((ev.eventAction === 'last changed' || ev.eventAction === 'last update') && !whoisRdap.updatedDate) {
+        whoisRdap.updatedDate = ev.eventDate;
+      }
+    }
+  }
+
+  // 2. Entities
+  const allEntities = collectAllEntities(rdapData.entities);
+  for (const entity of allEntities) {
+    const roles: string[] = Array.isArray(entity.roles)
+      ? entity.roles.map((r: any) => String(r).toLowerCase())
+      : [];
+
+    // Registrar role
+    if (roles.includes('registrar')) {
+      const registrarFn = entity.vcardArray?.[1]?.find?.((v: any[]) => Array.isArray(v) && v[0] === 'fn')?.[3];
+      whoisRdap.registrar =
+        whoisRdap.registrar ||
+        entity.legalName ||
+        (typeof registrarFn === 'string' ? registrarFn : undefined) ||
+        entity.handle;
+    }
+
+    // Abuse contact
+    if (roles.includes('abuse') && Array.isArray(entity.vcardArray?.[1])) {
+      for (const vcardItem of entity.vcardArray[1]) {
+        if (Array.isArray(vcardItem)) {
+          if (vcardItem[0] === 'email' && !whoisRdap.abuseContactEmail && typeof vcardItem[3] === 'string') {
+            whoisRdap.abuseContactEmail = vcardItem[3];
+          }
+          if (vcardItem[0] === 'tel' && !whoisRdap.abuseContactPhone && typeof vcardItem[3] === 'string') {
+            whoisRdap.abuseContactPhone = vcardItem[3];
+          }
+        }
+      }
+    }
+
+    // Registrant or Owner role
+    if (roles.includes('registrant') || roles.includes('owner')) {
+      const vcardProps = Array.isArray(entity.vcardArray?.[1]) ? entity.vcardArray[1] : [];
+
+      // Extract Formatted Name (fn)
+      const fnProp = vcardProps.find((p: any) => Array.isArray(p) && p[0] === 'fn');
+      let extractedFn: string | undefined = undefined;
+      if (fnProp && fnProp[3] !== undefined && fnProp[3] !== null) {
+        if (typeof fnProp[3] === 'string') {
+          extractedFn = fnProp[3].trim();
+        } else if (Array.isArray(fnProp[3])) {
+          extractedFn = fnProp[3].filter((x: any) => typeof x === 'string' && x.trim()).join(' ').trim();
+        }
+      }
+
+      if (extractedFn) {
+        if (isPrivacyToken(extractedFn)) {
+          whoisRdap.privacyProtected = true;
+          if (!whoisRdap.privacyNotice) {
+            whoisRdap.privacyNotice = extractedFn.length > 5 ? extractedFn : 'Registrant identity redacted for privacy';
+          }
+          whoisRdap.registrantName = extractedFn;
+        } else {
+          whoisRdap.registrantName = extractedFn;
+        }
+      }
+
+      // Extract Organization (org) - handling strings and arrays
+      const orgProp = vcardProps.find((p: any) => Array.isArray(p) && p[0] === 'org');
+      let extractedOrg: string | undefined = undefined;
+      if (orgProp && orgProp[3] !== undefined && orgProp[3] !== null) {
+        if (typeof orgProp[3] === 'string') {
+          extractedOrg = orgProp[3].trim();
+        } else if (Array.isArray(orgProp[3])) {
+          extractedOrg = orgProp[3].filter((x: any) => typeof x === 'string' && x.trim()).join(' - ').trim();
+        }
+      }
+
+      if (extractedOrg) {
+        whoisRdap.organization = extractedOrg;
+        if (isPrivacyToken(extractedOrg)) {
+          whoisRdap.privacyProtected = true;
+          if (!whoisRdap.privacyNotice) {
+            whoisRdap.privacyNotice = `Privacy proxy: ${extractedOrg}`;
+          }
+        }
+      }
+
+      // Extract Address (adr) country code - inspect parameter object p[1]?.cc and address array p[3]?.[6]
+      const adrProp = vcardProps.find((p: any) => Array.isArray(p) && p[0] === 'adr');
+      if (adrProp) {
+        const paramObj = adrProp[1] && typeof adrProp[1] === 'object' ? adrProp[1] : undefined;
+        const paramCc = typeof paramObj?.cc === 'string' ? paramObj.cc.trim() : undefined;
+        const adrArray = Array.isArray(adrProp[3]) ? adrProp[3] : undefined;
+        const arrayCountry = typeof adrArray?.[6] === 'string' ? adrArray[6].trim() : undefined;
+
+        const resolvedCountry = paramCc || arrayCountry;
+        if (resolvedCountry && !whoisRdap.country) {
+          whoisRdap.country = resolvedCountry;
+        }
+      }
+
+      // Entity handle fallback: if vcardArray is omitted or no registrantName, check entity.handle (unless generic redaction)
+      if (!whoisRdap.registrantName && typeof entity.handle === 'string') {
+        const handle = entity.handle.trim();
+        const genericRedaction = /^(redacted|withheld|private|privacy|none|not applicable|n\/a|-)$/i;
+        if (handle) {
+          if (genericRedaction.test(handle) || isPrivacyToken(handle)) {
+            whoisRdap.privacyProtected = true;
+            whoisRdap.registrantName = 'Redacted for Privacy';
+            if (!whoisRdap.privacyNotice) {
+              whoisRdap.privacyNotice = `Identity withheld/redacted: ${handle}`;
+            }
+          } else {
+            whoisRdap.registrantName = handle;
+          }
+        }
+      }
+
+      // Inspect entity remarks for privacy notices
+      if (Array.isArray(entity.remarks)) {
+        for (const remark of entity.remarks) {
+          const title = typeof remark?.title === 'string' ? remark.title : '';
+          const desc = Array.isArray(remark?.description)
+            ? remark.description.join(' ')
+            : typeof remark?.description === 'string'
+            ? remark.description
+            : '';
+          if (isPrivacyToken(title) || isPrivacyToken(desc)) {
+            whoisRdap.privacyProtected = true;
+            if (!whoisRdap.privacyNotice) {
+              whoisRdap.privacyNotice = desc || title;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Notices & Remarks at top level
+  const notices = [
+    ...(Array.isArray(rdapData.remarks) ? rdapData.remarks : []),
+    ...(Array.isArray(rdapData.notices) ? rdapData.notices : []),
+  ];
+  for (const n of notices) {
+    const title = typeof n?.title === 'string' ? n.title : '';
+    const desc = Array.isArray(n?.description)
+      ? n.description.join(' ')
+      : typeof n?.description === 'string'
+      ? n.description
+      : '';
+    if (isPrivacyToken(title) || isPrivacyToken(desc)) {
+      whoisRdap.privacyProtected = true;
+      if (!whoisRdap.privacyNotice) {
+        whoisRdap.privacyNotice = desc || title;
+      }
+    }
+  }
+
+  // 4. Global string serialization check for privacy tokens
+  const serialized = JSON.stringify(rdapData).toLowerCase();
+  if (
+    serialized.includes('privacy') ||
+    serialized.includes('redacted') ||
+    serialized.includes('withheld') ||
+    serialized.includes('proxy') ||
+    serialized.includes('whoisguard') ||
+    serialized.includes('domains by proxy')
+  ) {
+    whoisRdap.privacyProtected = true;
+    if (!whoisRdap.privacyNotice) {
+      whoisRdap.privacyNotice = 'Registration data is protected or redacted for privacy';
+    }
+  }
 }
 
 export const passiveReconAgent: WorkerAgent<PassiveReconResult> = {
@@ -247,11 +459,13 @@ export const passiveReconAgent: WorkerAgent<PassiveReconResult> = {
       registryExpiry: undefined,
       createdDate: undefined,
       updatedDate: undefined,
+      registrantName: undefined,
       organization: undefined,
       country: undefined,
       abuseContactEmail: undefined,
       abuseContactPhone: undefined,
-      privacyProtected: true,
+      privacyProtected: false,
+      privacyNotice: undefined,
       rawRdapUrl: `https://rdap.org/domain/${encodeURIComponent(domain)}`,
       evidenceId: `ev-rdap-${domain}`,
     };
@@ -271,72 +485,44 @@ export const passiveReconAgent: WorkerAgent<PassiveReconResult> = {
         const rdapData = await res.json();
         whoisRdap.rawRdapUrl = rdapUrl;
 
-        // Parse events (registration, expiration, last change)
-        if (Array.isArray(rdapData.events)) {
-          for (const ev of rdapData.events) {
-            if (ev.eventAction === 'registration') whoisRdap.createdDate = ev.eventDate;
-            if (ev.eventAction === 'expiration') whoisRdap.registryExpiry = ev.eventDate;
-            if (ev.eventAction === 'last changed' || ev.eventAction === 'last update') {
-              whoisRdap.updatedDate = ev.eventDate;
+        // Parse registry RDAP payload
+        parseRdapPayload(rdapData, whoisRdap);
+
+        // Follow rel: "related" link with type: "application/rdap+json" to query registrar RDAP from thin registries (Verisign/PIR)
+        const relatedLink = Array.isArray(rdapData.links)
+          ? rdapData.links.find(
+              (l: any) =>
+                l &&
+                l.rel === 'related' &&
+                (l.type === 'application/rdap+json' ||
+                  (typeof l.type === 'string' && (l.type.includes('rdap') || l.type.includes('json')))) &&
+                typeof l.href === 'string'
+            )
+          : undefined;
+
+        if (relatedLink?.href) {
+          const safety = isSafeUrlForFetch(relatedLink.href);
+          if (safety.safe) {
+            try {
+              const registrarRes = await fetchWithRetry(
+                relatedLink.href,
+                {
+                  headers: { Accept: 'application/rdap+json, application/json' },
+                  next: { revalidate: 86400 },
+                },
+                { retries: 1, timeoutMs: 4000 }
+              );
+              if (registrarRes.ok) {
+                const registrarData = await registrarRes.json();
+                parseRdapPayload(registrarData, whoisRdap);
+              }
+            } catch (err) {
+              logger.warn('passiveReconAgent', `Registrar RDAP lookup failed for ${relatedLink.href}: ${err}`);
             }
+          } else {
+            logger.warn('passiveReconAgent', `Blocked unsafe RDAP related link URL: ${relatedLink.href} (${safety.reason})`);
           }
         }
-
-        // Parse entities (registrar, registrant, abuse contacts)
-        if (Array.isArray(rdapData.entities)) {
-          for (const entity of rdapData.entities) {
-            const roles: string[] = entity.roles || [];
-
-            if (roles.includes('registrar')) {
-              whoisRdap.registrar =
-                entity.legalName ||
-                entity.vcardArray?.[1]?.find?.((v: any[]) => v[0] === 'fn')?.[3] ||
-                entity.handle ||
-                whoisRdap.registrar;
-            }
-
-            if (roles.includes('registrant')) {
-              const org = entity.vcardArray?.[1]?.find?.((v: any[]) => v[0] === 'org')?.[3];
-              const country = entity.vcardArray?.[1]?.find?.((v: any[]) => v[0] === 'adr')?.[3]?.[6];
-              if (org) whoisRdap.organization = org;
-              if (country) whoisRdap.country = country;
-            }
-
-            if (roles.includes('abuse')) {
-              // Find abuse email and telephone in vcardArray
-              if (Array.isArray(entity.vcardArray?.[1])) {
-                for (const vcardItem of entity.vcardArray[1]) {
-                  if (vcardItem[0] === 'email') whoisRdap.abuseContactEmail = vcardItem[3];
-                  if (vcardItem[0] === 'tel') whoisRdap.abuseContactPhone = vcardItem[3];
-                }
-              }
-            }
-
-            // Check nested entities for abuse contact
-            if (Array.isArray(entity.entities)) {
-              for (const subEntity of entity.entities) {
-                if (subEntity.roles?.includes('abuse') && Array.isArray(subEntity.vcardArray?.[1])) {
-                  for (const vcardItem of subEntity.vcardArray[1]) {
-                    if (vcardItem[0] === 'email' && !whoisRdap.abuseContactEmail) {
-                      whoisRdap.abuseContactEmail = vcardItem[3];
-                    }
-                    if (vcardItem[0] === 'tel' && !whoisRdap.abuseContactPhone) {
-                      whoisRdap.abuseContactPhone = vcardItem[3];
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        // Detect WHOIS/RDAP privacy redaction
-        const serialized = JSON.stringify(rdapData).toLowerCase();
-        whoisRdap.privacyProtected =
-          serialized.includes('privacy') ||
-          serialized.includes('redacted') ||
-          serialized.includes('withheld') ||
-          serialized.includes('proxy');
       }
     } catch {
       logger.warn('passiveReconAgent', `RDAP resolution failed for ${domain}; using baseline.`);
@@ -351,12 +537,29 @@ export const passiveReconAgent: WorkerAgent<PassiveReconResult> = {
       whoisRdap.organization = whoisRdap.organization || 'Privacy Service Provided';
       whoisRdap.country = whoisRdap.country || 'US';
       whoisRdap.abuseContactEmail = whoisRdap.abuseContactEmail || `abuse@${domain}`;
+      whoisRdap.privacyProtected = true;
+      whoisRdap.privacyNotice = whoisRdap.privacyNotice || 'WHOIS privacy proxy active';
+      whoisRdap.registrantName = whoisRdap.registrantName || 'Redacted for Privacy';
+    } else {
+      if (whoisRdap.privacyProtected) {
+        if (!whoisRdap.registrantName) {
+          whoisRdap.registrantName = 'Redacted for Privacy';
+        }
+        if (!whoisRdap.privacyNotice) {
+          whoisRdap.privacyNotice = 'Registrant identity withheld for privacy';
+        }
+      } else if (!whoisRdap.registrantName && whoisRdap.organization) {
+        whoisRdap.registrantName = whoisRdap.organization;
+      }
     }
 
     emitFinding({
       type: 'rdap_record_acquired',
       registrar: whoisRdap.registrar,
       expiry: whoisRdap.registryExpiry,
+      registrantName: whoisRdap.registrantName,
+      organization: whoisRdap.organization,
+      country: whoisRdap.country,
       privacyProtected: whoisRdap.privacyProtected,
     });
 
@@ -405,12 +608,12 @@ export const passiveReconAgent: WorkerAgent<PassiveReconResult> = {
         sourceUrl: whoisRdap.rawRdapUrl,
         evidenceType: 'Other',
         rawData: JSON.stringify(whoisRdap, null, 2),
-        notes: `Retrieved registry registration record: registrar ${whoisRdap.registrar || 'Unknown'}, privacy protected: ${whoisRdap.privacyProtected}`,
+        notes: `Retrieved registry registration record: registrar ${whoisRdap.registrar || 'Unknown'}, registrant: ${whoisRdap.registrantName || 'Unknown'}, privacy protected: ${whoisRdap.privacyProtected}`,
         confidence: 'HIGH',
         confidenceScore: 90,
         collectionMethod: 'RFC 7484 / RFC 9082 ICANN RDAP JSON Protocol',
         relatedEntity: domain,
-        relatedObservation: `Registered via ${whoisRdap.registrar || 'Registry'}, expiry ${whoisRdap.registryExpiry || 'N/A'}`,
+        relatedObservation: `Registered via ${whoisRdap.registrar || 'Registry'}, registrant: ${whoisRdap.registrantName || 'Unknown'}, expiry ${whoisRdap.registryExpiry || 'N/A'}`,
         observationNature: 'OBSERVED',
         verificationHash: rdapHash,
       },
