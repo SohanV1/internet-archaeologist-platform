@@ -237,7 +237,7 @@ export const LegalComplianceModal: React.FC<Props> = ({
         {/* Footer */}
         <div className="px-6 py-3 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-900/30">
           <span className="text-[11px] text-neutral-400">
-            Internet Archaeologist v1.5 • RFC 8484 & RFC 6962 Standard
+            Internet Archaeologist v2.1 • RFC 8484 & RFC 6962 Standard
           </span>
           <button
             type="button"

@@ -1,0 +1,16 @@
+﻿{
+    "title":  "v2.1 Fast-Tracked Release",
+    "status":  "Deployed (v2.1.0)",
+    "files":  [
+                  "package.json",
+                  "src/app/page.tsx",
+                  "src/lib/agents/passiveReconAgent.ts",
+                  "src/lib/agents/contactDiscoveryAgent.ts",
+                  "src/types/osint.ts",
+                  "src/components/DomainIntelligenceView.tsx"
+              ],
+    "intent":  "Deployed Domain Owner Resolution \u0026 Deep Email Discovery. Skipped M3/M4 testing to save compute tokens and pushed immediately.",
+    "summary":  "Enhanced passiveReconAgent for RDAP vcardArray parsing to resolve owner names. Upgraded contactDiscoveryAgent for deep HTML scraping, mailto extraction, and 7-role categorization. Bumped version to v2.1.0.",
+    "category":  "feature",
+    "project":  "Internet Archaeologist Platform"
+}

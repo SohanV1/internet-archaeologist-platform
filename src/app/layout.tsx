@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { ThemeProvider } from '@/context/ThemeContext';
 
 export const metadata: Metadata = {
-  title: 'Internet Archaeologist Platform v1.5',
+  title: 'Internet Archaeologist Platform v2.1',
   description:
     'Passive public OSINT reconnaissance engine that performs forensic analysis of domain histories, tech stack migrations, and infrastructure evolution using public records.',
 };

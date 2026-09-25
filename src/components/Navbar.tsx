@@ -85,7 +85,7 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
                 Internet Archaeologist
               </h1>
               <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-mono font-medium border border-black/[0.04] dark:border-white/[0.06]">
-                v1.5
+                v2.1
               </span>
             </div>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
