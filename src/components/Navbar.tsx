@@ -17,7 +17,7 @@ import { useTheme } from '@/context/ThemeContext';
 interface NavbarProps {
   currentDomain: string;
   onSearch: (domain: string) => void;
-  onExportReport: (format: 'json' | 'html' | 'csv-dns' | 'csv-subs') => void;
+  onExportReport: (format: 'json' | 'html' | 'csv-dns' | 'csv-subs' | 'csv-contacts') => void;
   savedCount: number;
   onToggleSavedModal: () => void;
   onOpenGlobalSearch?: () => void;
@@ -256,6 +256,15 @@ export const NavbarComponent: React.FC<NavbarProps> = ({
                   className="w-full text-left px-3 py-2 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer"
                 >
                   <span>Subdomains (CSV)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    onExportReport('csv-contacts');
+                    setIsExportOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer"
+                >
+                  <span>Discovered Contacts (CSV)</span>
                 </button>
               </div>
             )}

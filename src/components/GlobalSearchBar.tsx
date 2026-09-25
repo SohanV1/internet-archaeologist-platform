@@ -19,6 +19,7 @@ import {
   Mail,
   HeartPulse,
   ShieldAlert,
+  Bot,
 } from 'lucide-react';
 
 interface SearchResultItem {
@@ -26,6 +27,7 @@ interface SearchResultItem {
   tab: NavigationTab;
   tabLabel: string;
   category:
+    | 'Subagents'
     | 'DNS'
     | 'Subdomain'
     | 'Technology'
@@ -107,6 +109,18 @@ export const GlobalSearchBar: React.FC<Props> = ({
   const indexedItems: SearchResultItem[] = useMemo(() => {
     if (!investigation) return [];
     const items: SearchResultItem[] = [];
+
+    // OmniRoute Subagents Tab
+    items.push({
+      id: 'tab-subagents',
+      tab: 'subagents',
+      tabLabel: 'OmniRoute Subagents',
+      category: 'Subagents',
+      title: 'OmniRoute Autonomous Subagents Swarm',
+      subtitle: `Dispatch and monitor local AI subagents for ${investigation.domain}`,
+      badge: 'OMNI',
+      icon: Bot,
+    });
 
     // 1. DNS Records -> 'infra' or 'overview'
     investigation.dnsRecords.forEach((rec, idx) => {

@@ -6,3 +6,12 @@ if (typeof global.TextEncoder === 'undefined') {
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
 }
+
+if (typeof global.Request === 'undefined' && typeof Request !== 'undefined') {
+  // @ts-ignore
+  global.Request = Request;
+  // @ts-ignore
+  global.Response = Response;
+  // @ts-ignore
+  global.Headers = Headers;
+}

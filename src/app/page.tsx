@@ -15,7 +15,7 @@ import {
   saveInvestigation,
   deleteInvestigation,
 } from '@/lib/osint/storage';
-import { generateHtmlReport, exportDnsToCsv, exportSubdomainsToCsv } from '@/lib/osint/export';
+import { generateHtmlReport, exportDnsToCsv, exportSubdomainsToCsv, exportContactsToCsv } from '@/lib/osint/export';
 import { validateAndSanitizeDomain } from '@/lib/osint/validator';
 import { LegalComplianceModal, ComplianceSection } from '@/components/LegalComplianceModal';
 import { TargetAuthorizationModal } from '@/components/TargetAuthorizationModal';
@@ -24,80 +24,84 @@ import { AgentId, AgentTelemetry, AuthorizationGateRecord } from '@/types/agent'
 import { Globe, Loader2, Copy, Check, AlertTriangle, Terminal, ShieldAlert } from 'lucide-react';
 
 
-// Lazy loading of heavy tab components for optimized perceived performance
+// Smooth client-loaded tab modules (instant switching without disruptive skeleton flashes)
+const OmniRouteSubagentsView = dynamic(
+  () => import('@/components/OmniRouteSubagentsView').then((m) => m.OmniRouteSubagentsView),
+  { ssr: false }
+);
 const WebsiteStory = dynamic(
   () => import('@/components/WebsiteStory').then((m) => m.WebsiteStory),
-  { loading: () => <SkeletonLoader type="card" /> }
+  { ssr: false }
 );
 const TechEvolutionMatrix = dynamic(
   () => import('@/components/TechEvolutionMatrix').then((m) => m.TechEvolutionMatrix),
-  { loading: () => <SkeletonLoader type="matrix" /> }
+  { ssr: false }
 );
 const VisualArcheology = dynamic(
   () => import('@/components/VisualArcheology').then((m) => m.VisualArcheology),
-  { loading: () => <SkeletonLoader type="card" /> }
+  { ssr: false }
 );
 const DnsDriftTracker = dynamic(
   () => import('@/components/DnsDriftTracker').then((m) => m.DnsDriftTracker),
-  { loading: () => <SkeletonLoader type="table" /> }
+  { ssr: false }
 );
 const SnapshotComparison = dynamic(
   () => import('@/components/SnapshotComparison').then((m) => m.SnapshotComparison),
-  { loading: () => <SkeletonLoader type="card" /> }
+  { ssr: false }
 );
 const SubdomainsView = dynamic(
   () => import('@/components/SubdomainsView').then((m) => m.SubdomainsView),
-  { loading: () => <SkeletonLoader type="table" /> }
+  { ssr: false }
 );
 const CertificateHistory = dynamic(
   () => import('@/components/CertificateHistory').then((m) => m.CertificateHistory),
-  { loading: () => <SkeletonLoader type="table" /> }
+  { ssr: false }
 );
 const DnsHistoryMap = dynamic(
   () => import('@/components/DnsHistoryMap').then((m) => m.DnsHistoryMap),
-  { loading: () => <SkeletonLoader type="card" /> }
+  { ssr: false }
 );
 const DomainVsDomain = dynamic(
   () => import('@/components/DomainVsDomain').then((m) => m.DomainVsDomain),
-  { loading: () => <SkeletonLoader type="card" /> }
+  { ssr: false }
 );
 const TechStack = dynamic(() => import('@/components/TechStack').then((m) => m.TechStack), {
-  loading: () => <SkeletonLoader type="card" />,
+  ssr: false,
 });
 const Timeline = dynamic(() => import('@/components/Timeline').then((m) => m.Timeline), {
-  loading: () => <SkeletonLoader type="card" />,
+  ssr: false,
 });
 const ChangeDetector = dynamic(
   () => import('@/components/ChangeDetector').then((m) => m.ChangeDetector),
-  { loading: () => <SkeletonLoader type="table" /> }
+  { ssr: false }
 );
 const RelationshipGraph = dynamic(
   () => import('@/components/RelationshipGraph').then((m) => m.RelationshipGraph),
-  { loading: () => <SkeletonLoader type="graph" /> }
+  { ssr: false }
 );
 const EvidenceList = dynamic(
   () => import('@/components/EvidenceList').then((m) => m.EvidenceList),
-  { loading: () => <SkeletonLoader type="table" /> }
+  { ssr: false }
 );
 const AnalyticsDashboard = dynamic(
   () => import('@/components/AnalyticsDashboard').then((m) => m.AnalyticsDashboard),
-  { loading: () => <SkeletonLoader type="card" /> }
+  { ssr: false }
 );
 const DomainIntelligenceView = dynamic(
   () => import('@/components/DomainIntelligenceView').then((m) => m.DomainIntelligenceView),
-  { loading: () => <SkeletonLoader type="card" /> }
+  { ssr: false }
 );
 const WebsiteHealthCard = dynamic(
   () => import('@/components/WebsiteHealthCard').then((m) => m.WebsiteHealthCard),
-  { loading: () => <SkeletonLoader type="card" /> }
+  { ssr: false }
 );
 const VulnerabilityReport = dynamic(
   () => import('@/components/VulnerabilityReport').then((m) => m.VulnerabilityReport),
-  { loading: () => <SkeletonLoader type="table" /> }
+  { ssr: false }
 );
 const SnapshotHistoryDiff = dynamic(
   () => import('@/components/SnapshotHistoryDiff').then((m) => m.SnapshotHistoryDiff),
-  { loading: () => <SkeletonLoader type="card" /> }
+  { ssr: false }
 );
 
 const LOADING_STAGES = [
@@ -109,6 +113,7 @@ const LOADING_STAGES = [
 ];
 
 export type NavigationTab =
+  | 'subagents'
   | 'story'
   | 'tech-evolution'
   | 'visual-archeology'
@@ -161,6 +166,7 @@ export default function Home() {
   const [pendingTargetDomain, setPendingTargetDomain] = useState<string>('');
   const [pendingInitialTab, setPendingInitialTab] = useState<NavigationTab | undefined>(undefined);
   const [activeDomain, setActiveDomain] = useState<string>('');
+  const [showTelemetryDrawer, setShowTelemetryDrawer] = useState<boolean>(false);
 
   const handleOpenLegal = useCallback((section: ComplianceSection) => {
     setLegalSection(section);
@@ -405,7 +411,7 @@ export default function Home() {
   }, []);
 
   const handleExportReport = useCallback(
-    (format: 'json' | 'html' | 'csv-dns' | 'csv-subs') => {
+    (format: 'json' | 'html' | 'csv-dns' | 'csv-subs' | 'csv-contacts') => {
       if (!investigation) return;
 
       let blob: Blob;
@@ -429,6 +435,12 @@ export default function Home() {
           const csvContent = exportSubdomainsToCsv(investigation);
           blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
           filename = `subdomains-${investigation.domain}-${dateStr}.csv`;
+          break;
+        }
+        case 'csv-contacts': {
+          const csvContent = exportContactsToCsv(investigation);
+          blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+          filename = `contacts-${investigation.domain}-${dateStr}.csv`;
           break;
         }
         case 'json':
@@ -457,6 +469,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f5f5f7] dark:bg-[#09090b] text-neutral-900 dark:text-neutral-100 font-sans transition-colors duration-200">
+      {/* Top Ambient Progress Bar during background stream */}
+      {loading && (
+        <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-400 animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.6)]" />
+      )}
+
       <Navbar
         currentDomain={investigation?.domain || 'example.com'}
         onSearch={(d) => handleInvestigate(d)}
@@ -467,8 +484,44 @@ export default function Home() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-6">
-        {/* Loading Progress State - v2.0 Real-Time Parallel Telemetry */}
-        {loading && (
+        {/* Non-blocking Telemetry Pill when investigation is already loaded */}
+        {loading && investigation && (
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 bg-white/90 dark:bg-[#141416]/90 border border-amber-500/30 rounded-2xl text-xs text-neutral-800 dark:text-neutral-200 shadow-xs backdrop-blur-xl animate-in fade-in duration-200">
+              <div className="flex items-center gap-2.5">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                </span>
+                <span className="font-semibold text-amber-700 dark:text-amber-400">
+                  Live Parallel Swarm:
+                </span>
+                <span className="font-mono text-neutral-600 dark:text-neutral-400">
+                  Streaming OSINT telemetry for {activeDomain || pendingTargetDomain || 'target domain'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTelemetryDrawer((prev) => !prev)}
+                className="px-3 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-medium text-xs transition-colors cursor-pointer border border-amber-500/20"
+              >
+                {showTelemetryDrawer ? 'Hide Swarm Progress' : 'View Swarm Progress'}
+              </button>
+            </div>
+
+            {showTelemetryDrawer && (
+              <div className="animate-in fade-in duration-200">
+                <AgentProgressTracker
+                  telemetries={telemetries}
+                  activeDomain={activeDomain || pendingTargetDomain || 'target domain'}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Initial First-Load State only if no prior investigation loaded */}
+        {loading && !investigation && (
           <div className="space-y-4 animate-in fade-in duration-300">
             <AgentProgressTracker
               telemetries={telemetries}
@@ -504,8 +557,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* Active Investigation Views */}
-        {investigation && !loading && (
+        {/* Active Investigation Views - Unblocked during background updates */}
+        {investigation && (
           <>
             {/* Domain Top Overview Banner with Codebase Intelligence */}
             <DomainOverview
@@ -535,6 +588,13 @@ export default function Home() {
               {/* Main Tab Views Content Container with Error Boundary */}
               <div className="flex-1 w-full min-w-0 space-y-6">
                 <ErrorBoundary fallbackTitle="Module Render Exception">
+                  {activeTab === 'subagents' && (
+                    <OmniRouteSubagentsView
+                      currentInvestigation={investigation}
+                      onTraceEvidence={handleTraceEvidence}
+                    />
+                  )}
+
                   {activeTab === 'story' && investigation.summary && (
                     <WebsiteStory
                       domain={investigation.domain}

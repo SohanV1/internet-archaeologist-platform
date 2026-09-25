@@ -48,7 +48,7 @@ export async function fetchWithRetry(
         ...init,
         headers: {
           'User-Agent':
-            'InternetArchaeologist-PassiveOSINT/1.5 (+https://github.com/SohanV1/osint_tool)',
+            'InternetArchaeologist-PassiveOSINT/2.1 (+https://github.com/SohanV1/osint_tool)',
           ...(options?.headers || {}),
           ...(init?.headers || {}),
         },

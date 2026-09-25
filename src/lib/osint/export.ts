@@ -89,8 +89,40 @@ export function generateHtmlReport(inv: Investigation): string {
       </tbody>
     </table>
 
+    ${inv.whoisRdap ? `
+    <h2>5. Domain Registration & RDAP Identity</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">Registrant Name</div>
+        <div class="card-val" style="font-size: 14px;">${inv.whoisRdap.registrantName || (inv.whoisRdap.privacyProtected ? 'Redacted for Privacy' : 'N/A')}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Organization</div>
+        <div class="card-val" style="font-size: 14px;">${inv.whoisRdap.organization || 'N/A'}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Country</div>
+        <div class="card-val" style="font-size: 14px;">${inv.whoisRdap.country || 'N/A'}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Privacy Status</div>
+        <div class="card-val" style="font-size: 14px;">${inv.whoisRdap.privacyProtected ? 'Protected' : 'Public'}</div>
+      </div>
+    </div>` : ''}
+
+    ${inv.exposedContacts && inv.exposedContacts.length > 0 ? `
+    <h2>6. Discovered Public Contacts & Personnel</h2>
+    <table>
+      <thead>
+        <tr><th>Role</th><th>Contact (Masked)</th><th>Source</th><th>Confidence</th></tr>
+      </thead>
+      <tbody>
+        ${inv.exposedContacts.map((c) => `<tr><td style="color: #38bdf8; font-weight: bold; text-transform: uppercase;">${c.role}</td><td>${c.value}</td><td>${c.source}</td><td>${c.confidence}%</td></tr>`).join('')}
+      </tbody>
+    </table>` : ''}
+
     <div class="footer">
-      Generated automatically by Internet Archaeologist Platform v1.0 • Cryptographically Verified Forensic Artifact
+      Generated automatically by Internet Archaeologist Platform v2.1 • Cryptographically Verified Forensic Artifact
     </div>
   </div>
 </body>
@@ -109,6 +141,20 @@ export function exportSubdomainsToCsv(inv: Investigation): string {
   const rows = [['Subdomain', 'Root Domain', 'Source', 'Status']];
   inv.subdomains.forEach((s) => {
     rows.push([`"${s.subdomain}"`, `"${s.fullDomain}"`, `"${s.source}"`, s.status]);
+  });
+  return rows.map((r) => r.join(',')).join('\n');
+}
+
+export function exportContactsToCsv(inv: Investigation): string {
+  const rows = [['Type', 'Value', 'Role', 'Source', 'Confidence']];
+  (inv.exposedContacts || []).forEach((c) => {
+    rows.push([
+      `"${(c.type || 'email').replace(/"/g, '""')}"`,
+      `"${(c.value || '').replace(/"/g, '""')}"`,
+      `"${(c.role || 'general').replace(/"/g, '""')}"`,
+      `"${(c.source || '').replace(/"/g, '""')}"`,
+      `${c.confidence ?? 0}%`,
+    ]);
   });
   return rows.map((r) => r.join(',')).join('\n');
 }

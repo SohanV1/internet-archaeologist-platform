@@ -65,3 +65,20 @@ export interface AgentStreamEvent {
     partialResult?: Record<string, unknown>;
   };
 }
+
+export interface OmniRouteSubagentTask {
+  id: string;
+  title: string;
+  prompt: string;
+  role: 'code' | 'research' | 'general';
+  model: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  result?: string;
+  auditFindings?: string[];
+  executionTimeMs?: number;
+  tokensUsed?: number;
+  createdAt: string;
+  targetDomain?: string;
+  error?: string;
+}
+

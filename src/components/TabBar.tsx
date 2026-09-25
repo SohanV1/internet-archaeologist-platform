@@ -24,6 +24,8 @@ import {
   X,
   HeartPulse,
   ShieldAlert,
+  Bot,
+  Zap,
 } from 'lucide-react';
 import { NavigationTab } from '@/app/page';
 
@@ -69,10 +71,23 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
   const categories: TabCategory[] = useMemo(
     () => [
       {
+        id: 'ai-swarm',
+        label: 'Autonomous AI Swarm',
+        tabs: [
+          {
+            id: 'subagents',
+            label: 'OmniRoute Subagents',
+            shortLabel: 'Subagents',
+            icon: Bot,
+            badge: 'OMNI',
+          },
+          { id: 'story', label: 'Website Story', shortLabel: 'Story', icon: Sparkles },
+        ],
+      },
+      {
         id: 'core',
         label: 'Core Overview',
         tabs: [
-          { id: 'story', label: 'Website Story', shortLabel: 'Story', icon: Sparkles },
           { id: 'overview', label: 'Domain Overview', shortLabel: 'Overview', icon: Globe },
           { id: 'visual-archeology', label: 'Visual Archeology', shortLabel: 'Visuals', icon: Eye },
           {
@@ -81,6 +96,7 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
             shortLabel: 'Analytics',
             icon: BarChart2,
           },
+          { id: 'vs', label: 'Domain vs Domain', shortLabel: 'Domain VS', icon: Swords },
         ],
       },
       {
@@ -135,29 +151,15 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
         ],
       },
       {
-        id: 'intel',
-        label: 'Comparative & Audit',
-        tabs: [
-          { id: 'vs', label: 'Domain vs Domain', shortLabel: 'Domain VS', icon: Swords },
-          {
-            id: 'evidence',
-            label: 'Evidence Ledger',
-            shortLabel: 'Evidence',
-            icon: Shield,
-            badge: counts.evidence,
-          },
-        ],
-      },
-      {
         id: 'defensive-v2',
-        label: 'v2.0 Defensive Suite',
+        label: 'Defensive & Audit Suite',
         tabs: [
           {
-            id: 'domain-intel',
-            label: 'Domain Intelligence',
-            shortLabel: 'Domain Intel',
-            icon: Globe,
-            badge: counts.contacts,
+            id: 'vulnerabilities',
+            label: 'Vulnerability Posture',
+            shortLabel: 'Vuln Audit',
+            icon: ShieldAlert,
+            badge: counts.vulns,
           },
           {
             id: 'website-health',
@@ -167,11 +169,18 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
             badge: counts.healthIssues,
           },
           {
-            id: 'vulnerabilities',
-            label: 'Vulnerability Posture',
-            shortLabel: 'Vuln Audit',
-            icon: ShieldAlert,
-            badge: counts.vulns,
+            id: 'domain-intel',
+            label: 'Domain Intelligence',
+            shortLabel: 'Domain Intel',
+            icon: Globe,
+            badge: counts.contacts,
+          },
+          {
+            id: 'evidence',
+            label: 'Evidence Ledger',
+            shortLabel: 'Evidence',
+            icon: Shield,
+            badge: counts.evidence,
           },
           {
             id: 'scan-diff',
@@ -351,7 +360,11 @@ export const TabBarComponent: React.FC<TabBarProps> = ({ activeTab, onTabChange,
                           {!isCollapsed && Boolean(tab.badge) && (
                             <span
                               className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono shrink-0 ${
-                                isActive
+                                tab.id === 'subagents'
+                                  ? isActive
+                                    ? 'bg-amber-400 text-neutral-950 font-bold'
+                                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 font-bold'
+                                  : isActive
                                   ? 'bg-white/20 text-white dark:bg-black/15 dark:text-neutral-950'
                                   : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'
                               }`}

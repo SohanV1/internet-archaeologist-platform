@@ -1,0 +1,39 @@
+name: Security & Quality Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Dependency & Static Code Security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Run Typecheck
+        run: npm run typecheck
+
+      - name: Run ESLint Security & Code Style Check
+        run: npm run lint
+
+      - name: Run Dependency Audit
+        run: npm audit --audit-level=critical || true
